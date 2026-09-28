@@ -34,7 +34,9 @@ uv run cp4285 download --domain both
 uv run cp4285 audit
 ```
 
-Or download one category with `--domain Electronics` or `--domain Movies_and_TV`. Existing files are preserved. A `.part` file marks an incomplete download; rerunning that domain restarts it. Successful downloads record source URL, size and SHA-256 in a manifest. The checksum records provenance, not independent verification against a publisher checksum.
+Or download one category with `--domain Electronics` or `--domain Movies_and_TV`. Existing data **or manifest** files (including symlinks) are refused before requesting the network. Each attempt uses its own temporary `.part` file, validates the expected CSV header and reads the gzip through its checksum/trailer in bounded chunks before publishing. HTTP failures, truncated/corrupt gzip files and invalid headers do not produce a final data file or manifest; temporary files are cleaned on ordinary failure. A killed process may leave an unused temporary file; retries use a new one rather than overwriting it.
+
+Successful downloads record source URL, size and SHA-256 in a manifest. The checksum records provenance, not independent verification against a publisher checksum. Data and manifest are published separately: if writing the manifest fails after data publication, the validated data is preserved. Inspect that file/manifest situation before retrying; do not automatically delete or replace either artifact.
 
 Default inputs are `data/raw/Electronics.csv.gz` and `data/raw/Movies_and_TV.csv.gz`. Existing local CSV or CSV.gz files can be used by changing the config paths. The required schema is `user_id,parent_asin,rating,timestamp`, with Unix milliseconds.
 
@@ -70,6 +72,14 @@ uv run cp4285 --config configs/pilot.toml pilot --output runs/electronics-pilot-
 ```
 
 Paths within the config resolve from the repository root. CLI output paths resolve normally from the current working directory, so run the documented commands at the root.
+
+### Artifact safety checkpoint
+
+Audit reports, prepared snapshots, download manifests, neural metrics and classical JSON reports use the same **create-only** writer. It serializes finite JSON before publication, writes a same-directory temporary file, then links the completed file into place without replacing an existing file or symlink—even if another writer wins the destination race. Failed publication cleans its temporary file. The filesystem must support hardlinks; unsupported filesystems fail rather than fall back to overwriting. Atomic visibility is not a guarantee of power-loss durability or a multi-file transaction.
+
+For repeat audits, choose a new `audit --output reports/audit-02.json`. For a new split, change `data.prepared` to a new snapshot path in the config; `prepare` has no `--output` or `--overwrite` flag. Pilot runs still require a new run directory. Existing research artifacts are never silently replaced by these JSON writers. Classical caches and model-checkpoint restart semantics are unchanged.
+
+Offline regressions in `tests/test_artifact_safety.py` cover corrupt/truncated downloads beyond the header buffer, HTTP/header failures, preservation of existing files/manifests, JSON serialization and destination races, and audit/prepare CLI errors. No network downloads are needed for those checks. The current validation/retention shared-prefix construction is unchanged; resolve that research-contract choice before a real neural pilot.
 
 ### Split and evaluation contract
 

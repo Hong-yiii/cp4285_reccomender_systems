@@ -13,7 +13,7 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 | Implemented | Still proposed / not measured |
 | --- | --- |
 | uv-managed Python 3.12 package and CLI | Final dataset and classical-model selection |
-| Explicit official Amazon ID-file downloads | Real Amazon audit/training results for the neural cutoff pilot |
+| Explicit official Amazon ID-file downloads with full gzip validation | Real Amazon audit/training results for the neural cutoff pilot |
 | Original-ID overlap, duplicate and timestamp audits | Neural B embeddings/scoring and mixed-domain updates |
 | Bounded familiar-item A preparation with isolated holdouts | Classical/neural comparison under one protocol |
 | Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
@@ -33,14 +33,16 @@ The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-trai
 - Omit ambiguous timestamp ties. Build vocabulary from initial training only; count omitted unknown items. Exclude validation and retention events from all training targets **and prefixes**.
 - Freeze A histories, targets and full initial catalogue across evaluation checkpoints. Rank with stable ties; tune on validation, never retention curves.
 - Left-pad to fixed width, keeping the latest item at position 49 by default. Initial training supervises all nonpadding positions in each sampled user's final training window; continuation supervises only the fresh final target to avoid implicit replay.
-- Preserve weights across continuation; reset Adam (betas 0.9/0.98) once at the phase boundary, then preserve its state. Existing run directories must not be overwritten.
+- Preserve weights across continuation; reset Adam (betas 0.9/0.98) once at the phase boundary, then preserve its state. Existing run directories must not be overwritten. Audit/prepared/manifest/metric/classical-report JSON is create-only; use new output paths for repeat runs.
 - Planned mixtures use B's share of supervised examples. The draft group deck instead uses B/A volume: resolve the denominator. Fixed total updates also reduce A exposure as B increases.
 - Separate catalogues require shared parameters before B can affect A. Do not equate unrelated integer IDs or fabricate cross-user histories. Disjoint matrix-factorisation factors can be an isolation control.
 
 ## Next actions
 
+**Checkpoint reached:** original SASRec is merged in [PR #2](https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/2), preserving the teammate's classical comparator. The subsequent artifact-safety checkpoint adds full gzip verification and non-overwriting JSON publication. It does not approve acquisition or change the experiment split. See the [runbook](docs/IMPLEMENTATION.md#artifact-safety-checkpoint) for retry/recovery limits.
+
 1. Confirm the **29 September design critique** submission time in Canvas; the template's weekday/date conflict is unresolved. Review [requirements](docs/REQUIREMENTS.md) and [deck preparation](docs/DEFENSE.md).
-2. Agree task, category pair, feedback filter, mixture denominator and classical-model sharing with the team.
+2. Agree task, category pair, feedback filter, mixture denominator and classical-model sharing with the team. Explicitly resolve the neural validation/retention shared-prefix interpretation and align classical/neural protocols before comparing scores.
 3. Review storage/compute before explicitly downloading full categories; run the audit and inspect feasibility/coverage before changing config defaults.
 4. Run a real A-only pilot and validate its split, reload and frozen-control behavior.
 5. Only then implement B interfaces, independent mixture branches and B evaluation; leave adapters/replay until a defensible baseline exists.
