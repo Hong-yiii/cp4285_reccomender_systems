@@ -66,3 +66,7 @@ Additional sources checked for the neural workstream:
 - [Week 05: SASRec and causal attention](https://wing-nus.github.io/cp4285-website/slides/w05/w05.html#/sasrec-causal-self-attention-for-next-item-prediction): inspected the named SASRec slides and surrounding chronology material in the official HTML deck. There is no Week 05 PDF in the local slides folder.
 
 Interpretation for the project: original SASRec studies next-item recommendation from histories; continued multi-domain updates and separate domain interfaces are our proposed additions. Its sampled-candidate benchmark scores are not directly comparable with full-catalogue evaluation.
+
+## SASRec implementation selection — 28 September 2026
+
+Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) model. The implementation source is pinned to commit `e3738967fddab206d6eeb4fda433e7a7034dd8b1`; `model.py`, `modules.py`, `sampler.py`, `main.py` and the Apache-2.0 license were inspected. Our native PyTorch port replaces the generic encoder while retaining the original block equations and sequence-wise initial supervision. See [SASREC.md](SASREC.md) for immutable source links, attribution, verification and deviations from the legacy TensorFlow runtime and benchmark protocol.

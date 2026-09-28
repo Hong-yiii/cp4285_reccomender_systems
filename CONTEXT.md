@@ -12,25 +12,28 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 
 | Implemented | Still proposed / not measured |
 | --- | --- |
-| uv-managed Python 3.12 package and CLI | Final dataset/model selection |
-| Explicit official Amazon ID-file downloads | Real Amazon download, audit or training results |
-| Original-ID overlap, duplicate and timestamp audits | B embeddings/scoring and mixed-domain updates |
+| uv-managed Python 3.12 package and CLI | Final dataset and classical-model selection |
+| Explicit official Amazon ID-file downloads | Real Amazon audit/training results for the neural cutoff pilot |
+| Original-ID overlap, duplicate and timestamp audits | Neural B embeddings/scoring and mixed-domain updates |
 | Bounded familiar-item A preparation with isolated holdouts | Classical/neural comparison under one protocol |
-| SASRec-style PyTorch model, validation-selected checkpoint | Exact SASRec reproduction |
+| Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
 | Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
 | Synthetic lifecycle tests and six-slide HTML narrative | Final team deck / submission |
 | Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; multi-seed classical results |
 
-The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two.
+**Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
+
+The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.
 
 ## Provisional defaults and invariants
 
 - Amazon Reviews 2023 Electronics (A), Movies & TV (B); official deduplicated 5-core ID files.
 - Target is the **next reviewed item**, all ratings by default; review times are not purchase/viewing times and low ratings are not endorsements.
-- Config: 2021-01-01 initial cutoff, 2022-01-01 stream end, at most 500 reviewers, history 50, hidden size 32. These are exploratory, not tuned settings.
+- Config: 2021-01-01 initial cutoff, 2022-01-01 stream end, at most 500 reviewers, history 50, hidden size 50, two blocks, one head, dropout 0.5. These are exploratory, not tuned settings.
 - Omit ambiguous timestamp ties. Build vocabulary from initial training only; count omitted unknown items. Exclude validation and retention events from all training targets **and prefixes**.
 - Freeze A histories, targets and full initial catalogue across evaluation checkpoints. Rank with stable ties; tune on validation, never retention curves.
-- Preserve weights across continuation; reset Adam once at the phase boundary, then preserve its state. Existing run directories must not be overwritten.
+- Left-pad to fixed width, keeping the latest item at position 49 by default. Initial training supervises all nonpadding positions in each sampled user's final training window; continuation supervises only the fresh final target to avoid implicit replay.
+- Preserve weights across continuation; reset Adam (betas 0.9/0.98) once at the phase boundary, then preserve its state. Existing run directories must not be overwritten.
 - Planned mixtures use B's share of supervised examples. The draft group deck instead uses B/A volume: resolve the denominator. Fixed total updates also reduce A exposure as B increases.
 - Separate catalogues require shared parameters before B can affect A. Do not equate unrelated integer IDs or fabricate cross-user histories. Disjoint matrix-factorisation factors can be an isolation control.
 
@@ -45,7 +48,7 @@ The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-trai
 ## Context and slides
 
 - [Neural model rationale](docs/MODERN-RECOMMENDER.md), [experiment controls](docs/EXPERIMENT.md), [dataset assessment](docs/DATASET-ASSESSMENT.md).
-- [Classical comparator](docs/CLASSICAL.md): first real-data finding is that only models with a shared, fixed capacity (QR rank, SLIST item budget) degrade when disjoint B data is added; only 10.3% of Electronics users also appear in Movies & TV.
+- [Classical comparator](docs/CLASSICAL.md): the contributor reports single-seed validation sweeps showing disjoint-B effects under shared rank/item budgets and 10.3% reviewer overlap. These originating-workspace results were not rerun during the SASRec merge and are not a common-protocol neural comparison.
 - [Slide narrative and Mermaid diagrams](docs/SLIDE-FLOW.md); [editable HTML slides](slides/index.html).
 - [Primary references, course slides and local-only source index](docs/SOURCES.md).
 - `local/course/` holds copied Week 01–02 PDFs, learning notes and references on the migrated machine. `local/sources/` holds supplied project evidence and the draft team PDF. Neither is published.

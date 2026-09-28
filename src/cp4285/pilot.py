@@ -1,4 +1,8 @@
-"""A-only lifecycle check with validation selection and fixed full-catalogue evaluation."""
+"""A-only lifecycle check with validation selection and fixed full-catalogue evaluation.
+
+Sequence sampling adapts kang205/SASRec sampler.py (Kang and McAuley, Apache-2.0;
+see NOTICE). Modified for prepared data, PyTorch and fresh-event continuation.
+"""
 
 import copy
 import json
@@ -8,19 +12,53 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.nn import functional as F
 
 from .data import save_json, sha256
-from .model import SequentialRecommender
+from .model import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
 
 
-def tensors(examples, device):
-    width = max(len(x["history"]) for x in examples)
-    history = torch.zeros((len(examples), width), dtype=torch.long, device=device)
+def tensors(examples, device, max_length):
+    history = torch.zeros((len(examples), max_length), dtype=torch.long, device=device)
     for i, row in enumerate(examples):
-        history[i, : len(row["history"])] = torch.tensor(row["history"], device=device)
+        prefix = row["history"][-max_length:]
+        if not prefix or any(item <= 0 for item in prefix):
+            raise ValueError("Each example needs a nonempty history of positive item IDs")
+        history[i, -len(prefix) :] = torch.tensor(prefix, device=device)
     targets = torch.tensor([x["target"] for x in examples], device=device)
     return history, targets
+
+
+def initial_sequences(examples):
+    """One final training sequence per user; exclude ALL their initial items from negatives."""
+    latest, seen = {}, {}
+    for row in examples:  # Prepared examples are chronological; no validation/retention rows here.
+        user = row["user"]
+        latest[user] = row
+        seen.setdefault(user, set()).update([*row["history"], row["target"]])
+    return [{**row, "seen": seen[user]} for user, row in latest.items()]
+
+
+def training_tensors(examples, count, device, max_length, rng, *, all_positions=False):
+    history, targets = tensors(examples, device, max_length)
+    positive = torch.zeros_like(history)
+    positive[:, -1] = targets
+    if all_positions:
+        positive[:, :-1] = history[:, 1:]
+        positive.masked_fill_(history.eq(0), 0)
+    negative = torch.zeros_like(history)
+    for i, row in enumerate(examples):
+        excluded = row.get("seen", set(row["history"]) | {row["target"]})
+        if len(excluded) >= count:
+            raise ValueError("No eligible negative item for an example; adjust cohort/catalogue")
+        size = min(len(row["history"]), max_length) if all_positions else 1
+        samples = []
+        for _ in range(size):
+            candidate = rng.randrange(1, count + 1)
+            while candidate in excluded:
+                candidate = rng.randrange(1, count + 1)
+            samples.append(candidate)
+        negative[i, -size:] = torch.tensor(samples, device=device)
+    return history, positive, negative
 
 
 def ranking_metrics(scores, targets, k):
@@ -45,7 +83,7 @@ def evaluate(model, examples, batch_size, k, device):
     model.eval()
     total = {"ndcg": 0.0, "recall": 0.0, "count": 0}
     for start in range(0, len(examples), batch_size):
-        h, t = tensors(examples[start : start + batch_size], device)
+        h, t = tensors(examples[start : start + batch_size], device, model.max_length)
         scores = model.scores(h)
         if not torch.isfinite(scores).all():
             raise ValueError("Nonfinite evaluation scores")
@@ -62,28 +100,18 @@ def evaluate(model, examples, batch_size, k, device):
     }
 
 
-def update(model, optimizer, examples, count, device, rng):
+def update(model, optimizer, examples, count, device, rng, *, all_positions=False):
     model.train()
-    history, positive = tensors(examples, device)
-    negatives = []
-    for row in examples:
-        excluded = set(row["history"]) | {row["target"]}
-        if len(excluded) >= count:
-            raise ValueError("No eligible negative item for an example; adjust cohort/catalogue")
-        candidate = rng.randrange(1, count + 1)
-        while candidate in excluded:
-            candidate = rng.randrange(1, count + 1)
-        negatives.append(candidate)
-    negative = torch.tensor(negatives, device=device)
-    vector = model(history)
-    positive_score = (vector * model.items(positive)).sum(1)
-    negative_score = (vector * model.items(negative)).sum(1)
-    loss = (F.softplus(-positive_score) + F.softplus(negative_score)).mean()
+    history, positive, negative = training_tensors(
+        examples, count, device, model.max_length, rng, all_positions=all_positions
+    )
+    loss = model.sampled_loss(history, positive, negative)
     if not torch.isfinite(loss):
         raise ValueError("Nonfinite training loss")
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
-    torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+    # Check gradients without clipping: upstream Adam does not use gradient clipping.
+    torch.nn.utils.clip_grad_norm_(model.parameters(), float("inf"), error_if_nonfinite=True)
     optimizer.step()
     return float(loss.detach())
 
@@ -115,35 +143,52 @@ def run(prepared_path, cfg, output, synthetic=False):
         "max_length": data["metadata"]["config"]["max_length"],
         **cfg["model"],
     }
-    model = SequentialRecommender(**model_args).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=training["learning_rate"])
+    model = SASRec(**model_args).to(device)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=training["learning_rate"], betas=(0.9, 0.98)
+    )
     batch = training["batch_size"]
     k = training["k"]
+    initial = initial_sequences(data["train"])
+    if not initial:
+        raise ValueError("Initial training needs at least one user sequence")
     validation_trace = []
     best = -math.inf
     best_state = None
     for epoch in range(training["epochs"]):
-        indices = list(range(len(data["train"])))
-        rng.shuffle(indices)
         losses = []
-        for start in range(0, len(indices), batch):
-            examples = [data["train"][i] for i in indices[start : start + batch]]
-            losses.append(update(model, optimizer, examples, len(data["item_ids"]), device, rng))
+        # Upstream samples users uniformly with replacement. Allow one batch for tiny smoke data.
+        for _ in range(max(1, len(initial) // batch)):
+            examples = rng.choices(initial, k=batch)
+            losses.append(
+                update(
+                    model,
+                    optimizer,
+                    examples,
+                    len(data["item_ids"]),
+                    device,
+                    rng,
+                    all_positions=True,
+                )
+            )
         metrics = evaluate(model, data["validation"], batch, k, device)
         validation_trace.append({"epoch": epoch + 1, "loss": float(np.mean(losses)), **metrics})
         if metrics[f"ndcg@{k}"] > best:
             best = metrics[f"ndcg@{k}"]
             best_state = copy.deepcopy(model.state_dict())
+    if best_state is None:
+        raise ValueError("Validation did not select a finite initial checkpoint")
     model.load_state_dict(best_state)
     before = evaluate(model, data["retention"], batch, k, device)
-    torch.save({"model": best_state, "model_args": model_args}, output / "initial.pt")
-    restored = SequentialRecommender(**model_args).to(device)
+    provenance = {"implementation": IMPLEMENTATION, "upstream_commit": UPSTREAM_COMMIT}
+    torch.save({"model": best_state, "model_args": model_args, **provenance}, output / "initial.pt")
+    restored = SASRec(**model_args).to(device)
     restored.load_state_dict(
         torch.load(output / "initial.pt", map_location=device, weights_only=True)["model"]
     )
     restored.eval()
     model.eval()
-    probe, _ = tensors(data["retention"][:batch], device)
+    probe, _ = tensors(data["retention"][:batch], device, model.max_length)
     with torch.no_grad():
         reload_max_difference = float((restored.scores(probe) - model.scores(probe)).abs().max())
     after = evaluate(restored, data["retention"], batch, k, device)
@@ -151,7 +196,9 @@ def run(prepared_path, cfg, output, synthetic=False):
         raise AssertionError("Checkpoint reload did not reproduce fixed evaluation")
     frozen = copy.deepcopy(restored)
     # Reset once at phase transition, retain the same optimizer across update cycles.
-    optimizer = torch.optim.Adam(restored.parameters(), lr=training["continuation_learning_rate"])
+    optimizer = torch.optim.Adam(
+        restored.parameters(), lr=training["continuation_learning_rate"], betas=(0.9, 0.98)
+    )
     curves = [{"cycle": 0, "updates": 0, "frozen": before, "a_only": after}]
     cursor = 0
     for cycle in range(1, training["cycles"] + 1):
@@ -172,6 +219,7 @@ def run(prepared_path, cfg, output, synthetic=False):
         )
         torch.save(
             {
+                **provenance,
                 "model": restored.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 "model_args": model_args,
@@ -196,10 +244,17 @@ def run(prepared_path, cfg, output, synthetic=False):
         "validation": validation_trace,
         "retention": curves,
         "evaluation": "full initial-training catalogue; no seen-item exclusion; fixed prefixes",
-        "implementation": "SASRec-style PyTorch pre-norm Transformer, not exact paper replication",
+        **provenance,
+        "training_protocol": {
+            "initial": "uniform user sampling; all nonpadding next-item positions in final window",
+            "initial_users": len(initial),
+            "initial_batches_per_epoch": max(1, len(initial) // batch),
+            "continuation": "fresh target only; historical positions masked to avoid implicit replay",
+            "adam_betas": [0.9, 0.98],
+        },
         "unimplemented": [
             "B interfaces and mixed updates",
-            "classical baseline",
+            "classical comparison under the neural pilot protocol",
             "multi-seed study",
         ],
     }

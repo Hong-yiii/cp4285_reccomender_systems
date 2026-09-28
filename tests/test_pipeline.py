@@ -6,7 +6,7 @@ import torch
 
 from cp4285.cli import demo
 from cp4285.data import audit, millis, prepare
-from cp4285.model import SequentialRecommender
+from cp4285.model import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
 from cp4285.pilot import ranking_metrics, tensors
 
 
@@ -40,13 +40,17 @@ def test_seconds_are_rejected_instead_of_silent_bad_temporal_split(tmp_path):
         audit(f, f, "2021-01-01")
 
 
-def test_padding_does_not_change_a_history_representation():
+def test_batch_composition_does_not_change_fixed_position_scores():
     torch.manual_seed(1)
-    model = SequentialRecommender(20, 8, hidden=8, heads=1, layers=1, dropout=0).eval()
-    alone = torch.tensor([[1, 2]])
-    batched = torch.tensor([[1, 2, 0, 0], [3, 4, 5, 6]])
+    model = SASRec(20, 4, hidden=8, heads=1, layers=1, dropout=0).eval()
+    alone = torch.tensor([[0, 0, 1, 2]])
+    batched = torch.tensor([[0, 0, 1, 2], [3, 4, 5, 6]])
     with torch.no_grad():
         assert torch.allclose(model.scores(alone)[0], model.scores(batched)[0], atol=1e-5)
+    with pytest.raises(ValueError, match="left-padded"):
+        model(torch.tensor([[1, 2, 0, 0]]))
+    with pytest.raises(ValueError, match="nonempty"):
+        model(torch.zeros((1, 4), dtype=torch.long))
 
 
 def test_ranking_metrics_known_ranks_and_ties():
@@ -80,8 +84,14 @@ def test_end_to_end_checkpoint_and_holdout_contract(tmp_path):
     assert len(reverse) == data["metadata"]["items"]
     initial = torch.load(output / "pilot/initial.pt", weights_only=True)
     continued = torch.load(output / "pilot/cycle-2.pt", weights_only=True)
+    assert initial["implementation"] == continued["implementation"] == IMPLEMENTATION
+    assert result["upstream_commit"] == UPSTREAM_COMMIT
+    assert initial["model_args"]["hidden"] == 50
+    assert initial["model_args"]["layers"] == 2
+    assert initial["model_args"]["max_length"] == 50
     assert continued["stream_cursor"] == 32
     assert continued["optimizer"]["state"]
+    assert continued["optimizer"]["param_groups"][0]["betas"] == (0.9, 0.98)
     assert any(not torch.equal(v, continued["model"][k]) for k, v in initial["model"].items())
     with pytest.raises(FileExistsError):
         demo(output)
@@ -107,7 +117,9 @@ def test_cohort_selection_does_not_require_future_activity(tmp_path):
     assert any(r["user"] == "synthetic-user-0" for r in prepared["retention"])
 
 
-def test_tensor_prefixes_are_right_padded():
-    h, t = tensors([{"history": [1, 2], "target": 3}, {"history": [4], "target": 5}], "cpu")
-    assert h.tolist() == [[1, 2], [4, 0]]
-    assert t.tolist() == [3, 5]
+def test_tensor_prefixes_are_left_padded_to_fixed_width():
+    h, t = tensors(
+        [{"history": [1, 2, 3, 4], "target": 5}, {"history": [4], "target": 5}], "cpu", 3
+    )
+    assert h.tolist() == [[2, 3, 4], [0, 0, 4]]
+    assert t.tolist() == [5, 5]

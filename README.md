@@ -4,7 +4,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 **Research question:** How does continued training on a changing domain mixture affect a recommender's performance on its original task?
 
-**Status — 28 September 2026:** working research proposal plus a runnable **SASRec-style A-only pilot**. Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. Amazon Electronics / Movies & TV and the shared two-domain model remain provisional. A **classical comparator** now runs on real Amazon data ([CLASSICAL.md](docs/CLASSICAL.md), exploratory single-seed results under a leave-last-out protocol). B interfaces for the neural model, mixed neural updates and multi-seed experiments are not implemented. Synthetic checks are **not** real-data results.
+**Status — 28 September 2026:** working research proposal plus a runnable **original-architecture SASRec A-only pilot (PyTorch port)**. Hongyi selected the authors' SASRec model; see [source fidelity and protocol differences](docs/SASREC.md). Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. A **classical comparator** is also implemented, with contributor-reported real Amazon exploratory single-seed results under leave-last-out splitting ([CLASSICAL.md](docs/CLASSICAL.md)). Its protocol differs from the neural cutoff pilot, so their scores are not yet comparable. Amazon Electronics / Movies & TV and the shared two-domain neural model remain provisional. Neural B interfaces, mixed neural updates and multi-seed experiments are not implemented. Neural checks remain synthetic and are **not** real-data results.
 
 ## Start here
 
@@ -13,7 +13,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
 - [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md)
-- [Runbook](docs/IMPLEMENTATION.md)
+- [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md) and [slide narrative](docs/SLIDE-FLOW.md)
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 

@@ -1,6 +1,6 @@
 # Hongyi's neural recommender workstream
 
-Updated 25 September 2026. **Confirmed by Hongyi:** his contribution concerns the modern deep-learning recommender. The architecture and protocol below are recommendations awaiting selection, not completed work or team decisions.
+Updated 28 September 2026. **Confirmed by Hongyi:** his contribution concerns the modern deep-learning recommender, and the base model is now the original **kang205/SASRec** architecture. Its implemented PyTorch port is documented in [SASREC.md](SASREC.md). The two-domain adaptation and experimental protocol below remain proposals, not completed work or blanket team approval.
 
 ## Validation of the three assumptions
 
@@ -28,9 +28,9 @@ Call B “a second domain” or “a shifted training distribution.” It is out
 
 This is an offline simulation of continued model updates. It does not require a live service or Kafka infrastructure, and it cannot measure feedback effects created by real users reacting to the model's recommendations.
 
-## Proposed neural model
+## Selected base model and proposed domain adaptation
 
-Start with a **small SASRec-based sequential recommender**, conditional on the selected datasets providing meaningful ordered interactions. SASRec uses self-attention to predict the next item from past interactions. It is an established neural baseline from 2018, not a claim of current state of the art. [Kang and McAuley, 2018](https://arxiv.org/abs/1808.09781)
+Use the **original SASRec architecture**, as selected by Hongyi on 28 September, with datasets that provide meaningful ordered interactions. SASRec uses self-attention to predict the next item from past interactions. It is an established neural baseline from 2018, not a claim of current state of the art. [Kang and McAuley, 2018](https://arxiv.org/abs/1808.09781)
 
 For two domains with separate catalogues, the proposed adaptation is:
 

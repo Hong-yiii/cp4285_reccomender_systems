@@ -11,17 +11,19 @@ max_users = 500
 max_length = 50
 seed = 4285
 
+# Architecture defaults from kang205/SASRec/main.py; no reduced demo architecture.
 [model]
-hidden = 32
+hidden = 50
 heads = 1
 layers = 2
-dropout = 0.2
+dropout = 0.5
+l2_emb = 0.0
 
 [training]
 seed = 4285
 device = "cpu"                      # cpu is reproducible and portable; mps/cuda can be selected explicitly
 epochs = 3
-batch_size = 64
+batch_size = 128
 learning_rate = 0.001
 continuation_learning_rate = 0.0001
 cycles = 3

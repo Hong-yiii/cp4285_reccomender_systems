@@ -1,6 +1,6 @@
 # Classical comparator
 
-Status: implemented and run on real Amazon data (28 September 2026). The results are **single-seed, validation-split exploratory results**, not tuned final numbers. The protocol differs from the SASRec pilot (see [Protocol](#protocol)), so the two sets of numbers are not directly comparable yet.
+Status: implemented, with **contributor-reported real Amazon runs from the originating workspace** (28 September 2026). Those runs were not rerun during the SASRec integration; raw logs are not included here. The results are **single-seed, validation-split exploratory results**, not tuned final numbers. The protocol differs from the SASRec pilot (see [Protocol](#protocol)), so the two sets of numbers are not directly comparable yet.
 
 ## Question
 
@@ -30,7 +30,7 @@ The `EXPERIMENT.md` note that isolated MF factors are an isolation control appli
 
 ## Results: disjoint B (0-core Movies & TV), k=64, SLIST N=20K
 
-NDCG@10 on A validation users, one run (seed 0, before the port's default became 4285); raw log in the originating workspace. The level is B events as a share of A training events.
+Contributor-reported NDCG@10 on A validation users, one originating-workspace run (seed 0, before the port's default became 4285); raw log remains in that workspace, not independently verified by this integration. The level is B events as a share of A training events.
 
 | B injected | MostPop | Markov | Markov QR-SVD (A share of rank) | SLIST (A share of items) |
 | --- | --- | --- | --- | --- |
