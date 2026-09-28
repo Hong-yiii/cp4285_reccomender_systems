@@ -9,7 +9,7 @@ import numpy as np
 
 from ..common.utils import save_json
 from .contaminate import build_stream
-from .data import leave_last_out, load_domains, subsample_users, to_csr, with_validation
+from .data import before, load_domains, make_split, subsample_users, to_csr, with_validation
 from .evaluate import evaluate, sample_pairs
 from .models import (
     QRSVD,
@@ -23,7 +23,18 @@ from .models import (
     transitions,
 )
 
-TARGETS_HELP = "held-out events per user in each of validation and test (default 1)"
+TARGETS_HELP = "last protocol: held-out events per user in validation and in test"
+
+
+def add_split_args(p):
+    p.add_argument(
+        "--protocol", choices=["last", "time"], default="last",
+        help="last: next item (leave-last-out); time: next items after a cutoff",
+    )  # fmt: skip
+    p.add_argument("--targets", type=int, default=1, help=TARGETS_HELP)
+    p.add_argument("--cutoff", default="2022-01-01", help="time protocol: test window start")
+    p.add_argument("--window-days", type=float, default=365, help="time protocol: window")
+    p.add_argument("--max-targets", type=int, default=10, help="time protocol: per user")
 
 
 def _load(args):
@@ -35,10 +46,13 @@ def _setup(args):
     a, b, n_users = _load(args)
     if args.users:
         a = subsample_users(a, args.users, args.seed)
-    split = leave_last_out(a, args.targets)
+    split, valid_end, test_end = make_split(a, args)
     held = split.valid if args.split == "valid" else split.test
     if args.split == "test":  # score test targets from a history that includes validation
         split = with_validation(split)
+    end = valid_end if args.split == "valid" else test_end
+    if end is not None:  # time protocol: B is also cut at the end of training
+        b = before(b, end)
     pairs = sample_pairs(held, args.eval_users, args.seed)
     print(
         f"loaded in {time.time() - t0:.0f}s: {len(split.train_user):,} A training events, "
@@ -186,7 +200,7 @@ def add_arguments(parser, root: Path, data_cfg: dict):
             continue
         p.add_argument("--output", type=Path, default=root / "reports/classical")
         p.add_argument("--design", choices=["disjoint", "shared"], default="disjoint")
-        p.add_argument("--levels", type=float, nargs="+", default=[0, 0.1, 0.5, 1.0, 2.0])
+        p.add_argument("--levels", type=float, nargs="+", default=[0, 0.1, 0.5, 1.0])
         p.add_argument("--k", type=int, default=64, help="QR-SVD rank")
         p.add_argument("--beta", type=float, default=0.25, help="popularity down-weighting")
         p.add_argument("--window", type=int, default=1, help="transition window (steps)")
@@ -202,7 +216,7 @@ def add_arguments(parser, root: Path, data_cfg: dict):
         p.add_argument("--users", type=int, default=None, help="subsample A users")
         p.add_argument("--eval-users", type=int, default=20000)
         p.add_argument("--split", choices=["valid", "test"], default="valid")
-        p.add_argument("--targets", type=int, default=1, help=TARGETS_HELP)
+        add_split_args(p)
         p.add_argument("--full-catalog", action="store_true", help="rank over A + B items")
         p.add_argument("--seed", type=int, default=4285)
         p.add_argument("--forget", type=float, default=1.0, help="stream: old-data decay")
@@ -213,14 +227,14 @@ def add_arguments(parser, root: Path, data_cfg: dict):
     st.add_argument("--b", type=Path, default=Path(data_cfg["b"]), help="B ID file")
     st.add_argument("--cache", type=Path, default=root / "data/processed")
     st.add_argument("--output", type=Path, default=root / "reports/classical")
-    st.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.1, 0.5, 1.0, 1.4])
+    st.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.1, 0.5, 1.0])
     st.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     st.add_argument("--ks", type=int, nargs="+", default=[32, 64, 128, 256], help="rank grid")
     st.add_argument("--betas", type=float, nargs="+", default=[0.0, 0.25], help="beta grid")
     st.add_argument("--k", type=int, default=None, help="skip tuning: use this rank")
     st.add_argument("--beta", type=float, default=None, help="skip tuning: use this beta")
     st.add_argument("--eval-users", type=int, default=50000)
-    st.add_argument("--targets", type=int, default=1, help=TARGETS_HELP)
+    add_split_args(st)
     st.add_argument("--boot", type=int, default=1000, help="bootstrap resamples")
     st.add_argument("--no-scaled", dest="scaled", action="store_false",
                     help="skip the rank-grows-with-data control")  # fmt: skip

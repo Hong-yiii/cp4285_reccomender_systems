@@ -214,3 +214,65 @@ def test_paired_change_detects_a_uniform_drop_and_no_change():
     assert same[0] == pytest.approx(0) and same[1] == pytest.approx(0) and same[3] == 1.0
     drop = paired_change(base, base * 0.8, n_boot=200)
     assert drop[0] == pytest.approx(-0.2) and drop[2] < 0 and drop[3] == 0.0
+
+
+def test_time_split_targets_new_products_in_each_window():
+    from cp4285.classical.data import time_split
+
+    day = lambda n: 1_600_000_000_000 + n * DAY
+    events = [  # (user, item, day)
+        (0, 0, 1), (0, 1, 5), (0, 2, 12), (0, 2, 13), (0, 1, 14), (0, 3, 22), (0, 4, 25),
+        (0, 5, 35),
+        (1, 6, 15), (1, 7, 21),
+        (2, 8, 2),
+        (3, 9, 3), (3, 10, 21), (3, 11, 22), (3, 12, 23),
+    ]  # fmt: skip
+    u, i, d = (np.array(c) for c in zip(*events))
+    split = time_split(Domain("a", u, i, day(d), 13), day(20), 10 * DAY, max_targets=2)
+    targets = lambda rows: {(int(a), int(b)) for a, b in rows}
+    # validation: history before day 10, targets in [10, 20); repeats and seen items dropped
+    assert targets(split.valid) == {(0, 2)}
+    # test: history before day 20, targets in [20, 30), first two per user; day 35 unused
+    assert targets(split.test) == {(0, 3), (0, 4), (1, 7), (3, 10), (3, 11)}
+    history = with_validation(split)
+    assert sorted(history.train_item[history.train_user == 0]) == [0, 1, 1, 2, 2]
+    assert history.train_ts.max() < day(20)
+
+
+@pytest.mark.parametrize("protocol", ["last", "time"])
+def test_study_runs_end_to_end(tmp_path, protocol):
+    import argparse
+    import json
+
+    from cp4285.classical.experiments import add_arguments, run
+
+    def write(path, n_users, n_items, prefix, seed):
+        rng = np.random.default_rng(seed)
+        with gzip.open(path, "wt") as f:
+            w = csv.writer(f)
+            w.writerow(["user_id", "parent_asin", "rating", "timestamp"])
+            for u in range(n_users):
+                start = rng.integers(n_items)
+                for step in range(8):  # one review every 100 days from September 2020
+                    t = 1_600_000_000_000 + (step * 100 + u % 50) * DAY
+                    w.writerow([f"u{u}", f"{prefix}{(start + step) % n_items}", 5, t])
+        return path
+
+    a = write(tmp_path / "a.csv.gz", 120, 40, "e", 1)
+    b = write(tmp_path / "b.csv.gz", 150, 30, "m", 2)
+    parser = argparse.ArgumentParser()
+    add_arguments(parser, tmp_path, {"a": str(a), "b": str(b)})
+    args = parser.parse_args(
+        ["study", "--protocol", protocol, "--cutoff", "2022-01-01", "--window-days", "180",
+         "--cache", str(tmp_path / "cache"), "--output", str(tmp_path / "out"),
+         "--ks", "2", "4", "--betas", "0", "--seeds", "0", "--levels", "0", "0.5",
+         "--eval-users", "30", "--boot", "20"]
+    )  # fmt: skip
+    run(args)
+    (report,) = (tmp_path / "out").glob("study_*.json")
+    summary = json.loads(report.read_text())
+    metric = "recall@10" if protocol == "time" else "hit@10"
+    assert summary["primary_metric"] == metric
+    assert {r["model"] for r in summary["rows"]} >= {"mostpop", "markov", "qr", "qr_scaled"}
+    assert all(0 <= r[metric] <= 1 for r in summary["rows"])
+    assert len(summary["changes"]) == 4  # one per model at the 50% level

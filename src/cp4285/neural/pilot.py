@@ -153,7 +153,7 @@ def run(prepared_path, cfg, output, synthetic=False):
     if not initial:
         raise ValueError("Initial training needs at least one user sequence")
     validation_trace = []
-    best = -math.inf
+    best = (-math.inf, -math.inf)  # validation (Hit@K, NDCG@K); NDCG only breaks ties
     best_state = None
     for epoch in range(training["epochs"]):
         losses = []
@@ -173,8 +173,9 @@ def run(prepared_path, cfg, output, synthetic=False):
             )
         metrics = evaluate(model, data["validation"], batch, k, device)
         validation_trace.append({"epoch": epoch + 1, "loss": float(np.mean(losses)), **metrics})
-        if metrics[f"ndcg@{k}"] > best:
-            best = metrics[f"ndcg@{k}"]
+        score = (metrics[f"hit@{k}"], metrics[f"ndcg@{k}"])
+        if score > best:
+            best = score
             best_state = copy.deepcopy(model.state_dict())
     if best_state is None:
         raise ValueError("Validation did not select a finite initial checkpoint")

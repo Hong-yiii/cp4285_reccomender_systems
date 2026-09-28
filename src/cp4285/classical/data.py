@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 import duckdb
@@ -134,6 +135,68 @@ def leave_last_out(d: Domain, n_targets: int = 1) -> Split:
 
 def _targets(user: np.ndarray, item: np.ndarray) -> np.ndarray:
     return np.unique(np.c_[user, item], axis=0)  # sorted by user, duplicates dropped
+
+
+def time_split(d: Domain, cutoff_ms: int, window_ms: int, max_targets: int = 10) -> Split:
+    """Next-items split at a global time cutoff T with a window W.
+
+    Validation trains on events before T - W and targets products in [T - W, T); the test
+    protocol (with_validation) trains on events before T and targets products in [T, T + W).
+    Targets are each user's first max_targets distinct products in the window that the user
+    had not reviewed before it. Only users with an earlier event are scored, however few
+    events they have. Events from T + W on are never used.
+    """
+    order = np.lexsort((d.ts, d.user))
+    u, i, t = d.user[order], d.item[order], d.ts[order]
+    start = cutoff_ms - window_ms
+    train = t < start
+    valid = (t >= start) & (t < cutoff_ms)
+    test = (t >= cutoff_ms) & (t < cutoff_ms + window_ms)
+    users = np.unique(u[train])
+    return Split(
+        u[train],
+        i[train],
+        t[train],
+        _window_targets(u, i, train, valid, d.n_items, max_targets),
+        _window_targets(u, i, t < cutoff_ms, test, d.n_items, max_targets),
+        np.c_[users, np.full(len(users), start)],
+        np.c_[u[valid], i[valid], t[valid]],
+    )
+
+
+def _window_targets(u, i, history, window, n_items: int, cap: int) -> np.ndarray:
+    """First `cap` new distinct (user, item) pairs per user in the window, time-sorted input."""
+    seen = u[history].astype(np.int64) * n_items + i[history]
+    wu, wi = u[window], i[window]
+    key = wu.astype(np.int64) * n_items + wi
+    keep = ~np.isin(key, seen) & np.isin(wu, u[history])
+    _, first = np.unique(key[keep], return_index=True)
+    first = np.sort(first)  # back to (user, time) order
+    wu, wi = wu[keep][first], wi[keep][first]
+    if not len(wu):
+        return np.empty((0, 2), np.int64)
+    starts = np.flatnonzero(np.r_[True, wu[1:] != wu[:-1]])
+    within = np.arange(len(wu)) - np.repeat(starts, np.diff(np.r_[starts, len(wu)]))
+    return np.c_[wu, wi][within < cap]
+
+
+def before(d: Domain, t_ms: int) -> Domain:
+    """Only the events before t_ms, so nothing after a cutoff is trained on."""
+    m = d.ts < t_ms
+    return Domain(d.name, d.user[m], d.item[m], d.ts[m], d.n_items)
+
+
+def make_split(a: Domain, args) -> tuple[Split, int | None, int | None]:
+    """The split named by args.protocol, plus the training end (ms) for validation and test.
+
+    "last": leave-last-out with args.targets events per user (no global training end).
+    "time": time_split at args.cutoff (YYYY-MM-DD, UTC) with args.window_days.
+    """
+    if args.protocol == "last":
+        return leave_last_out(a, args.targets), None, None
+    cutoff = int(datetime.fromisoformat(args.cutoff).replace(tzinfo=UTC).timestamp() * 1000)
+    window = int(args.window_days * 86_400_000)
+    return time_split(a, cutoff, window, args.max_targets), cutoff - window, cutoff
 
 
 def with_validation(split: Split) -> Split:
