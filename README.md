@@ -4,13 +4,14 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 **Research question:** How does continued training on a changing domain mixture affect a recommender's performance on its original task?
 
-**Status — 28 September 2026:** working research proposal plus a runnable **SASRec-style A-only pilot**. Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. Amazon Electronics / Movies & TV and the shared two-domain model remain provisional. B interfaces, mixed updates, the classical comparator and multi-seed experiments are not implemented. Synthetic checks are **not** real-data results.
+**Status — 28 September 2026:** working research proposal plus a runnable **SASRec-style A-only pilot**. Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. Amazon Electronics / Movies & TV and the shared two-domain model remain provisional. A **classical comparator** now runs on real Amazon data ([CLASSICAL.md](docs/CLASSICAL.md), exploratory single-seed results under a leave-last-out protocol). B interfaces for the neural model, mixed neural updates and multi-seed experiments are not implemented. Synthetic checks are **not** real-data results.
 
 ## Start here
 
 - [Current context and next steps](CONTEXT.md)
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
+- [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md)
 - [Runbook](docs/IMPLEMENTATION.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md) and [slide narrative](docs/SLIDE-FLOW.md)
@@ -37,6 +38,7 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | Path | Purpose |
 | --- | --- |
 | `src/cp4285/` | CLI, ingestion/audit, model and A-only training |
+| `src/cp4285/classical/` | Classical comparator (`cp4285 classical ...`) |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
 | `docs/` | Research context, requirements, protocol, provenance and AI log |
