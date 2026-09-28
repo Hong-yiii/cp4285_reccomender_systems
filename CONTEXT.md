@@ -15,10 +15,11 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 | uv-managed Python 3.12 package and CLI | Final dataset/model selection |
 | Explicit official Amazon ID-file downloads | Real Amazon download, audit or training results |
 | Original-ID overlap, duplicate and timestamp audits | B embeddings/scoring and mixed-domain updates |
-| Bounded familiar-item A preparation with isolated holdouts | Classical-model comparison and parameter-sharing contract |
+| Bounded familiar-item A preparation with isolated holdouts | Classical/neural comparison under one protocol |
 | SASRec-style PyTorch model, validation-selected checkpoint | Exact SASRec reproduction |
 | Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
 | Synthetic lifecycle tests and six-slide HTML narrative | Final team deck / submission |
+| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; multi-seed classical results |
 
 The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two.
 
@@ -44,6 +45,7 @@ The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-trai
 ## Context and slides
 
 - [Neural model rationale](docs/MODERN-RECOMMENDER.md), [experiment controls](docs/EXPERIMENT.md), [dataset assessment](docs/DATASET-ASSESSMENT.md).
+- [Classical comparator](docs/CLASSICAL.md): first real-data finding is that only models with a shared, fixed capacity (QR rank, SLIST item budget) degrade when disjoint B data is added; only 10.3% of Electronics users also appear in Movies & TV.
 - [Slide narrative and Mermaid diagrams](docs/SLIDE-FLOW.md); [editable HTML slides](slides/index.html).
 - [Primary references, course slides and local-only source index](docs/SOURCES.md).
 - `local/course/` holds copied Week 01–02 PDFs, learning notes and references on the migrated machine. `local/sources/` holds supplied project evidence and the draft team PDF. Neither is published.

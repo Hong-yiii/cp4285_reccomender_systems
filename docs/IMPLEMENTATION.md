@@ -98,7 +98,9 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `src/cp4285/data.py` | Official download, ID audit and pilot partitions |
 | `src/cp4285/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
 | `src/cp4285/cli.py` | `cp4285` command |
+| `src/cp4285/classical/` | Classical comparator; see [CLASSICAL.md](CLASSICAL.md) |
 | `tests/test_pipeline.py` | Meaningful data/evaluator/lifecycle checks |
+| `tests/test_classical.py` | Classical loader, split, contamination, isolation and evaluator checks |
 | `configs/pilot.toml` | Reviewable experiment defaults |
 | `slides/index.html` | Six-slide narrative with data and implementation status |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |

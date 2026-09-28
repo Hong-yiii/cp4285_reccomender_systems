@@ -75,6 +75,12 @@ def main():
     pi.add_argument("--output")
     de = commands.add_parser("demo", help="Synthetic end-to-end software check, not Amazon results")
     de.add_argument("--output", default=str(ROOT / "runs/synthetic-smoke"))
+    cl = commands.add_parser("classical", help="Classical comparator under B contamination")
+    from .classical.experiments import add_arguments
+
+    pre = argparse.ArgumentParser(add_help=False)  # config supplies the classical data defaults
+    pre.add_argument("--config", default=str(ROOT / "configs/pilot.toml"))
+    add_arguments(cl, ROOT, config(pre.parse_known_args()[0].config)["data"])
     args = parser.parse_args()
     try:
         cfg = config(args.config)
@@ -112,6 +118,10 @@ def main():
             output = args.output or cfg["training"]["output"]
             run(d["prepared"], cfg, output)
             print(f"Pilot saved: {output}")
+        elif args.command == "classical":
+            from .classical.experiments import run as classical
+
+            classical(args)
         elif args.command == "demo":
             result = demo(args.output)
             print(
