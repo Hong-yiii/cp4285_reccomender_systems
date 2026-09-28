@@ -21,7 +21,7 @@ The environment is local to `.venv`. Do not use pip or modify a global Python en
 uv run cp4285 demo --output runs/my-synthetic-check
 ```
 
-This creates visibly synthetic CSVs, audits them, prepares the split, trains a small model, reloads its checkpoint, and performs two continued-training cycles. Inspect `pilot/metrics.json` under the chosen output directory. Its scope is marked synthetic. These numbers must never appear as Amazon results. Existing run directories are never overwritten; use a new output path for a repeat.
+This creates visibly synthetic CSVs, audits them, prepares the split, trains the configured original-architecture SASRec model on a small synthetic cohort, reloads its checkpoint, and performs two continued-training cycles. Inspect `pilot/metrics.json` under the chosen output directory. Its scope is marked synthetic. These numbers must never appear as Amazon results. Existing run directories are never overwritten; use a new output path for a repeat.
 
 Earlier synthetic runs are retained locally under `runs/` on the migrated machine; they are not included in a clone. Their recorded absolute paths describe the original workspace and are historical provenance, not reusable configuration. Tests cover holdout isolation, original-ID overlap, timestamp units, padding, stable metric ties, frozen evaluation and preservation of learned state. These checks do not establish research validity or convergence on real data.
 
@@ -54,8 +54,8 @@ Edit `configs/pilot.toml` after the audit. Current values are exploratory defaul
 - Target: next reviewed item using every rating (`min_rating=1.0`). For a positive-rating-only sequence, set `min_rating=4.0` and rerun both audit and preparation.
 - Initial cutoff: 1 January 2021 UTC; update stream ends 1 January 2022 UTC.
 - At most 500 initial-period eligible reviewers, selected by a deterministic hash of the original ID and seed. Selection does not depend on later activity. Each selected history is retained before sequence truncation.
-- Maximum history length 50; 32 hidden units; one attention head; two Transformer layers.
-- Three initial epochs, followed by three cycles of five updates, with batch size 64. If insufficient fresh continuation examples exist, the pilot fails with an explicit count instead of recycling data.
+- Original SASRec defaults: maximum history length 50; 50 hidden units; one attention head; two blocks; dropout 0.5; embedding-only L2 0.
+- Three initial feasibility epochs (not upstream's 201), followed by three cycles of five updates, with batch size 128. If insufficient fresh continuation examples exist, the pilot fails with an explicit count instead of recycling data.
 
 ```sh
 uv run cp4285 prepare
@@ -77,16 +77,18 @@ Paths within the config resolve from the repository root. CLI output paths resol
 - Require at least five initial-period events per eligible reviewer. Reserve the final two for validation and the fixed retention anchor; all earlier events form initial training examples.
 - Exclude both held-out events from all training targets and prefixes, including later continuation prefixes. The retention target uses only the initial training prefix, without the validation event.
 - Build the item vocabulary from initial training examples only. This first pilot studies familiar items; out-of-vocabulary held-out targets and later events are omitted and counted. Omitted unknown items do not enter histories. This reduces coverage and is not a new-item adaptation experiment.
-- Create one supervised target per example with a real preceding prefix. Preserve each user's event order, then order continued examples by timestamp. Sequence length truncation is explicit.
+- Left-pad every history to the configured fixed width. Initial training samples users uniformly with replacement and supervises all next-item positions in each user's final training window. Continuing examples remain chronological with only their fresh final target supervised; historical targets are masked to prevent unintended replay.
 - Select the initial checkpoint using validation NDCG only. Evaluate retention after selection, reload the saved checkpoint and verify the same scores. Reset Adam once for continued training, then preserve its state across cycles.
 - Evaluate the same retention examples against the full fixed initial item catalogue, excluding padding. Repeated items remain eligible, because this task predicts review events. Use a stable item-ID tie rule. At one relevant target, Recall@10 is Hit@10.
-- Training uses one sampled negative outside the supplied prefix and positive target. This is an unobserved alternative, not a known dislike. The sampled binary loss applies equal weight to each target example.
+- Use one sampled negative per active target: outside the user's full initial training item set for initial training, or outside the supplied prefix and fresh target for continuation. It is an unobserved alternative, not a known dislike. Sampled binary loss averages equally over active target positions. Adam uses betas (0.9, 0.98), without blanket weight decay or gradient clipping.
 
 `metrics.json` records source/prepared checksums, config, retained counts, omitted-event counts, software/device, validation history and fixed-A curves. Model/optimizer checkpoints record cycle and stream cursor. The CLI does not yet implement restarting an interrupted continuation run, even though state is saved. Do not tune the model on its retention curves.
 
 ### Model scope
 
-`src/cp4285/model.py` is a small **SASRec-style** causal Transformer using PyTorch pre-normalized encoder layers, learned item/position embeddings and tied output embeddings. It is not a byte-for-byte implementation of Kang and McAuley's architecture or a replication of their reported benchmark results. Initial training supervises prefixes individually. Sources: [SASRec](https://arxiv.org/abs/1808.09781), [ADER](https://arxiv.org/abs/2007.12000).
+`src/cp4285/model.py` now ports the **original kang205/SASRec architecture** to PyTorch, replacing the generic encoder. The source commit, architecture checklist, license, tests and deliberate protocol differences are documented in [SASREC.md](SASREC.md). Upstream uses Python 2 / TensorFlow 1.12; we are not running that legacy runtime or claiming its benchmark scores. The demo uses the full configured architecture, with only its data/update budget reduced.
+
+Initial training uses upstream-style sequence-wise loss and user sampling. Our fixed-A evaluator and fresh-event continuation are separate experimental choices. Checkpoints/metrics record implementation identity and upstream commit; old generic-model checkpoints are incompatible and must not be resumed as SASRec.
 
 The frozen control and A-only continued training are implemented. Before adding B, review the real-data audit, rating policy, time windows and classical-model sharing assumptions. Then add B embeddings/scoring, preserve real domain identities, and implement controlled mixture branches. Repeated seeds, B adaptation, the A-exposure-matched control, classical baseline and mitigations remain further work. The defaults are small feasibility settings, not a final experiment budget.
 

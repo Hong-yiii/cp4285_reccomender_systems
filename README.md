@@ -4,7 +4,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 **Research question:** How does continued training on a changing domain mixture affect a recommender's performance on its original task?
 
-**Status — 28 September 2026:** working research proposal plus a runnable **SASRec-style A-only pilot**. Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. Amazon Electronics / Movies & TV and the shared two-domain model remain provisional. B interfaces, mixed updates, the classical comparator and multi-seed experiments are not implemented. Synthetic checks are **not** real-data results.
+**Status — 28 September 2026:** working research proposal plus a runnable **original-architecture SASRec A-only pilot (PyTorch port)**. Hongyi selected the authors' SASRec model; see [source fidelity and protocol differences](docs/SASREC.md). Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. Amazon Electronics / Movies & TV and the shared two-domain model remain provisional. B interfaces, mixed updates, the classical comparator and multi-seed experiments are not implemented. Synthetic checks are **not** real-data results.
 
 ## Start here
 
@@ -12,7 +12,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md)
-- [Runbook](docs/IMPLEMENTATION.md)
+- [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md) and [slide narrative](docs/SLIDE-FLOW.md)
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 

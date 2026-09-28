@@ -29,8 +29,7 @@ def demo(output):
         raise FileExistsError(f"Demo directory exists: {base}")
     base.mkdir(parents=True)
     cfg = config(ROOT / "configs/pilot.toml")
-    cfg["data"].update(max_users=24, max_length=20)
-    cfg["model"].update(hidden=16, layers=1)
+    cfg["data"].update(max_users=24)
     cfg["training"].update(epochs=1, batch_size=8, cycles=2, updates_per_cycle=2)
     for domain in DOMAINS:
         with (base / f"{domain}.csv").open("w") as f:

@@ -2,7 +2,7 @@
 
 Initialized 25 September 2026. Status: understanding and proposed scope awaiting Hongyi's verification. These are AI-assisted working notes, not a team-approved proposal or submission.
 
-Latest clarification: Hongyi owns the **modern deep-learning recommender** contribution. Start with [MODERN-RECOMMENDER.md](MODERN-RECOMMENDER.md) for validation of the training assumptions and a proposed SASRec-based experiment; the exact model remains unselected.
+Latest clarification, 28 September: Hongyi owns the **modern deep-learning recommender** contribution and has selected the original **kang205/SASRec** model. [SASREC.md](SASREC.md) records its PyTorch port and source fidelity. Start with [MODERN-RECOMMENDER.md](MODERN-RECOMMENDER.md) for the research framing; dataset and two-domain design remain provisional.
 
 ## Runnable scaffold
 
@@ -19,7 +19,7 @@ The meeting's working experiment is:
 3. Re-measure recommendation quality on A as the mixture changes.
 4. Explain the behavior across models. A mitigation such as adapters is a possible extension.
 
-This summarizes the meeting and sketch; no dataset, architecture, mixture schedule, or mitigation is locked. The late discussion also leaves open a chronological experiment using one dataset. The fixed held-out evaluation protocol in EXPERIMENT.md is a proposed refinement, not a decision established by the meeting.
+This summarizes the original meeting and sketch. SASRec was subsequently selected for the neural workstream; no dataset, two-domain adaptation, mixture schedule, or mitigation is locked. The late discussion also leaves open a chronological experiment using one dataset. The fixed held-out evaluation protocol in EXPERIMENT.md is a proposed refinement, not a decision established by the meeting.
 
 ## What we should do first
 

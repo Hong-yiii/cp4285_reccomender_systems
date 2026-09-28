@@ -1,0 +1,19 @@
+SASRec — Self-Attentive Sequential Recommendation
+Wang-Cheng Kang and Julian McAuley (2018)
+https://github.com/kang205/SASRec
+Upstream commit: e3738967fddab206d6eeb4fda433e7a7034dd8b1
+
+src/cp4285/model.py is a modified PyTorch translation of upstream model.py and
+modules.py. The training sequence construction in src/cp4285/pilot.py follows
+upstream sampler.py. Modifications are documented in docs/SASREC.md.
+
+The original modules.py attributes its attention utilities to:
+June 2017 by Kyubyong Park — kbpark.linguist@gmail.com
+https://www.github.com/kyubyong/transformer
+
+The upstream code is licensed under the Apache License, Version 2.0.
+A verbatim copy is included in licenses/SASRec-Apache-2.0.txt.
+This notice does not assign a license to unrelated coursework or team materials.
+
+Citation: Kang, W.-C. and McAuley, J. (2018). Self-Attentive Sequential
+Recommendation. Proceedings of IEEE ICDM. https://arxiv.org/abs/1808.09781
