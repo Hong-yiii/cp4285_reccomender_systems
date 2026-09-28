@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cp4285 import cli
 
 
@@ -25,3 +27,15 @@ def test_repository_defaults(monkeypatch):
             {"inputs": (cfg["data"]["a"], cfg["data"]["b"])},
         )
     ]
+
+
+@pytest.mark.parametrize("malformed", [False, True])
+def test_cli_config_errors_are_reported_without_traceback(tmp_path, monkeypatch, capsys, malformed):
+    path = tmp_path / "invalid.toml"
+    if malformed:
+        path.write_text("[")
+    monkeypatch.setattr("sys.argv", ["cp4285", "--config", str(path), "doctor"])
+    with pytest.raises(SystemExit) as exc:
+        cli.main()
+    assert exc.value.code == 2
+    assert capsys.readouterr().err.startswith("Error: ")

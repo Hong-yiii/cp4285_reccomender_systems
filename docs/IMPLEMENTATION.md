@@ -90,7 +90,7 @@ Paths within the config resolve from the repository root. CLI output paths resol
 
 Initial training uses upstream-style sequence-wise loss and user sampling. Our fixed-A evaluator and fresh-event continuation are separate experimental choices. Checkpoints/metrics record implementation identity and upstream commit; old generic-model checkpoints are incompatible and must not be resumed as SASRec.
 
-The frozen control and A-only continued training are implemented. Before adding B, review the real-data audit, rating policy, time windows and classical-model sharing assumptions. Then add B embeddings/scoring, preserve real domain identities, and implement controlled mixture branches. Repeated seeds, B adaptation, the A-exposure-matched control, classical baseline and mitigations remain further work. The defaults are small feasibility settings, not a final experiment budget.
+The frozen control and A-only continued training are implemented. Before adding B, review the real-data audit, rating policy, time windows and classical-model sharing assumptions. Then add B embeddings/scoring, preserve real domain identities, and implement controlled mixture branches. The [classical comparator](CLASSICAL.md) is implemented under a different leave-last-out protocol. Repeated seeds, neural B adaptation, the A-exposure-matched control, a common-protocol classical/neural comparison and mitigations remain further work. The defaults are small feasibility settings, not a final experiment budget.
 
 ## Layout
 
@@ -100,7 +100,9 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `src/cp4285/data.py` | Official download, ID audit and pilot partitions |
 | `src/cp4285/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
 | `src/cp4285/cli.py` | `cp4285` command |
+| `src/cp4285/classical/` | Classical comparator; see [CLASSICAL.md](CLASSICAL.md) |
 | `tests/test_pipeline.py` | Meaningful data/evaluator/lifecycle checks |
+| `tests/test_classical.py` | Classical loader, split, contamination, isolation and evaluator checks |
 | `configs/pilot.toml` | Reviewable experiment defaults |
 | `slides/index.html` | Six-slide narrative with data and implementation status |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |

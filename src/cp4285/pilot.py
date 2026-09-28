@@ -254,7 +254,7 @@ def run(prepared_path, cfg, output, synthetic=False):
         },
         "unimplemented": [
             "B interfaces and mixed updates",
-            "classical baseline",
+            "classical comparison under the neural pilot protocol",
             "multi-seed study",
         ],
     }

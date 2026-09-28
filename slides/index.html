@@ -1001,8 +1001,8 @@
                 "
               >
                 Check sequence coverage, shared IDs, duplicates and timestamp
-                ties.<br />Audit command is ready. Amazon files have not been
-                audited.
+                ties.<br />Audit command is ready. The neural cutoff pilot has
+                no real-data audit yet.
               </p>
             </div>
             <div
@@ -1089,7 +1089,7 @@
           <div class="foot">
             <span
               >Implementation status · Two-domain training and the classical
-              comparator remain future work</span
+              comparison under the same protocol remain future work</span
             ><span>6 / 6</span>
           </div>
         </section>
@@ -1125,7 +1125,7 @@
         "This is our proposed adaptation, not the original SASRec architecture. A known request domain selects its embeddings and scoring interface. Both A and B training update the same Transformer. We propose tying input/output item embeddings within each domain. Histories remain within real user/session boundaries. Keep real reviewer identities for the audit. Check parent-product overlap before defining domain item mappings; never equate independently reindexed integers. Shared updates can help, harm or leave A unchanged. Transition: define when these shared weights update.",
         "Each experimental branch carries learned weights forward across cycles and uses fresh training observations. The proposed optimizer policy resets Adam once after initial training, identically across branches, then preserves optimizer state within the branch. A cycle is a block of optimizer steps, not necessarily a calendar day. The frozen control does not execute this update process. ADER provides a precedent for updating SASRec, but evaluates upcoming windows; our fixed A retention test is different. The current code ports the original kang205/SASRec architecture to PyTorch, with sequence-wise initial training and A-only continuation. Continued updates supervise only fresh targets to avoid implicit replay. This is not a reproduction of the original paper evaluation or the proposed two-domain interfaces. Transition: compare controlled branches.",
         "All branches start from an identical checkpoint and B initialization. Converging lines mean common evaluation, not merging the models. The 0%, 50% and 100% labels refer to B fractions of supervised examples. The existing group PDF instead uses B volume relative to A, so agree the denominator before adopting these labels. A model can underperform A-only continuation without dropping below its own initial A score. Measure both comparisons, repeated-run variability and B adaptation. Keep test data out of all updates and tuning. No measurable decline is a valid finding. A matched-A-exposure control can help distinguish harmful B updates from reduced A supervision. If reporting B volume relative to A, 10/50/100/200 percent corresponds to 9.1/33.3/50/66.7 percent B share. The pilot uses fixed full initial-catalogue candidates. Ordinary MF with disjoint user/item factors can remain isolated from B updates; audit the baseline sharing mechanism.",
-        "The repository uses uv and a locked environment. Available commands download official ID files, audit both domains, prepare a bounded A split, and run training/save-reload/continuation. Synthetic smoke tests check software only. Initial cohort selection uses pre-cutoff activity. Ambiguous tied timestamps are omitted rather than inventing an order. Validation and retention events never enter training prefixes. The first pilot excludes unseen items and reports that loss of coverage. Dataset choice, time cutoffs, rating policy, mixture design and the classical comparison still require review. No Amazon result is claimed.",
+        "The repository uses uv and a locked environment. Available commands download official ID files, audit both domains, prepare a bounded A split, and run training/save-reload/continuation. Synthetic smoke tests check software only. Initial cohort selection uses pre-cutoff activity. Ambiguous tied timestamps are omitted rather than inventing an order. Validation and retention events never enter training prefixes. The first pilot excludes unseen items and reports that loss of coverage. The classical comparator now reports exploratory real Amazon results under leave-last-out splitting; those scores are not comparable with the neural cutoff protocol. Dataset choice, time cutoffs, rating policy, mixture design and a common-protocol comparison still require review. No neural Amazon result is claimed.",
       ];
       let current = Math.max(
         0,
