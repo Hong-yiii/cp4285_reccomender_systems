@@ -116,7 +116,7 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `tests/test_pipeline.py` | Meaningful data/evaluator/lifecycle checks |
 | `tests/test_classical.py` | Classical loader, split, contamination, isolation and evaluator checks |
 | `configs/pilot.toml` | Reviewable experiment defaults |
-| `slides/index.html` | Six-slide narrative with data and implementation status |
+| `slides/README.md` | Link to the team Google Slides deck and slide principles (no code) |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |
 
 Import shared helpers from `cp4285.common.utils` and protocol-independent dataset handling (download, validated loading, audit) from `cp4285.common.data`. Keep each workstream's split construction and evaluation in its own package (`neural/`, `classical/`): their research protocols differ. `common.utils` imports only the standard library; `common.data` uses DuckDB and HTTPX but no model libraries.

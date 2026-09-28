@@ -670,8 +670,9 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#metrics-checkpoint"><strong>Latest · 20 · Hit@K and several targets</strong></a>
-          <a href="#update-classical-study">19 · Classical rigour</a>
+          <a href="#metrics-checkpoint"><strong>Latest · 21 · Hit@K and several targets</strong></a>
+          <a href="#update-classical-study">20 · Classical rigour</a>
+          <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
           <a href="#reviewer-checkpoint">16 · Shared utilities</a>
@@ -719,19 +720,23 @@
             role="note"
           >
             <strong>Current review checkpoint — 28 September 2026.</strong> PRs
-            #1–#4 are merged into main. The current package-layout change moves
-            the neural workstream into <code>src/cp4285/neural/</code> and shared
-            dataset handling into <code>src/cp4285/common/</code>; it changes
-            import paths, not training or evaluation behavior.
-            <a href="#update-classical-study">Section 19: classical rigour</a> and
-            <a href="#metrics-checkpoint">section 20: Hit@K and several targets</a> are on branch
-            <code>classical-study</code>, merged with this layout but not yet on main.
+            #1–#4 and #6 are merged into main, including the package layout
+            (<code>src/cp4285/neural/</code>, <code>src/cp4285/common/</code>).
+            The current change retires the HTML slides: the team deck is in
+            Google Slides, linked from
+            <a href="slides/README.md"><code>slides/README.md</code></a>
+            with slide principles. See
+            <a href="#slides-checkpoint">section 19: team deck</a>. No code,
+            training or evaluation behavior changes.
+            Branch <code>classical-study</code> adds
+            <a href="#update-classical-study">section 20: classical rigour</a> and
+            <a href="#metrics-checkpoint">section 21: Hit@K and several targets</a>.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
             >
             their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–20. Read the
+            unfixed-safety statements are superseded by sections 11–21. Read
             <a href="#layout-checkpoint">section 18: package layout</a> for the
             current file map, then
             <a href="#sasrec-architecture">section 17: SASRec step by step</a>
@@ -3432,10 +3437,87 @@ uv run pytest -q</code></pre>
           </p>
         </section>
         <!-- APPENDED LAYOUT CHECKPOINT 2026-09-28 END -->
+        <!-- APPENDED SLIDES CHECKPOINT 2026-09-28 START -->
+        <section id="slides-checkpoint">
+          <span class="section-num"
+            >19 / TEAM DECK CHECKPOINT — 28 SEPTEMBER 2026</span
+          >
+          <h2>One team deck in Google Slides. The repository supplies its neural content.</h2>
+          <p class="lead">
+            <code>slides/index.html</code> is retired. Earlier sections that
+            mention a six-slide HTML narrative describe their own checkpoints.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Where</th>
+                  <th scope="col">Now holds</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="slides/README.md"><code>slides/README.md</code></a>
+                  </td>
+                  <td>
+                    Link to the team's Google Slides deck, principles for
+                    slides the whole class can follow without knowing SASRec,
+                    the dataset or the papers, a plain-wording glossary and a
+                    pre-export checklist.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="slides/ISSUES.md"><code>slides/ISSUES.md</code></a>
+                  </td>
+                  <td>
+                    Problems in the live deck, deck-wide and slide by slide,
+                    ranked must-fix or should-fix.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="docs/SLIDE-FLOW.md"><code>docs/SLIDE-FLOW.md</code></a>
+                  </td>
+                  <td>
+                    Where the neural slides go, two paste-ready neural slides,
+                    the original four-slide narrative and its Mermaid diagrams.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <span class="label fact">FACT</span> Read on 28 September through
+            the deck's public text export and preview: 22 slides, 20 once
+            acknowledgements and references are excluded—the course limit. The
+            deck includes the classical pilot and its results but no neural
+            slide, and still lists SASRec as one of several options.
+          </p>
+          <p>
+            <span class="label recommend">RECOMMENDATION</span> Use the empty
+            data-exploration slide to introduce the dataset, replace the
+            outdated technical-plan slide with the first neural slide, and hide
+            the version history to make room for the second, so the count stays
+            at 20. Settle the mixture denominator before either slide quotes
+            mix levels.
+          </p>
+          <p>
+            <span class="label unchecked">UNCHECKED</span> The Google deck was
+            not edited from this repository, and later team edits may change
+            its slide numbers.
+          </p>
+          <p class="small">
+            <a href="#review-status">Back to current status</a> ·
+            <a href="#layout-checkpoint">Package layout</a>
+          </p>
+        </section>
+        <!-- APPENDED SLIDES CHECKPOINT 2026-09-28 END -->
 
         <!-- APPENDED CLASSICAL RIGOUR CHECKPOINT 2026-09-28 -->
         <section id="update-classical-study">
-          <span class="section-num">19 / CLASSICAL RIGOUR CHECKPOINT · 28 SEPTEMBER 2026</span>
+          <span class="section-num">20 / CLASSICAL RIGOUR CHECKPOINT · 28 SEPTEMBER 2026</span>
           <h2>The classical study now tunes on validation, reports on test and measures uncertainty.</h2>
           <p>
             <span class="label fact">FACT</span> A new command,
@@ -3509,7 +3591,7 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
 
         <!-- APPENDED METRICS CHECKPOINT 2026-09-28 -->
         <section id="metrics-checkpoint">
-          <span class="section-num">20 / METRICS CHECKPOINT · 28 SEPTEMBER 2026</span>
+          <span class="section-num">21 / METRICS CHECKPOINT · 28 SEPTEMBER 2026</span>
           <h2>Hit@K replaces the Recall@K label, and the classical study can hold out several targets per user.</h2>
           <p>
             <span class="label fact">FACT</span> Both evaluators counted whether the one hidden item

@@ -18,8 +18,8 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 | Bounded familiar-item A preparation with isolated holdouts | Classical/neural comparison under one protocol |
 | Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
 | Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
-| Synthetic lifecycle tests and six-slide HTML narrative | Final team deck / submission |
-| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; the multi-seed classical study (`cp4285 classical study`, validation-tuned, paired CIs) is implemented and partly run, see section 19 of `reference.html` |
+| Synthetic lifecycle tests | Final team deck / submission |
+| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; the multi-seed classical study (`cp4285 classical study`, validation-tuned, paired CIs) is implemented and partly run, see section 20 of `reference.html` |
 
 **Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
 
@@ -28,6 +28,8 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 **Metrics, 28 September (issue #8):** both evaluators report Hit@K (formerly labelled Recall@K; identical with one target). The classical split and evaluator accept `--targets m` future events per user, where Hit@K and Recall@K differ; m = 1 is unchanged and remains the default. `sweep --split test` now includes the validation event in the history. Choosing m, the target event and seen-item exclusion for both workstreams is still a team decision.
 
 **Package layout, 28 September:** the neural workstream lives in `src/cp4285/neural/` (`data.py` cutoff split, `model.py`, `pilot.py`). Protocol-independent download, validated loading and the A/B audit moved to `src/cp4285/common/data.py`. Each workstream keeps its own split and evaluation; the classical loader is unchanged. Import paths changed; CLI, config and behavior did not.
+
+**Slides, 28 September:** the team's Google Slides deck is canonical; [slides/README.md](slides/README.md) links it and sets slide principles for a class audience with no assumed knowledge of SASRec, the dataset or the papers. The HTML narrative was retired. The live deck is at the 20-slide limit and has no neural slides yet. [slides/ISSUES.md](slides/ISSUES.md) lists its problems slide by slide; [SLIDE-FLOW.md](docs/SLIDE-FLOW.md#live-deck-review--28-september-2026) places two neural slides.
 
 The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.
 
@@ -58,7 +60,7 @@ The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-trai
 - [Reviewer reference](reference.html): persistent, self-contained project walkthrough at the repository root. Original narrative and diagrams are preserved as dated evidence; read its latest checkpoint first. Append updates rather than silently rewriting historical results. Source and runbook remain authoritative.
 - [Neural model rationale](docs/MODERN-RECOMMENDER.md), [experiment controls](docs/EXPERIMENT.md), [dataset assessment](docs/DATASET-ASSESSMENT.md).
 - [Classical comparator](docs/CLASSICAL.md): the contributor reports single-seed validation sweeps showing disjoint-B effects under shared rank/item budgets and 10.3% reviewer overlap. These originating-workspace results were not rerun during the SASRec merge and are not a common-protocol neural comparison.
-- [Slide narrative and Mermaid diagrams](docs/SLIDE-FLOW.md); [editable HTML slides](slides/index.html).
+- [Team Google Slides deck and slide principles](slides/README.md); [deck issues](slides/ISSUES.md); [neural slides and Mermaid diagrams](docs/SLIDE-FLOW.md).
 - [Primary references, course slides and local-only source index](docs/SOURCES.md).
 - `local/course/` holds copied Week 01–02 PDFs, learning notes and references on the migrated machine. `local/sources/` holds supplied project evidence and the draft team PDF. Neither is published.
 - [AI log](docs/AI_LOG.md) records prior Codex assistance and the move to Pi. Add subsequent substantive assistance for the team's disclosure.

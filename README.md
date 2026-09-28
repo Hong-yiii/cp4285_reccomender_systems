@@ -15,7 +15,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md)
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
-- [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md) and [slide narrative](docs/SLIDE-FLOW.md)
+- [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 
 The next recorded milestone is the **29 September 2026 design critique**. The official template's weekday/date conflict remains unresolved; verify Canvas rather than assuming a submission deadline.
@@ -46,13 +46,13 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
 | `docs/` | Research context, requirements, protocol, provenance and AI log |
 | `reference.html` | Self-contained reviewer walkthrough; preserve the structure and append dated updates |
-| `slides/index.html` | Editable six-slide technical narrative; open directly in a browser |
+| `slides/` | `README.md`: link to the team's Google Slides deck and principles for making slides. `ISSUES.md`: known deck problems |
 | `local/` | **Ignored** course PDFs, private team sources and local migration notes |
 | `data/`, `runs/`, `reports/` | **Ignored** downloaded data and generated artifacts |
 | `AGENTS.md`, `CONTEXT.md` | Pi/agent entry points and current project state |
 
 ## Public repository boundary
 
-This repository publishes project code, authored research notes and the editable HTML diagrams. Raw meeting transcripts, prior agent chats, team PDFs, course PDFs, datasets, checkpoints and agent sessions stay local. See [source provenance](docs/SOURCES.md) for official links and local-only filenames; those local files are intentionally absent from a fresh clone. Do not force-add them without reviewing privacy, course policy and redistribution rights.
+This repository publishes project code, authored research notes and slide guidance. The team deck itself stays in Google Slides. Raw meeting transcripts, prior agent chats, team PDFs, course PDFs, datasets, checkpoints and agent sessions stay local. See [source provenance](docs/SOURCES.md) for official links and local-only filenames; those local files are intentionally absent from a fresh clone. Do not force-add them without reviewing privacy, course policy and redistribution rights.
 
 The course workspace now points here; this checkout is the project source of truth. [Migration notes](docs/MIGRATION.md) describe the split. No submission is made by this repository, and working proposals are not team-approved decisions.

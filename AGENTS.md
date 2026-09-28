@@ -9,7 +9,8 @@ This checkout is the canonical **group-project** home, not the whole course work
 - `docs/PROJECT.md`, `docs/UNDERSTANDING.md`: purpose, meeting synthesis and decision status.
 - `docs/EXPERIMENT.md`, `docs/MODERN-RECOMMENDER.md`, `docs/CONTINUED-TRAINING.md`: research protocol.
 - `docs/DATASET-ASSESSMENT.md`, `configs/pilot.toml`: provisional data choices and runnable defaults.
-- `docs/REQUIREMENTS.md`, `docs/DEFENSE.md`, `docs/SLIDE-FLOW.md`, `slides/index.html`: critique preparation and editable slides.
+- `docs/REQUIREMENTS.md`, `docs/DEFENSE.md`, `docs/SLIDE-FLOW.md`: critique preparation and neural slide content.
+- `slides/README.md`, `slides/ISSUES.md`: pointer to the team's Google Slides deck (canonical; edit it there, only when asked), slide principles for a class audience, and known deck issues.
 - `docs/SOURCES.md`: primary references, official course links and local-only source locations.
 - `docs/SASREC.md`: selected original architecture, pinned upstream code, license and explicit training/evaluation differences.
 - `src/cp4285/` (`common/`, `neural/`, `classical/`), `tests/`: Python CLI and lifecycle tests.
