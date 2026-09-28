@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#metrics-checkpoint"><strong>Latest · 21 · Hit@K and several targets</strong></a>
+          <a href="#next-items-checkpoint"><strong>Latest · 22 · Next-items proposal</strong></a>
+          <a href="#metrics-checkpoint">21 · Hit@K and several targets</a>
           <a href="#update-classical-study">20 · Classical rigour</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
@@ -730,13 +731,14 @@
             training or evaluation behavior changes.
             Branch <code>classical-study</code> adds
             <a href="#update-classical-study">section 20: classical rigour</a> and
-            <a href="#metrics-checkpoint">section 21: Hit@K and several targets</a>.
+            <a href="#metrics-checkpoint">section 21: Hit@K and several targets</a> and
+            <a href="#next-items-checkpoint">section 22: next-items proposal</a>.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
             >
             their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–21. Read
+            unfixed-safety statements are superseded by sections 11–22. Read
             <a href="#layout-checkpoint">section 18: package layout</a> for the
             current file map, then
             <a href="#sasrec-architecture">section 17: SASRec step by step</a>
@@ -3635,6 +3637,39 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
           <p class="small"><a href="#review-status">Current PR status</a></p>
         </section>
         <!-- APPENDED METRICS CHECKPOINT 2026-09-28 END -->
+
+        <!-- APPENDED NEXT-ITEMS CHECKPOINT 2026-09-28 -->
+        <section id="next-items-checkpoint">
+          <span class="section-num">22 / NEXT-ITEMS PROPOSAL · 28 SEPTEMBER 2026</span>
+          <h2>Two tasks, one metric each: Hit@10 for the next item, Recall@10 for the next items.</h2>
+          <p>
+            <span class="label fact">FACT</span> Team decision in
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/issues/8">issue #8</a>:
+            the task's metric selects the model or checkpoint and carries the confidence intervals;
+            NDCG@10 only breaks ties. B levels stop at 100%. The neural pilot now selects its initial
+            checkpoint by validation Hit@10.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> <code>cp4285 classical study --protocol time</code>
+            (<a href="src/cp4285/classical/data.py">time_split</a>) trains on reviews before a global
+            cutoff and hides each user's first 10 new products in the following window: 2021 for
+            validation, 2022 for test. Every user with an earlier review is scored. On the Electronics
+            5-core file that is 557K users, 48% of them with two or more targets.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> This is a proposal with run instructions in
+            <a href="docs/CLASSICAL.md">CLASSICAL.md</a>; neither study has been run with Hit@10 tuning or
+            the time protocol yet. A neural version needs a held-out user group whose later reviews never
+            enter continued training.
+          </p>
+          <p class="ref">
+            Also fixed: <code>classical study</code> crashed on its first scored level because a results
+            dict shadowed <code>per_user()</code>; an end-to-end study test now covers both protocols.
+            All 44 tests passed at this checkpoint.
+          </p>
+          <p class="small"><a href="#review-status">Current PR status</a></p>
+        </section>
+        <!-- APPENDED NEXT-ITEMS CHECKPOINT 2026-09-28 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

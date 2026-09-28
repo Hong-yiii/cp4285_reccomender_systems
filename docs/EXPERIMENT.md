@@ -20,7 +20,7 @@ The immediate output should be a short specification that fills these fields:
 | Data connection | Shared real users/items/features, or shared model parameters | Open; essential |
 | Updates | Which parameters change, at what cadence, on which examples? | Continued mini-batch training proposed |
 | Models | One classical baseline and one neural/advanced model | Required family comparison; exact choices open |
-| Primary outcome | Ranking quality on held-out A | NDCG@10 proposed |
+| Primary outcome | Ranking quality on held-out A | Hit@10 (next item), Recall@10 (next items); decided 28 September, issue #8 |
 | Claim boundary | What does this setup represent in a real application? | Open |
 
 ## The data connection comes first
@@ -42,7 +42,7 @@ The first row most closely matches the supplied sketch. The other rows are alter
 ## Proposed evaluation
 
 1. Construct initial A training data, validation data, unused A update data, and a held-out A retention test. Where time matters, initial training precedes update data; keep retention-test labels out of every update stream. Explain which period/population the fixed test measures.
-2. Save an A-trained checkpoint for each model. Record initial absolute NDCG@10 and an additional ranking metric such as Hit@10.
+2. Save an A-trained checkpoint for each model. Record initial absolute Hit@10 (next item) or Recall@10 (next items), plus NDCG@10.
 3. Branch each update condition from the same initial checkpoint, with a stated optimizer-state policy. Fix evaluation inputs, relevant items, eligible candidates and previously-seen-item filtering across checkpoints. Freeze sequential input histories if using a sequential model.
 4. Apply a matched update budget and evaluate A at fixed checkpoints. Rank all eligible A items exactly for a manageable catalogue; if sampling is necessary, document it and freeze the sampled candidates. Sampling can alter comparative conclusions. [Krichene and Rendle, 2020](https://research.google/pubs/on-sampled-metrics-for-item-recommendation/)
 5. Report absolute scores and signed change from the initial checkpoint, along with repeated-seed variation for final comparisons. Do not select conditions or tune models on the held-out A test.

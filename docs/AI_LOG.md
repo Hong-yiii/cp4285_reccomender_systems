@@ -223,3 +223,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 41 tests plus Ruff lint and format passed. On synthetic data, m = 1 metrics and per-user NDCG were bit-identical to the previous code for validation and test. A 50K-user real-data smoke run of `sweep --targets 2 --split test` completed; its numbers are a smoke check, not results.
 
 **Limits:** m > 1 was not run at full scale and is not comparable with m = 1. The neural pilot still has one target per user and no seen-item exclusion. Target event, m and exclusion remain team decisions.
+
+## 28 September 2026 — Next-items protocol and Hit@10 selection
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Drop the 140% level, use Hit@10, determine the best design for the next-items task, then commit and propose the method with run instructions before running it.
+
+**Assistance:** Measured candidate cutoffs and windows on the Electronics 5-core file and proposed T = 2022-01-01, W = 365 days, up to 10 new products per user. Added `time_split`, `make_split` and `before` to `classical/data.py`, `--protocol/--cutoff/--window-days/--max-targets` to the classical CLI, task-specific primary metrics (Hit@10 or Recall@10, NDCG@10 tiebreak) to tuning and paired intervals, and Hit@10 checkpoint selection to `neural/pilot.py`. Found and fixed a crash introduced earlier in this session: `study` shadowed `per_user()` with its results dict. Updated CLASSICAL (method, candidate table, run instructions), CONTEXT, EXPERIMENT, CONTINUED-TRAINING, UNDERSTANDING, IMPLEMENTATION and reference section 22.
+
+**Validation:** 44 tests plus Ruff passed, including a hand-built time split and end-to-end synthetic studies for both protocols. A 100K-user real-data smoke sweep with `--protocol time` completed (5,000 users, 10,651 targets); smoke numbers only. A started full study was stopped during tuning at the user's request so the method can be agreed first.
+
+**Limits:** Neither study has run with Hit@10 tuning or the time protocol. The 5-core filter uses whole-history counts. The neural next-items variant and its held-out user group are not built.
