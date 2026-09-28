@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QR model fit and predict</title>
+<!--
+  QR model, slide 2 of 2: fitting (randomized QR range finder with power iterations) and
+  prediction as vectors over product ids. Mirrors src/cp4285/classical/models.py
+  (MarkovQRSVD: M = T D, D = diag((pop+1)^-beta); QRSVD: l = k + 16 columns, 1 + 3 power
+  iterations, keep top k -> V) and evaluate.py (Electronics columns only, seen items removed,
+  hidden item in the top 10 -> Hit@10). Bar heights are illustrative.
+  Export:
+    chrome --headless --screenshot=qr-fit-predict.png --window-size=1920,1080 \
+           --force-device-scale-factor=2 --hide-scrollbars qr-fit-predict.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 56px; fill: #000; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 32px; font-weight: 700; fill: #1a1a1a; }
+  .text { font-size: 24px; fill: #1a1a1a; }
+  .muted { font-size: 24px; fill: #595959; }
+  .small { font-size: 22px; fill: #595959; }
+  .sym { font-size: 28px; font-weight: 700; fill: #1a1a1a; }
+  .shape { font-size: 26px; font-weight: 700; fill: #1a1a1a; }
+</style>
+</head>
+<body>
+<svg id="s" width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">QR model: fit once per mix level, then score every product</title>
+  <desc id="d">Fit: T (N by N counts) is multiplied by D, which scales down best-sellers, giving M. Starting from a random N by (k + 16) matrix, the model repeats four times: multiply by M-transpose M, then QR to re-straighten the columns. It keeps the strongest k columns as V, N by k, with k chosen on the tune reviews. This is redone from scratch at every mix level; there is no gradient descent. Predict: the shopper's latest product is a one-hot vector q (1 by N); q times M is that product's row (1 by N, mostly zero); times V gives k pattern weights; times V-transpose gives a score for every product (1 by N). Only Electronics products are ranked, products the shopper already reviewed are skipped, and a hidden review in the top 10 gives Hit@10 = 1. Scores are not probabilities; only their order matters.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+    <marker id="ah-blue" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1a6bb8"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#fff"/>
+
+  <text class="title" x="90" y="96">QR model: fit once per mix level, then score every product</text>
+
+  <!-- ═════════ 5 Fit ═════════ -->
+  <g transform="translate(90 140)">
+    <rect class="card" width="1740" height="420" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">5</text>
+    <text class="head" x="76" y="55">Fit: 4 passes over the table, no gradient descent</text>
+    <rect x="1230" y="22" width="480" height="46" rx="23" fill="#fff" stroke="#1a6bb8" stroke-width="2"/>
+    <text x="1470" y="53" text-anchor="middle" style="font-size:23px;font-weight:700;fill:#1a6bb8">↻ redone from scratch at every mix level</text>
+
+    <!-- T -->
+    <rect x="40" y="110" width="180" height="180" fill="#d6e4f3" stroke="#a6a6a6" stroke-width="2"/>
+    <g fill="#1a6bb8" id="dotsT"></g>
+    <text class="shape" x="130" y="328" text-anchor="middle">T  (N × N)</text>
+    <text class="small" x="130" y="358" text-anchor="middle">counts</text>
+
+    <line x1="232" y1="200" x2="330" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+    <text x="280" y="186" text-anchor="middle" style="font-size:26px;font-weight:700;fill:#1a1a1a">× D</text>
+
+    <!-- M -->
+    <rect x="346" y="110" width="180" height="180" fill="#d6e4f3" stroke="#a6a6a6" stroke-width="2"/>
+    <g fill="#1a6bb8" fill-opacity="0.7" id="dotsM"></g>
+    <text class="shape" x="436" y="328" text-anchor="middle">M = T·D  (N × N)</text>
+    <text class="small" x="436" y="358" text-anchor="middle">best-sellers scaled down</text>
+
+    <line x1="538" y1="200" x2="632" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- random start -->
+    <rect x="648" y="110" width="44" height="180" fill="#cfcfcf" stroke="#a6a6a6" stroke-width="2"/>
+    <g id="noise"></g>
+    <text class="shape" x="670" y="328" text-anchor="middle">N × (k+16)</text>
+    <text class="small" x="670" y="358" text-anchor="middle">random start</text>
+
+    <line x1="704" y1="200" x2="800" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- loop -->
+    <rect x="816" y="92" width="440" height="220" rx="18" fill="#fff" stroke="#1a6bb8" stroke-width="2.5" stroke-dasharray="10 7"/>
+    <text x="840" y="128" style="font-size:24px;font-weight:700;fill:#1a6bb8">repeat 4 times</text>
+    <g transform="translate(1210 116)" fill="none" stroke="#1a6bb8" stroke-width="3" stroke-linecap="round">
+      <path d="M12 0 a12 12 0 1 1 -8.5 3.5"/>
+      <path d="M1 -2 L4 4 L10 1"/>
+    </g>
+    <rect x="840" y="148" width="44" height="140" fill="#a9c7e6" stroke="#1a6bb8" stroke-width="2"/>
+    <text class="shape" x="904" y="186">Q ← QR( Mᵀ M Q )</text>
+    <text class="small" x="904" y="226">× MᵀM: strong patterns grow</text>
+    <text class="small" x="904" y="256">QR: re-straighten the columns</text>
+    <text class="small" x="904" y="286">Q stays N × (k+16)</text>
+
+    <line x1="1268" y1="200" x2="1362" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+    <text x="1314" y="238" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a1a1a">top k</text>
+
+    <!-- V -->
+    <rect x="1378" y="110" width="42" height="180" fill="#1a6bb8"/>
+    <text class="shape" x="1399" y="328" text-anchor="middle">V  (N × k)</text>
+    <text class="small" x="1399" y="358" text-anchor="middle">the model</text>
+
+    <text class="text" x="1448" y="140" style="font-weight:700">Each column of V:</text>
+    <text class="small" x="1448" y="172">one pattern over products,</text>
+    <text class="small" x="1448" y="202">e.g. “camera gear”</text>
+    <text class="small" x="1448" y="252">T and D are kept too:</text>
+    <text class="small" x="1448" y="282">prediction reads a row of T</text>
+
+    <text class="small" x="40" y="400">D divides column j by (shoppers who reviewed j + 1)^β · 16 spare columns for accuracy · k ∈ {32, 64, 128, 256} and β ∈ {0, 0.25} chosen on the tune reviews</text>
+  </g>
+
+  <!-- ═════════ 6 Predict ═════════ -->
+  <g transform="translate(90 590)">
+    <rect class="card" width="1740" height="460" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">6</text>
+    <text class="head" x="76" y="55">Predict for one shopper: a score for every product ID</text>
+
+    <!-- row labels -->
+    <text class="sym" x="40" y="122">q</text>
+    <text class="small" x="40" y="148">latest product</text>
+    <text class="sym" x="40" y="202">q · M</text>
+    <text class="small" x="40" y="228">its row of the table</text>
+    <text class="sym" x="40" y="282">× V</text>
+    <text class="small" x="40" y="308">k pattern weights</text>
+    <text class="sym" x="40" y="362">× Vᵀ</text>
+    <text class="small" x="40" y="388">score per product</text>
+
+    <!-- shapes -->
+    <g class="small" style="fill:#1a1a1a">
+      <text x="1206" y="132"><tspan font-weight="700">1 × N</tspan>, one 1</text>
+      <text x="1206" y="212"><tspan font-weight="700">1 × N</tspan>, mostly 0</text>
+      <text x="1206" y="292"><tspan font-weight="700">1 × k</tspan></text>
+      <text x="1206" y="372"><tspan font-weight="700">1 × N</tspan></text>
+    </g>
+
+    <g id="strips"></g>
+
+    <text class="small" x="40" y="446" style="font-style:italic">Scores, not probabilities: only their order matters. Bar heights are illustrative.</text>
+
+    <!-- ranking -->
+    <line x1="1380" y1="92" x2="1380" y2="430" stroke="#d0d0d0" stroke-width="2"/>
+    <text class="text" x="1410" y="112" style="font-weight:700">Rank Electronics only</text>
+    <text class="small" x="1410" y="142">skip already reviewed (×)</text>
+    <g>
+      <rect x="1410" y="160" width="300" height="42" rx="6" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+      <rect x="1410" y="210" width="300" height="42" rx="6" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+      <rect x="1410" y="260" width="300" height="42" rx="6" fill="#1a1a1a"/>
+      <text class="text" x="1424" y="189"><tspan font-weight="700">#1</tspan>  Screen protector</text>
+      <text class="text" x="1424" y="239"><tspan font-weight="700">#2</tspan>  Earbuds</text>
+      <text class="text" x="1424" y="289" style="fill:#fff"><tspan font-weight="700">#3</tspan>  Charger (hidden)</text>
+    </g>
+    <text class="small" x="1410" y="346">hidden review at #3</text>
+    <text x="1410" y="384" style="font-size:30px;font-weight:700;fill:#1a1a1a">Hit@10 = 1</text>
+    <text class="small" x="1410" y="414">1 if in the top 10, else 0</text>
+  </g>
+
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent) => {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      parent.appendChild(e); return e;
+    };
+    // sparse dots in the N x N squares and noise in the random start
+    const dots = (id, pts, x0, y0) => pts.forEach(([x, y]) =>
+      el('rect', { x: x0 + x, y: y0 + y, width: 10, height: 10 }, document.getElementById(id)));
+    const P = [[14,16],[60,10],[120,30],[34,62],[92,70],[150,58],[20,120],[74,112],[132,130],[56,152],[160,160],[104,40]];
+    dots('dotsT', P, 40, 110); dots('dotsM', P, 346, 110);
+    const noise = document.getElementById('noise');
+    for (let i = 0; i < 30; i++) el('rect', { x: 652 + (i * 17) % 34, y: 114 + i * 5.8, width: 6, height: 4,
+      fill: i % 3 ? '#8a8a8a' : '#f2f2f2' }, noise);
+
+    // prediction strips: 43 product slots; slots 0-16 Electronics, 17-42 Movies & TV
+    const g = document.getElementById('strips');
+    const X0 = 330, W = 20, NSLOT = 43, NE = 17, H = 50;
+    const slotX = i => X0 + i * W;
+    function frame(y, n) {
+      el('rect', { x: X0, y, width: n * W, height: H, fill: '#fff', stroke: '#c8c8c8', 'stroke-width': 1.5 }, g);
+      for (let i = 1; i < n; i++)
+        el('line', { x1: slotX(i), y1: y, x2: slotX(i), y2: y + H, stroke: '#eeeeee', 'stroke-width': 1 }, g);
+    }
+    function boundary(y) {
+      el('line', { x1: slotX(NE), y1: y - 4, x2: slotX(NE), y2: y + H + 4, stroke: '#595959',
+        'stroke-width': 2, 'stroke-dasharray': '4 4' }, g);
+    }
+    function bars(y, vals, colour, signed) {
+      const base = signed ? y + H / 2 : y + H, scale = signed ? H / 2 - 3 : H - 4;
+      vals.forEach((v, i) => {
+        if (!v) return;
+        const h = Math.abs(v) * scale, c = typeof colour === 'function' ? colour(i) : colour;
+        el('rect', { x: slotX(i) + 3, y: v > 0 ? base - h : base, width: W - 6, height: Math.max(h, 1.5), fill: c }, g);
+      });
+      if (signed) el('line', { x1: X0, y1: base, x2: X0 + vals.length * W, y2: base, stroke: '#9e9e9e', 'stroke-width': 1 }, g);
+    }
+    function label(x, y, text, style) {
+      const t = el('text', { x, y, 'text-anchor': 'middle', style }, g); t.textContent = text;
+    }
+
+    // q: one-hot at Case (slot 5)
+    frame(100, NSLOT); boundary(100);
+    el('rect', { x: slotX(7) + 1, y: 101, width: W - 2, height: H - 2, fill: '#1a6bb8' }, g);
+    label(slotX(7) + W / 2, 94, 'Cable', 'font-size:20px;font-weight:700;fill:#1a6bb8');
+
+    // q·M: Cable's row, Electronics only (off-diagonal block is zero)
+    const r = Array(NSLOT).fill(0); r[5] = 0.3; r[9] = 0.85; r[12] = 0.55; r[14] = 0.65;
+    frame(180, NSLOT); boundary(180); bars(180, r, '#1a6bb8', false);
+
+    // × V: 256 pattern weights (drawn as 16)
+    const p = [0.6,-0.3,0.85,0.2,-0.55,0.4,0.1,-0.2,0.5,-0.4,0.3,0.15,-0.1,0.35,-0.25,0.2];
+    frame(260, p.length); bars(260, p, '#1a6bb8', true);
+
+    // × Vᵀ: a score for every product
+    const s = [0.1,0.05,0.35,-0.05,0.15,0.4,0.08,0.5,0.02,0.65,-0.1,0.12,0.92,0.05,0.75,0.1,-0.05,
+               0.06,-0.04,0.08,0.03,-0.06,0.05,0.02,-0.03,0.07,0.04,-0.05,0.03,0.06,-0.02,0.05,0.02,
+               -0.04,0.06,0.03,-0.03,0.05,0.02,-0.05,0.04,0.03,-0.02];
+    frame(340, NSLOT); boundary(340);
+    bars(340, s, i => i >= NE ? '#bfbfbf' : i === 9 ? '#1a1a1a' : (i === 2 || i === 5 || i === 7) ? '#a9c7e6' : '#1a6bb8', true);
+    label(slotX(2) + W / 2, 334, '×', 'font-size:24px;font-weight:700;fill:#1a1a1a');
+    label(slotX(5) + W / 2, 334, '×', 'font-size:24px;font-weight:700;fill:#1a1a1a');
+    label(slotX(7) + W / 2, 334, '×', 'font-size:24px;font-weight:700;fill:#1a1a1a');
+    label(slotX(9) + W / 2 + 18, 334, 'Charger', 'font-size:20px;font-weight:700;fill:#1a1a1a');
+    // brackets under the score strip
+    el('path', { d: `M${X0} 398 v8 H${slotX(NE) - 4} v-8`, fill: 'none', stroke: '#1a6bb8', 'stroke-width': 2 }, g);
+    el('path', { d: `M${slotX(NE) + 4} 398 v8 H${slotX(NSLOT)} v-8`, fill: 'none', stroke: '#9e9e9e', 'stroke-width': 2 }, g);
+    label(slotX(NE / 2), 426, 'Electronics: ranked', 'font-size:20px;font-weight:700;fill:#1a6bb8');
+    label(slotX(NE + (NSLOT - NE) / 2), 426, 'Movies & TV: not ranked', 'font-size:20px;fill:#595959');
+  </script>
+</svg>
+</body>
+</html>

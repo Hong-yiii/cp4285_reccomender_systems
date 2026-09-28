@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SASRec data</title>
+<!--
+  SASRec, slide 1 of 2: how reviews become fixed-length sequences.
+  Mirrors src/cp4285/neural/data.py (cutoff split, 5+ pre-cutoff reviews, last two pre-cutoff
+  reviews held out as validation then retention, 2021 reviews as the continuation stream,
+  familiar-item ids 1..I with 0 = padding) and pilot.training_tensors (left-padded width 50,
+  shifted next-item targets, one sampled negative per position). Product names and ids are
+  illustrative. Colours follow the team deck.
+  Export:
+    chrome --headless --screenshot=sasrec-data.png --window-size=1920,1080 \
+           --force-device-scale-factor=2 --hide-scrollbars sasrec-data.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 56px; fill: #000; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 32px; font-weight: 700; fill: #1a1a1a; }
+  .text { font-size: 24px; fill: #1a1a1a; }
+  .muted { font-size: 24px; fill: #595959; }
+  .small { font-size: 22px; fill: #595959; }
+</style>
+</head>
+<body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">SASRec: reviews become fixed-length sequences</title>
+  <desc id="d">1: each kept shopper has 5 or more Electronics reviews before 1 January 2021. Older reviews train; the second-last before the cutoff tunes settings; the last before the cutoff is the fixed test; 2021 reviews arrive later for continued training. 2: reviews become history-to-next-product examples: initial training (Laptop, Phone to Case), tune and test share the history Laptop, Phone, Case and predict Cable and Charger, continued training predicts Earbuds then Mouse. 3: products in pre-2021 training reviews get ids 1 to I, 0 is padding; each training row is 50 positions, left-padded, with the real next product and a random product at every position; a batch is 128 by 50.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#fff"/>
+
+  <text class="title" x="90" y="96">SASRec: reviews become fixed-length sequences</text>
+
+  <!-- ───── 1 Timeline with cutoff ───── -->
+  <g transform="translate(90 140)" id="c1">
+    <rect class="card" width="1740" height="290" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">1</text>
+    <text class="head" x="76" y="55">Split each shopper’s Electronics reviews at 1 Jan 2021</text>
+
+    <line x1="1145" y1="124" x2="1145" y2="236" stroke="#1a1a1a" stroke-width="3" stroke-dasharray="8 6"/>
+    <text x="1145" y="112" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a1a1a">1 Jan 2021</text>
+    <text class="muted" x="40" y="268">Kept: shoppers with 5+ reviews before 2021. The test review is fixed for the whole study.</text>
+    <text class="muted" x="1200" y="268" style="fill:#1a6bb8">2021 reviews arrive later, in time order</text>
+  </g>
+
+  <!-- ───── 2 Examples ───── -->
+  <g transform="translate(90 450)" id="c2">
+    <rect class="card" width="870" height="590" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">2</text>
+    <text class="head" x="76" y="55">Make (history → next product) examples</text>
+    <text class="small" x="240" y="98">history, latest last</text>
+    <text class="small" x="722" y="98">next</text>
+
+    <text class="small" x="40" y="532">Held-out reviews (Cable, Charger) never enter a history</text>
+    <text class="small" x="40" y="560">or a training target. Tune and test share one history.</text>
+  </g>
+
+  <!-- ───── 3 IDs and tensor ───── -->
+  <g transform="translate(990 450)" id="c3">
+    <rect class="card" width="840" height="590" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">3</text>
+    <text class="head" x="76" y="55">Product IDs and the input tensor</text>
+
+    <rect x="40" y="86" width="80" height="50" fill="#fff" stroke="#a6a6a6" stroke-width="2"/>
+    <text x="80" y="119" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#595959">0</text>
+    <rect x="120" y="86" width="676" height="50" fill="#1a6bb8"/>
+    <text x="458" y="119" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#fff">1 … I : products in pre-2021 training reviews</text>
+    <text class="small" x="40" y="162">0 = padding · products first seen after training are skipped</text>
+    <text class="small" x="40" y="190">Movies &amp; TV products: planned, not built yet</text>
+
+    <text class="text" x="40" y="246" style="font-weight:700">One training row: last 5 of 50 positions</text>
+    <g class="small" text-anchor="middle">
+      <text x="236" y="276">0 … 44</text>
+      <text x="355" y="276">45</text><text x="441" y="276">46</text><text x="527" y="276">47</text>
+      <text x="613" y="276">48</text><text x="699" y="276">49</text>
+    </g>
+    <g class="text" style="font-size:22px">
+      <text x="40" y="320">history</text>
+      <text x="40" y="374">real next</text>
+      <text x="40" y="428">random</text>
+    </g>
+    <g id="grid"></g>
+
+    <text class="text" x="40" y="504" style="font-weight:700">Batch shape: 128 shoppers × 50 positions</text>
+    <text class="small" x="40" y="534">Left-padded with 0; the latest review sits in position 49.</text>
+    <text class="small" x="40" y="564">Every position is asked to predict the next product.</text>
+  </g>
+
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent, text) => {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      if (text !== undefined) e.textContent = text;
+      parent.appendChild(e); return e;
+    };
+    const STYLE = {
+      train: { fill: '#1a6bb8', stroke: 'none', text: '#fff' },
+      tune:  { fill: '#a9c7e6', stroke: '#1a6bb8', text: '#1a1a1a' },
+      test:  { fill: '#1a1a1a', stroke: 'none', text: '#fff' },
+      fresh: { fill: '#fff', stroke: '#1a6bb8', text: '#1a6bb8' },
+      hist:  { fill: '#fff', stroke: '#a6a6a6', text: '#1a1a1a' },
+    };
+    function chip(parent, x, y, w, h, label, kind, size) {
+      const s = STYLE[kind];
+      el('rect', { x, y, width: w, height: h, rx: h / 2, fill: s.fill,
+        stroke: s.stroke, 'stroke-width': kind === 'fresh' ? 3 : 2 }, parent);
+      el('text', { x: x + w / 2, y: y + h / 2 + size * 0.36, 'text-anchor': 'middle',
+        style: `font-size:${size}px;font-weight:700;fill:${s.text}` }, parent, label);
+    }
+    const arrow = (parent, x1, y, x2) => el('line', { x1, y1: y, x2, y2: y, stroke: '#7f7f7f',
+      'stroke-width': 3, 'marker-end': 'url(#ah)' }, parent);
+
+    // 1: timeline
+    const c1 = document.getElementById('c1');
+    const T = [['Laptop','Mar 2018','train'],['Phone','Jan 2019','train'],['Case','Mar 2019','train'],
+               ['Cable','Jun 2020','tune'],['Charger','Nov 2020','test'],
+               ['Earbuds','Feb 2021','fresh'],['Mouse','Jul 2021','fresh']];
+    const tx = i => 40 + i * 220 + (i >= 5 ? 60 : 0);
+    const role = { train: ['train', '#1a6bb8'], tune: ['tune', '#1a1a1a'], test: ['test', '#1a1a1a'], fresh: ['continued training', '#1a6bb8'] };
+    T.forEach(([name, date, kind], i) => {
+      el('text', { x: tx(i) + 85, y: 112, 'text-anchor': 'middle', class: 'small' }, c1, date);
+      chip(c1, tx(i), 128, 170, 56, name, kind, 26);
+      if (i < T.length - 1 && i !== 4) arrow(c1, tx(i) + 176, 156, tx(i + 1) - 8);
+      if (kind !== 'fresh')
+        el('text', { x: tx(i) + 85, y: 222, 'text-anchor': 'middle', style: `font-size:24px;font-weight:700;fill:${role[kind][1]}` }, c1, role[kind][0]);
+    });
+    el('text', { x: (tx(5) + tx(6) + 170) / 2, y: 222, 'text-anchor': 'middle',
+      style: 'font-size:24px;font-weight:700;fill:#1a6bb8' }, c1, 'continued training');
+
+    // 2: examples, histories right-aligned like the padded tensor
+    const c2 = document.getElementById('c2');
+    const rows = [
+      ['Initial training', '#1a6bb8', ['Laptop','Phone'], 'Case', 'train'],
+      ['Tune', '#1a1a1a', ['Laptop','Phone','Case'], 'Cable', 'tune'],
+      ['Test', '#1a1a1a', ['Laptop','Phone','Case'], 'Charger', 'test'],
+      ['Continued', '#1a6bb8', ['Laptop','Phone','Case'], 'Earbuds', 'fresh'],
+      ['Continued', '#1a6bb8', ['Laptop','Phone','Case','Earbuds'], 'Mouse', 'fresh'],
+    ];
+    rows.forEach(([label, colour, hist, target, kind], r) => {
+      const y = 118 + r * 78;
+      el('text', { x: 40, y: y + 28, style: `font-size:24px;font-weight:700;fill:${colour}` }, c2, label);
+      hist.forEach((h, j) => chip(c2, 240 + (4 - hist.length + j) * 106, y, 100, 40, h, 'hist', 19));
+      arrow(c2, 666, y + 20, 712);
+      chip(c2, 722, y, 110, 40, target, kind, 19);
+    });
+
+    // 3: tensor grid (positions 45..49)
+    const g = document.getElementById('grid');
+    const R = [
+      ['hist', [['214','Laptop'], ['57','Phone']]],
+      ['next', [['57','Phone'], ['903','Case']]],
+      ['rand', [['1488',''], ['76','']]],
+    ];
+    const cellFill = { hist: '#d6e4f3', next: '#1a6bb8', rand: '#bfbfbf' };
+    const cellText = { hist: '#1a1a1a', next: '#fff', rand: '#1a1a1a' };
+    R.forEach(([kind, vals], r) => {
+      const y = 290 + r * 54;
+      el('rect', { x: 160, y, width: 152, height: 48, fill: '#fff', stroke: '#d0d0d0', 'stroke-width': 1.5 }, g);
+      el('text', { x: 236, y: y + 32, 'text-anchor': 'middle', style: 'font-size:22px;fill:#9e9e9e' }, g, '0 … 0');
+      for (let c = 0; c < 5; c++) {
+        const x = 312 + c * 86, v = c >= 3 ? vals[c - 3] : null;
+        el('rect', { x, y, width: 86, height: 48, fill: v ? cellFill[kind] : '#fff', stroke: '#d0d0d0', 'stroke-width': 1.5 }, g);
+        if (!v) { el('text', { x: x + 43, y: y + 32, 'text-anchor': 'middle', style: 'font-size:22px;fill:#9e9e9e' }, g, '0'); continue; }
+        el('text', { x: x + 43, y: y + (v[1] ? 22 : 32), 'text-anchor': 'middle',
+          style: `font-size:${v[1] ? 20 : 22}px;font-weight:700;fill:${cellText[kind]}` }, g, v[0]);
+        if (v[1]) el('text', { x: x + 43, y: y + 42, 'text-anchor': 'middle',
+          style: `font-size:16px;fill:${cellText[kind]}` }, g, v[1]);
+      }
+    });
+  </script>
+</svg>
+</body>
+</html>

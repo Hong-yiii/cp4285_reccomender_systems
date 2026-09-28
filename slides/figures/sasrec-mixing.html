@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SASRec mixing shapes</title>
+<!--
+  SASRec with Movies & TV mixed in, by tensor shape. PLANNED design (docs/CONTINUED-TRAINING.md:
+  domain-specific item rows, shared causal Transformer, same B initialisation in every branch,
+  B negatives from B's own catalogue, B never in A's candidate pool). Not implemented.
+  Shared-parameter count from src/cp4285/neural/model.py defaults (hidden 50, 2 blocks):
+  positions 2,500 + 2 x (5 Linear x 2,550 + 2 LayerNorm x 100) + final LayerNorm 100 = 28,500.
+  Export:
+    chrome --headless --screenshot=sasrec-mixing.png --window-size=1920,1080 \
+           --force-device-scale-factor=2 --hide-scrollbars sasrec-mixing.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 56px; fill: #000; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 32px; font-weight: 700; fill: #1a1a1a; }
+  .text { font-size: 24px; fill: #1a1a1a; }
+  .small { font-size: 22px; fill: #595959; }
+  .shape { font-size: 22px; font-weight: 700; fill: #1a1a1a; }
+</style>
+</head>
+<body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">Mixing in Movies &amp; TV: new rows, same shared weights</title>
+  <desc id="d">Planned design, not built. 1: the item table E grows from I_A + 1 rows to I_A + I_B + 1 rows of 50 numbers; Movies &amp; TV rows are appended after Electronics. Everything else, about 28,500 numbers (positions, two attention blocks, normalisation), is shared and keeps its size. 2: at a 100 percent mix, a batch of 128 histories has 64 Electronics rows and 64 Movies &amp; TV rows, each row all one category; shapes are 128 by 50 ids, 128 by 50 by 50 after lookup and after the shared blocks, 128 by 50 at the last position; each row is scored against its real next product and one random product from its own category. 3: a Movies &amp; TV example updates Movies &amp; TV rows and the shared weights, which are the only route to Electronics; Electronics rows are untouched if random products come from Movies &amp; TV; today's code samples random products from all ids. 4: the Electronics test keeps its shape: h, n by 50, times the Electronics rows, 50 by I_A, gives n by I_A scores; Movies &amp; TV rows are never used, so Movies &amp; TV can reach these scores only through h.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#e6e6e6"/><line x1="0" y1="0" x2="0" y2="10" stroke="#bfbfbf" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="#fff"/>
+
+  <text class="title" x="90" y="96">Mixing in Movies &amp; TV: new rows, same shared weights</text>
+  <rect x="1596" y="44" width="234" height="48" rx="24" fill="#fff" stroke="#595959" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1713" y="76" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#595959">Planned · not built</text>
+
+  <!-- ═════════ 1 What grows ═════════ -->
+  <g transform="translate(90 140)">
+    <rect class="card" width="670" height="420" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">1</text>
+    <text class="head" x="76" y="55">What grows, what stays fixed</text>
+
+    <text class="shape" x="40" y="94">Item table E</text>
+    <rect x="40" y="104" width="90" height="10" fill="#fff" stroke="#a6a6a6" stroke-width="1.5"/>
+    <rect x="40" y="114" width="90" height="136" fill="#1a6bb8"/>
+    <rect x="40" y="250" width="90" height="120" fill="#bfbfbf"/>
+    <rect x="40" y="250" width="90" height="120" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="7 5"/>
+    <text x="146" y="113" style="font-size:18px;fill:#595959">0: padding</text>
+    <text x="146" y="176" style="font-size:22px;font-weight:700;fill:#1a6bb8">Electronics</text>
+    <text x="146" y="204" class="small">rows 1 … I_A</text>
+    <text x="146" y="304" style="font-size:22px;font-weight:700;fill:#1a1a1a">Movies &amp; TV · new</text>
+    <text x="146" y="332" class="small">rows I_A+1 … I_A+I_B</text>
+    <text class="small" x="40" y="404">(I_A + I_B + 1) × 50</text>
+
+    <!-- shared part -->
+    <rect x="384" y="80" width="256" height="300" rx="14" fill="#fff" stroke="#1a6bb8" stroke-width="2.5"/>
+    <text x="512" y="112" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a6bb8">Shared, fixed size</text>
+    <g id="shared"></g>
+    <text x="512" y="332" text-anchor="middle" style="font-size:24px;font-weight:700;fill:#1a1a1a">≈ 28,500 numbers</text>
+    <text x="512" y="360" text-anchor="middle" class="small">used by every prediction</text>
+  </g>
+
+  <!-- ═════════ 2 One batch ═════════ -->
+  <g transform="translate(790 140)" id="c2">
+    <rect class="card" width="1040" height="420" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">2</text>
+    <text class="head" x="76" y="55">One training batch at a 100% mix</text>
+
+    <!-- history ids -->
+    <rect x="40" y="100" width="140" height="100" fill="#1a6bb8"/>
+    <rect x="40" y="200" width="140" height="100" fill="#bfbfbf"/>
+    <g id="rows"></g>
+    <rect x="188" y="100" width="12" height="100" fill="#1a6bb8"/>
+    <rect x="188" y="200" width="12" height="100" fill="#bfbfbf"/>
+    <text x="64" y="156" style="font-size:20px;font-weight:700;fill:#fff">64 Elec.</text>
+    <text x="52" y="256" style="font-size:20px;font-weight:700;fill:#1a1a1a">64 M&amp;TV</text>
+    <text class="shape" x="110" y="334" text-anchor="middle">128 × 50</text>
+    <text class="small" x="110" y="362" text-anchor="middle">IDs + category</text>
+
+    <line x1="210" y1="200" x2="250" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- embedded -->
+    <rect x="272" y="92" width="110" height="200" fill="#fff" stroke="#a6a6a6" stroke-width="1.5"/>
+    <rect x="262" y="100" width="110" height="100" fill="#d6e4f3" stroke="#a6a6a6" stroke-width="1.5"/>
+    <rect x="262" y="200" width="110" height="100" fill="#e6e6e6" stroke="#a6a6a6" stroke-width="1.5"/>
+    <text class="shape" x="322" y="334" text-anchor="middle">128 × 50 × 50</text>
+    <text class="small" x="322" y="362" text-anchor="middle">look up E</text>
+
+    <line x1="392" y1="200" x2="432" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- shared blocks -->
+    <rect x="444" y="100" width="156" height="200" rx="14" fill="#fff" stroke="#1a6bb8" stroke-width="2.5"/>
+    <text x="522" y="176" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a6bb8">2 attention</text>
+    <text x="522" y="204" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a6bb8">blocks</text>
+    <text x="522" y="240" text-anchor="middle" class="small">shared</text>
+    <text class="shape" x="522" y="334" text-anchor="middle">128 × 50 × 50</text>
+    <text class="small" x="522" y="362" text-anchor="middle">both categories</text>
+
+    <line x1="612" y1="200" x2="652" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- h -->
+    <rect x="664" y="100" width="22" height="100" fill="#1a6bb8"/>
+    <rect x="664" y="200" width="22" height="100" fill="#bfbfbf"/>
+    <text class="shape" x="675" y="334" text-anchor="middle">h: 128 × 50</text>
+
+    <line x1="698" y1="200" x2="738" y2="200" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- scoring -->
+    <text class="shape" x="752" y="120">Score 2 rows of E:</text>
+    <text class="small" x="752" y="154" style="fill:#1a1a1a">real next product</text>
+    <text class="small" x="752" y="184" style="fill:#1a1a1a">1 random product from</text>
+    <text class="small" x="752" y="212" style="fill:#1a1a1a">the row’s own category</text>
+    <text class="shape" x="752" y="262">→ 128 + 128 scores</text>
+    <text class="shape" x="752" y="292">→ loss</text>
+
+    <text class="small" x="40" y="398">Each row is one category: Movies &amp; TV reviews come from new shoppers.</text>
+  </g>
+
+  <!-- ═════════ 3 Where the update goes ═════════ -->
+  <g transform="translate(90 580)" id="c3">
+    <rect class="card" width="870" height="460" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">3</text>
+    <text class="head" x="76" y="55">Where a Movies &amp; TV example’s update goes</text>
+
+    <rect x="40" y="340" width="790" height="96" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="2" stroke-dasharray="7 5"/>
+    <text class="text" x="62" y="376"><tspan font-weight="700">To fix before building:</tspan> today’s code picks random products</text>
+    <text class="text" x="62" y="410">from all IDs, which would push Electronics rows down directly.</text>
+  </g>
+
+  <!-- ═════════ 4 Electronics test ═════════ -->
+  <g transform="translate(990 580)">
+    <rect class="card" width="840" height="460" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">4</text>
+    <text class="head" x="76" y="55">Electronics test: same shape as before</text>
+
+    <rect x="40" y="110" width="24" height="170" fill="#1a6bb8"/>
+    <text x="86" y="206" text-anchor="middle" style="font-size:36px;fill:#1a1a1a">·</text>
+    <rect x="104" y="170" width="250" height="50" fill="#1a6bb8"/>
+    <rect x="354" y="170" width="140" height="50" fill="url(#hatch)" stroke="#9e9e9e" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="424" y="204" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#595959">unused</text>
+    <text x="526" y="208" text-anchor="middle" style="font-size:36px;fill:#1a1a1a">=</text>
+    <rect x="556" y="110" width="250" height="170" fill="#d6e4f3" stroke="#1a6bb8" stroke-width="2"/>
+    <g id="scoremap"></g>
+
+    <text class="shape" x="52" y="318" text-anchor="middle">h</text>
+    <text class="small" x="52" y="346" text-anchor="middle">n × 50</text>
+    <text class="shape" x="229" y="318" text-anchor="middle">Electronics rows of Eᵀ</text>
+    <text class="small" x="229" y="346" text-anchor="middle">50 × I_A</text>
+    <text class="small" x="424" y="258" text-anchor="middle">Movies &amp; TV rows</text>
+    <text class="shape" x="681" y="318" text-anchor="middle">n × I_A scores</text>
+    <text class="small" x="681" y="346" text-anchor="middle">same as the pilot</text>
+
+    <text class="text" x="40" y="398" style="font-weight:700">Movies &amp; TV can reach these scores only through h.</text>
+    <text class="small" x="40" y="432">Fair comparison: Electronics-only training, same number of updates.</text>
+  </g>
+
+  <text x="90" y="1070" class="small" style="font-style:italic">100% mix = as much Movies &amp; TV as Electronics = 64 of 128 rows per batch (neural mix definition still open). Same Movies &amp; TV starting rows in every branch.</text>
+
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent, text) => {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      if (text !== undefined) e.textContent = text;
+      parent.appendChild(e); return e;
+    };
+
+    // shared weights: positions + two blocks of five 50x50 matrices
+    const sh = document.getElementById('shared');
+    el('rect', { x: 404, y: 132, width: 40, height: 40, fill: '#1a6bb8' }, sh);
+    el('text', { x: 456, y: 158, style: 'font-size:20px;fill:#1a1a1a' }, sh, 'positions 50 × 50');
+    [['block 1', 190], ['block 2', 244]].forEach(([name, y]) => {
+      for (let i = 0; i < 5; i++) el('rect', { x: 404 + i * 30, y, width: 26, height: 26, fill: '#1a6bb8' }, sh);
+      el('text', { x: 562, y: y + 20, style: 'font-size:20px;fill:#1a1a1a' }, sh, name);
+    });
+    el('text', { x: 404, y: 296, style: 'font-size:18px;fill:#595959' }, sh, 'each: 5 matrices of 50 × 50');
+
+    // faint row lines in the history id matrix
+    const rows = document.getElementById('rows');
+    for (let i = 1; i < 16; i++) el('line', { x1: 40, y1: 100 + i * 12.5, x2: 180, y2: 100 + i * 12.5,
+      stroke: '#ffffff', 'stroke-opacity': 0.35, 'stroke-width': 1 }, rows);
+
+    // 3: update routes
+    const c3 = document.getElementById('c3');
+    const routes = [
+      [true, 'Movies & TV rows of E', 'its history, real next and random products', '#1a6bb8'],
+      [true, 'Shared weights', 'the only route from Movies & TV to Electronics', '#1a1a1a'],
+      [false, 'Electronics rows of E', 'untouched, if random products come from Movies & TV', '#9e9e9e'],
+    ];
+    routes.forEach(([yes, name, note, colour], r) => {
+      const y = 104 + r * 76;
+      el('circle', { cx: 62, cy: y + 18, r: 20, fill: yes ? colour : '#fff', stroke: colour, 'stroke-width': 2.5 }, c3);
+      el('text', { x: 62, y: y + 27, 'text-anchor': 'middle', style: `font-size:24px;font-weight:700;fill:${yes ? '#fff' : colour}` }, c3, yes ? '✓' : '✕');
+      el('text', { x: 100, y: y + 14, style: `font-size:24px;font-weight:700;fill:${r === 1 ? '#1a1a1a' : '#1a1a1a'}` }, c3, name);
+      el('text', { x: 100, y: y + 42, style: 'font-size:22px;fill:#595959' }, c3, note);
+    });
+
+    // 4: score heat-map in the n x I_A result
+    const sm = document.getElementById('scoremap');
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 10; c++) {
+      const v = (Math.sin(r * 3.1 + c * 1.7) + 1) / 2;
+      el('rect', { x: 562 + c * 24, y: 116 + r * 23.5, width: 22, height: 21.5, fill: '#1a6bb8', 'fill-opacity': 0.15 + 0.7 * v }, sm);
+    }
+  </script>
+</svg>
+</body>
+</html>

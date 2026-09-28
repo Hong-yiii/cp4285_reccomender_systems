@@ -199,3 +199,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** All 36 tests pass, including the reference link/self-containment check; Ruff passes. Slide numbers and content were checked against the export and screenshots of slides 1–5 and 7–13.
 
 **Limits:** No change to code, data, training or evaluation. The Google deck was not edited, and its slide numbers will drift as the team edits it. The neural slides describe built software and a planned experiment; there is still no neural Amazon result. The mixture denominator and classical/neural split alignment remain team decisions.
+
+## 29 September 2026 — Slide figures
+
+**Tool:** Claude Code (Claude Opus 5.5), with headless Chrome to render figures and the in-app browser for read-only viewing of the team deck.
+
+**Request:** Diagrams for the deck, built one slide at a time: the motivation (train once versus keep updating), the proposed-method pipeline, the classical models, two slides each on how the QR model and SASRec handle the data, fit and predict (with tensor shapes and outputs over product IDs), how mixing in Movies & TV works by tensor shape, and next item (Hit@10) versus next items (Recall@10). Then open and merge a PR with anything else useful.
+
+**Assistance:** Read the classical and neural code, configs, design docs, issue #8 and the `classical-study` branch, and drew each figure from them rather than from the deck text. Added nine HTML figures with PNG exports under `slides/figures/`, plus an index and a pointer from `slides/README.md`. Matched the deck's colours by reading its public preview; the deck itself was not edited. Recorded Hongyi's statement that the full classical study keeps only the QR model in `CONTEXT.md`, noting that `MarkovQRSVD` still builds and stores the full transition table, so dropping the Markov baseline saves no training cost. Updated the figures to the issue #8 metric decision after it was made.
+
+**Findings raised with the user:** on `main`, classical `sweep --split test` scores from the latest training review, so it predicts two steps ahead (fixed on the `classical-study` branch); SASRec's output is a score per product, not a probability, and its training loss is a yes/no loss on two products per position; for mixing, Electronics predictions can change only through the shared weights (about 28,500 numbers) as long as random products for Movies & TV examples come from Movies & TV, which today's sampler does not guarantee.
+
+**Limits:** Figures only; no code, data, training or evaluation changed. Example products, ranks and bar heights are illustrative. The mixing figure describes a planned design. Figures that cite the QR test refit, Hit@10 checkpoint selection or the next-items split depend on PR #9 as it stood on 28 September.

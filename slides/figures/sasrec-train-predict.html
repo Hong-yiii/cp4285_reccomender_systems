@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SASRec train and predict</title>
+<!--
+  SASRec, slide 2 of 2: forward pass with tensor shapes, output scores over product ids,
+  sampled yes/no loss and the pilot training lifecycle. Mirrors src/cp4285/neural/model.py
+  (hidden 50, 2 blocks, 1 head, causal attention, tied item table, scores = last position x
+  item table^T) and pilot.py (3 epochs, batch 128, Adam 0.001 then reset to 0.0001,
+  checkpoint selected by validation Hit@10 (NDCG@10 breaks ties), frozen control, 3 cycles x 5 updates of fresh 2021 targets,
+  retention Hit@10 after every cycle, no seen-item masking). Settings are the pilot defaults
+  in configs/pilot.toml. Bar heights are illustrative.
+  Export:
+    chrome --headless --screenshot=sasrec-train-predict.png --window-size=1920,1080 \
+           --force-device-scale-factor=2 --hide-scrollbars sasrec-train-predict.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 56px; fill: #000; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 32px; font-weight: 700; fill: #1a1a1a; }
+  .text { font-size: 24px; fill: #1a1a1a; }
+  .muted { font-size: 24px; fill: #595959; }
+  .small { font-size: 22px; fill: #595959; }
+  .shape { font-size: 24px; font-weight: 700; fill: #1a1a1a; }
+</style>
+</head>
+<body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">SASRec: score every product from the history, then keep training</title>
+  <desc id="d">Predict: a batch of histories, B by 50 product ids, is turned into 50 learned numbers per position plus a position signal (B by 50 by 50), passed through two self-attention blocks in which each position looks only at earlier reviews, and the last position (B by 50) is multiplied by the item table to give a score for every product id (B by I). All products are ranked, repeats allowed; a hidden review in the top 10 gives Hit@10 = 1. Train: at every position the score of the real next product is pushed up and the score of one random product pushed down, using the loss minus log sigma of the positive score minus log sigma of minus the negative score. Initial training on reviews before 2021 runs 3 epochs and keeps the epoch with the best tune Hit@10 as the saved model. From the saved model, a frozen copy stops training and a continued copy trains on 2021 reviews in time order, 3 rounds of 5 updates of 128 reviews, loss on the new review only. After every round both are scored on the same test. Mixing in Movies &amp; TV is planned.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+    <marker id="ah-dark" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="14" markerHeight="14" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1a1a1a"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#fff"/>
+
+  <text class="title" x="90" y="96">SASRec: score every product, then keep training</text>
+
+  <!-- ═════════ 4 Predict ═════════ -->
+  <g transform="translate(90 140)" id="c4">
+    <rect class="card" width="1740" height="410" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">4</text>
+    <text class="head" x="76" y="55">Predict: a history in, one score per product ID out</text>
+
+    <!-- history -->
+    <g id="hist"></g>
+    <text class="shape" x="164" y="318" text-anchor="middle">B × 50</text>
+    <text class="small" x="164" y="346" text-anchor="middle">product IDs</text>
+
+    <line x1="290" y1="190" x2="338" y2="190" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- embeddings -->
+    <rect x="350" y="112" width="150" height="150" fill="#d6e4f3" stroke="#a6a6a6" stroke-width="2"/>
+    <g id="emb"></g>
+    <text class="shape" x="425" y="318" text-anchor="middle">B × 50 × 50</text>
+    <text class="small" x="425" y="346" text-anchor="middle">50 learned numbers</text>
+    <text class="small" x="425" y="372" text-anchor="middle">per ID, + position</text>
+
+    <line x1="512" y1="190" x2="560" y2="190" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- attention blocks -->
+    <rect x="572" y="92" width="300" height="190" rx="16" fill="#fff" stroke="#1a6bb8" stroke-width="2.5"/>
+    <text x="722" y="126" text-anchor="middle" style="font-size:24px;font-weight:700;fill:#1a6bb8">2 self-attention blocks</text>
+    <g id="mask"></g>
+    <text class="small" x="706" y="178">each position</text>
+    <text class="small" x="706" y="206">looks only at</text>
+    <text class="small" x="706" y="234">earlier reviews</text>
+    <text class="shape" x="722" y="318" text-anchor="middle">B × 50 × 50</text>
+
+    <line x1="884" y1="190" x2="932" y2="190" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+
+    <!-- last position -->
+    <rect x="944" y="112" width="24" height="150" fill="#1a6bb8"/>
+    <text class="shape" x="956" y="318" text-anchor="middle">B × 50</text>
+    <text class="small" x="956" y="346" text-anchor="middle">last position</text>
+
+    <line x1="980" y1="190" x2="1052" y2="190" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+    <text x="1016" y="170" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#1a1a1a">× Eᵀ</text>
+
+    <!-- scores over product ids -->
+    <g id="scores"></g>
+    <text class="shape" x="1064" y="318">B × I scores</text>
+    <text class="small" x="1064" y="346">one per product ID</text>
+    <text class="small" x="1064" y="372">E: same table as the input</text>
+
+    <!-- ranking -->
+    <line x1="1440" y1="92" x2="1440" y2="380" stroke="#d0d0d0" stroke-width="2"/>
+    <text class="text" x="1466" y="110" style="font-weight:700">Rank all I products</text>
+    <text class="small" x="1466" y="140">repeat reviews allowed</text>
+    <rect x="1466" y="158" width="240" height="40" rx="6" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+    <rect x="1466" y="206" width="240" height="40" rx="6" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+    <rect x="1466" y="254" width="240" height="40" rx="6" fill="#1a1a1a"/>
+    <text class="text" x="1480" y="186"><tspan font-weight="700">#1</tspan>  Earbuds</text>
+    <text class="text" x="1480" y="234"><tspan font-weight="700">#2</tspan>  Tripod</text>
+    <text class="text" x="1480" y="282" style="fill:#fff"><tspan font-weight="700">#3</tspan>  Charger (test)</text>
+    <text x="1466" y="334" style="font-size:28px;font-weight:700;fill:#1a1a1a">Hit@10 = 1</text>
+    <text class="small" x="1466" y="364">top 10: 1, else 0</text>
+
+    <text class="small" x="40" y="398" style="font-style:italic">B = 128 shoppers per batch · I = products in the ID list · 1 attention head · bar heights illustrative</text>
+  </g>
+
+  <!-- ═════════ 5 Train ═════════ -->
+  <g transform="translate(90 570)" id="c5">
+    <rect class="card" width="1740" height="480" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">5</text>
+    <text class="head" x="76" y="55">Train: push the real next product up, a random one down</text>
+
+    <!-- loss panel -->
+    <text class="small" x="40" y="104">at every position, two scores:</text>
+    <g id="loss"></g>
+    <text x="40" y="324" style="font-size:24px;font-weight:700;fill:#1a1a1a">loss = −log σ(s⁺) − log σ(−s⁻)</text>
+    <text class="small" x="40" y="362">σ turns a score into a yes/no chance</text>
+    <text class="small" x="40" y="390">“is this the next product?”</text>
+    <text class="small" x="40" y="430">Scores over all I products do not</text>
+    <text class="small" x="40" y="458">sum to 1; ranking uses raw scores.</text>
+
+    <line x1="500" y1="92" x2="500" y2="456" stroke="#d0d0d0" stroke-width="2"/>
+
+    <!-- lifecycle -->
+    <rect x="530" y="96" width="420" height="250" rx="16" fill="#fff" stroke="#1a6bb8" stroke-width="2.5" stroke-dasharray="10 7"/>
+    <text x="552" y="130" style="font-size:24px;font-weight:700;fill:#1a6bb8">Initial training: pre-2021</text>
+    <text class="text" x="552" y="170">repeat 3 epochs:</text>
+    <text class="small" x="572" y="202">sample 128 shoppers, all positions</text>
+    <text class="small" x="572" y="232">Adam step, learning rate 0.001</text>
+    <text class="small" x="572" y="262">Hit@10 on the tune reviews</text>
+    <text class="text" x="552" y="316" style="font-weight:700">keep the best epoch</text>
+
+    <line x1="962" y1="220" x2="1008" y2="220" stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)"/>
+    <!-- saved model -->
+    <rect x="1020" y="176" width="130" height="88" rx="10" fill="#1a6bb8"/>
+    <text x="1085" y="214" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#fff">saved</text>
+    <text x="1085" y="242" text-anchor="middle" style="font-size:22px;font-weight:700;fill:#fff">model</text>
+
+    <!-- branches -->
+    <g fill="none" stroke="#7f7f7f" stroke-width="3">
+      <path d="M1150 220 H1172 V126 H1196" marker-end="url(#ah)"/>
+      <path d="M1172 220 H1196" marker-end="url(#ah)"/>
+      <path d="M1172 220 V314 H1196" marker-end="url(#ah)" stroke-dasharray="7 6"/>
+    </g>
+    <rect x="1208" y="100" width="500" height="52" rx="26" fill="#fff" stroke="#a6a6a6" stroke-width="2"/>
+    <text class="text" x="1230" y="134"><tspan font-weight="700">Frozen:</tspan> no more training</text>
+
+    <rect x="1208" y="170" width="500" height="100" rx="18" fill="#fff" stroke="#1a6bb8" stroke-width="3"/>
+    <text class="text" x="1230" y="204" style="fill:#1a6bb8;font-weight:700">Continued: 2021 reviews, in time order</text>
+    <text class="small" x="1230" y="232">3 rounds × 5 updates × 128 reviews</text>
+    <text class="small" x="1230" y="258">new-review loss · Adam reset (lr 0.0001)</text>
+
+    <rect x="1208" y="288" width="500" height="52" rx="26" fill="none" stroke="#9e9e9e" stroke-width="2" stroke-dasharray="7 6"/>
+    <text class="text" x="1230" y="322" style="fill:#595959">+ Movies &amp; TV mixed in: <tspan font-weight="700">planned</tspan></text>
+
+    <!-- same test -->
+    <g fill="none" stroke="#1a1a1a" stroke-width="2.5">
+      <path d="M1720 126 H1726 V392"/>
+      <path d="M1712 220 H1726"/>
+      <path d="M1712 314 H1726"/>
+      <path d="M1726 392 H1480" marker-end="url(#ah-dark)"/>
+    </g>
+    <rect x="1000" y="364" width="468" height="56" rx="28" fill="#1a1a1a"/>
+    <text x="1234" y="400" text-anchor="middle" style="font-size:23px;font-weight:700;fill:#fff">After every round: same test, Hit@10</text>
+
+    <text class="small" x="530" y="458" style="font-style:italic">Built and tested on made-up data: initial, frozen and continued. Pilot settings; no real-data result yet.</text>
+  </g>
+
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent, text) => {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      if (text !== undefined) e.textContent = text;
+      parent.appendChild(e); return e;
+    };
+
+    // history strip: 0 … 0 | 214 | 57 | 903
+    const hist = document.getElementById('hist');
+    const H = [['0 … 0', '#fff', '#9e9e9e', 80], ['214', '#d6e4f3', '#1a1a1a', 56], ['57', '#d6e4f3', '#1a1a1a', 56], ['903', '#d6e4f3', '#1a1a1a', 56]];
+    let x = 40;
+    H.forEach(([t, fill, colour, w]) => {
+      el('rect', { x, y: 164, width: w, height: 52, fill, stroke: '#a6a6a6', 'stroke-width': 1.5 }, hist);
+      el('text', { x: x + w / 2, y: 197, 'text-anchor': 'middle', style: `font-size:${t.length > 3 ? 20 : 22}px;font-weight:700;fill:${colour}` }, hist, t);
+      x += w;
+    });
+    ['Laptop', 'Phone', 'Case'].forEach((n, i) => el('text', { x: 148 + i * 56, y: 156, 'text-anchor': 'middle', style: 'font-size:16px;fill:#595959' }, hist, n));
+
+    // embedding rows: padding rows empty, last three rows filled
+    const emb = document.getElementById('emb');
+    for (let r = 0; r < 10; r++) {
+      const filled = r >= 7;
+      el('rect', { x: 356, y: 118 + r * 14, width: 138, height: 10, fill: filled ? '#1a6bb8' : '#ffffff', 'fill-opacity': filled ? 0.85 : 0.9 }, emb);
+    }
+
+    // causal mask: lower triangle
+    const mask = document.getElementById('mask');
+    const n = 8, c = 12, mx = 594, my = 150;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+      el('rect', { x: mx + j * c, y: my + i * c, width: c - 1.5, height: c - 1.5, fill: j <= i ? '#1a6bb8' : '#e3e3e3' }, mask);
+
+    // score strip over product ids 1..I
+    const sc = document.getElementById('scores');
+    const S = [0.2,-0.1,0.35,0.05,0.9,-0.2,0.1,0.3,0.7,0.02,-0.15,0.25,0.6,0.1,-0.05,0.15,0.45,0.05,-0.1,0.2];
+    const sx = 1064, sw = 16, sy = 112, sh = 150, base = sy + sh * 0.62;
+    el('rect', { x: sx, y: sy, width: S.length * sw, height: sh, fill: '#fff', stroke: '#c8c8c8', 'stroke-width': 1.5 }, sc);
+    el('line', { x1: sx, y1: base, x2: sx + S.length * sw, y2: base, stroke: '#9e9e9e', 'stroke-width': 1 }, sc);
+    S.forEach((v, i) => {
+      const h = Math.abs(v) * (sh * 0.58);
+      el('rect', { x: sx + i * sw + 3, y: v > 0 ? base - h : base, width: sw - 6, height: Math.max(h, 1.5),
+        fill: i === 12 ? '#1a1a1a' : '#1a6bb8' }, sc);
+    });
+    el('text', { x: sx, y: sy - 8, style: 'font-size:18px;fill:#595959' }, sc, 'ID 1');
+    el('text', { x: sx + S.length * sw, y: sy - 8, 'text-anchor': 'end', style: 'font-size:18px;fill:#595959' }, sc, 'I');
+
+    // loss panel: two score rows with sigmoid gauges
+    const loss = document.getElementById('loss');
+    const rows = [
+      ['s⁺', 'real next (Case): push up', 0.88, '#1a6bb8'],
+      ['s⁻', 'random product: push down', 0.18, '#9e9e9e'],
+    ];
+    rows.forEach(([sym, label, p, colour], r) => {
+      const y = 116 + r * 96;
+      el('text', { x: 40, y: y + 26, style: 'font-size:26px;font-weight:700;fill:#1a1a1a' }, loss, sym);
+      el('text', { x: 90, y: y + 26, style: 'font-size:22px;fill:#1a1a1a' }, loss, label);
+      el('rect', { x: 90, y: y + 40, width: 300, height: 26, rx: 13, fill: '#fff', stroke: '#c8c8c8', 'stroke-width': 1.5 }, loss);
+      el('rect', { x: 90, y: y + 40, width: 300 * p, height: 26, rx: 13, fill: colour }, loss);
+      el('text', { x: 400, y: y + 60, style: 'font-size:20px;font-weight:700;fill:#1a1a1a' }, loss, `σ = ${p.toFixed(2)}`);
+    });
+  </script>
+</svg>
+</body>
+</html>

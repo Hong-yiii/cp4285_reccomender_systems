@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QR model data</title>
+<!--
+  QR model, slide 1 of 2: how the review data becomes the product x product table T.
+  Mirrors src/cp4285/classical/data.py (leave-last-out split), contaminate.py (disjoint
+  Movies & TV shoppers, item ids [Electronics | Movies & TV]) and models.transitions
+  (window 1, reverse direction at 0.5). Colours follow the team deck.
+  Export:
+    chrome --headless --screenshot=qr-data.png --window-size=1920,1080 \
+           --force-device-scale-factor=2 --hide-scrollbars qr-data.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 56px; fill: #000; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 32px; font-weight: 700; fill: #1a1a1a; }
+  .text { font-size: 24px; fill: #1a1a1a; }
+  .muted { font-size: 24px; fill: #595959; }
+  .small { font-size: 22px; fill: #595959; }
+  .chip-t { font-size: 26px; font-weight: 700; }
+</style>
+</head>
+<body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">QR model: from reviews to a product by product count table</title>
+  <desc id="d">1: each shopper's Electronics reviews are sorted by date; older reviews train, the second-latest tunes settings, the latest is the test. 2: whole Movies &amp; TV shoppers are added as new shoppers until their reviews reach 0 to 100 percent of the Electronics training reviews. 3: every product gets a column number, Electronics first (0 to 368,227), then Movies &amp; TV, N in total. 4: table T is N by N; rows are the last product, columns the next product; a shopper who reviewed Case right after Phone adds 1 at (Phone, Case) and 0.5 at (Case, Phone). Electronics and Movies &amp; TV share no shopper, so the off-diagonal blocks are 0.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#fff"/>
+
+  <text class="title" x="90" y="96">QR model: reviews become one product × product table</text>
+
+  <!-- ───── 1 Sort and hold out ───── -->
+  <g transform="translate(90 150)">
+    <rect class="card" width="980" height="290" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">1</text>
+    <text class="head" x="76" y="55">Sort each shopper’s Electronics reviews by date</text>
+
+    <g class="small" text-anchor="middle">
+      <text x="125" y="114">Jan 2019</text><text x="355" y="114">Mar 2019</text>
+      <text x="585" y="114">Jun 2020</text><text x="815" y="114">Feb 2021</text>
+    </g>
+    <rect x="40"  y="128" width="170" height="56" rx="28" fill="#1a6bb8"/>
+    <rect x="270" y="128" width="170" height="56" rx="28" fill="#1a6bb8"/>
+    <rect x="500" y="128" width="170" height="56" rx="28" fill="#a9c7e6" stroke="#1a6bb8" stroke-width="2"/>
+    <rect x="730" y="128" width="170" height="56" rx="28" fill="#1a1a1a"/>
+    <g class="chip-t" text-anchor="middle">
+      <text x="125" y="165" fill="#fff">Phone</text>
+      <text x="355" y="165" fill="#fff">Case</text>
+      <text x="585" y="165" fill="#1a1a1a">Cable</text>
+      <text x="815" y="165" fill="#fff">Charger</text>
+    </g>
+    <g stroke="#7f7f7f" stroke-width="3" marker-end="url(#ah)">
+      <line x1="216" y1="156" x2="262" y2="156"/>
+      <line x1="446" y1="156" x2="492" y2="156"/>
+      <line x1="676" y1="156" x2="722" y2="156"/>
+    </g>
+    <g text-anchor="middle" style="font-size:24px;font-weight:700">
+      <text x="125" y="222" fill="#1a6bb8">train</text>
+      <text x="355" y="222" fill="#1a6bb8">train</text>
+      <text x="585" y="222" fill="#1a1a1a">tune</text>
+      <text x="815" y="222" fill="#1a1a1a">test</text>
+    </g>
+    <text class="small" x="40" y="268"><tspan font-weight="700" fill="#1a1a1a">Tune:</tspan> from Case, find Cable. <tspan font-weight="700" fill="#1a1a1a">Test:</tspan> add Cable to training, then from Cable, find Charger.</text>
+  </g>
+
+  <!-- ───── 2 Mix in Movies & TV ───── -->
+  <g transform="translate(90 460)">
+    <rect class="card" width="980" height="300" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">2</text>
+    <text class="head" x="76" y="55">Add Movies &amp; TV reviews as new shoppers</text>
+
+    <g class="text">
+      <text x="40" y="118">Shopper 1</text>
+      <text x="40" y="170">Shopper 2</text>
+      <text x="40" y="222">New shopper</text>
+      <text x="40" y="274">New shopper</text>
+    </g>
+    <g fill="#1a6bb8">
+      <rect x="210" y="90"  width="104" height="40" rx="20"/><rect x="322" y="90"  width="104" height="40" rx="20"/>
+      <rect x="210" y="142" width="104" height="40" rx="20"/><rect x="322" y="142" width="104" height="40" rx="20"/><rect x="434" y="142" width="104" height="40" rx="20"/>
+    </g>
+    <g fill="#bfbfbf">
+      <rect x="210" y="194" width="104" height="40" rx="20"/><rect x="322" y="194" width="104" height="40" rx="20"/>
+      <rect x="210" y="246" width="104" height="40" rx="20"/><rect x="322" y="246" width="104" height="40" rx="20"/><rect x="434" y="246" width="104" height="40" rx="20"/>
+    </g>
+    <g text-anchor="middle" style="font-size:21px;font-weight:700">
+      <g fill="#fff">
+        <text x="262" y="117">Phone</text><text x="374" y="117">Case</text>
+        <text x="262" y="169">Laptop</text><text x="374" y="169">Mouse</text><text x="486" y="169">Bag</text>
+      </g>
+      <g fill="#1a1a1a">
+        <text x="262" y="221">Drama</text><text x="374" y="221">Comedy</text>
+        <text x="262" y="273">Anime</text><text x="374" y="273">Series</text><text x="486" y="273">Thriller</text>
+      </g>
+    </g>
+
+    <g class="muted">
+      <text x="600" y="118">Whole Movies &amp; TV shoppers,</text>
+      <text x="600" y="150">picked at random, until their</text>
+      <text x="600" y="182">reviews = 0–100% of the</text>
+      <text x="600" y="214">Electronics training reviews.</text>
+      <text x="600" y="258" style="fill:#1a1a1a;font-weight:700">No shopper is in both.</text>
+    </g>
+  </g>
+
+  <!-- ───── 3 Product ids ───── -->
+  <g transform="translate(90 780)">
+    <rect class="card" width="980" height="260" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">3</text>
+    <text class="head" x="76" y="55">Give every product one column number</text>
+
+    <rect x="40"  y="98" width="360" height="58" fill="#1a6bb8"/>
+    <rect x="400" y="98" width="540" height="58" fill="#bfbfbf"/>
+    <text x="220" y="135" text-anchor="middle" style="font-size:24px;font-weight:700;fill:#fff">Electronics</text>
+    <text x="670" y="135" text-anchor="middle" style="font-size:24px;font-weight:700;fill:#1a1a1a">Movies &amp; TV</text>
+    <g class="small">
+      <text x="40" y="186">0</text>
+      <text x="396" y="186" text-anchor="end">368,227</text>
+      <text x="406" y="186">368,228</text>
+      <text x="940" y="186" text-anchor="end">N − 1</text>
+    </g>
+    <text class="text" x="40" y="232"><tspan font-weight="700">N</tspan> = 368,228 Electronics + all Movies &amp; TV products <tspan class="small">(not to scale)</tspan></text>
+  </g>
+
+  <!-- ───── 4 Count table T ───── -->
+  <g transform="translate(1110 150)">
+    <rect class="card" width="720" height="890" rx="20"/>
+    <circle cx="40" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="40" y="53" text-anchor="middle">4</text>
+    <text class="head" x="76" y="55">Count what comes next: T is N × N</text>
+    <text class="muted" x="40" y="100">rows = <tspan font-weight="700" fill="#1a1a1a">last</tspan> product · columns = <tspan font-weight="700" fill="#1a1a1a">next</tspan> product</text>
+
+    <!-- group labels -->
+    <g class="small" text-anchor="middle" style="fill:#1a1a1a">
+      <text x="262" y="148">Electronics</text>
+      <text x="442" y="148">Movies &amp; TV</text>
+    </g>
+    <g class="small" text-anchor="end" style="fill:#1a1a1a">
+      <text x="180" y="240">Electronics</text>
+      <text x="180" y="420">Movies &amp; TV</text>
+    </g>
+
+    <!-- blocks: Electronics x Electronics, Movies x Movies, zero off-diagonal -->
+    <rect x="190" y="160" width="144" height="144" fill="#d6e4f3"/>
+    <rect x="334" y="304" width="216" height="216" fill="#e3e3e3"/>
+    <rect x="334" y="160" width="216" height="144" fill="#fff"/>
+    <rect x="190" y="304" width="144" height="216" fill="#fff"/>
+    <g fill="#1a6bb8">
+      <rect x="214" y="182" width="10" height="10"/><rect x="260" y="176" width="10" height="10"/>
+      <rect x="298" y="200" width="10" height="10"/><rect x="232" y="228" width="10" height="10"/>
+      <rect x="280" y="252" width="10" height="10"/><rect x="204" y="270" width="10" height="10"/>
+      <rect x="312" y="282" width="10" height="10"/><rect x="250" y="288" width="10" height="10"/>
+    </g>
+    <g fill="#9e9e9e">
+      <rect x="352" y="322" width="10" height="10"/><rect x="410" y="340" width="10" height="10"/>
+      <rect x="470" y="330" width="10" height="10"/><rect x="380" y="380" width="10" height="10"/>
+      <rect x="520" y="396" width="10" height="10"/><rect x="440" y="420" width="10" height="10"/>
+      <rect x="362" y="456" width="10" height="10"/><rect x="498" y="470" width="10" height="10"/>
+      <rect x="420" y="492" width="10" height="10"/><rect x="530" y="500" width="10" height="10"/>
+    </g>
+    <g text-anchor="middle" style="font-size:34px;fill:#9e9e9e">
+      <text x="442" y="244">0</text>
+      <text x="262" y="424">0</text>
+    </g>
+    <rect x="190" y="160" width="360" height="360" fill="none" stroke="#a6a6a6" stroke-width="2"/>
+    <line x1="334" y1="160" x2="334" y2="520" stroke="#a6a6a6" stroke-width="1.5"/>
+    <line x1="190" y1="304" x2="550" y2="304" stroke="#a6a6a6" stroke-width="1.5"/>
+
+    <!-- zoom: a few Electronics cells -->
+    <rect x="206" y="174" width="34" height="34" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+    <line x1="223" y1="208" x2="223" y2="578" stroke="#1a1a1a" stroke-width="2" stroke-dasharray="6 6"/>
+
+    <rect x="196" y="578" width="400" height="210" fill="#fff" stroke="#1a1a1a" stroke-width="2.5"/>
+    <g class="small" text-anchor="middle" style="fill:#1a1a1a">
+      <text x="348" y="604">Phone</text><text x="444" y="604">Case</text><text x="540" y="604">Cable</text>
+    </g>
+    <g class="text" text-anchor="end">
+      <text x="290" y="648">Phone</text><text x="290" y="702">Case</text><text x="290" y="756">Cable</text>
+    </g>
+    <g fill="#fff" stroke="#d0d0d0" stroke-width="1.5">
+      <rect x="300" y="614" width="96" height="54"/><rect x="396" y="614" width="96" height="54" fill="#1a6bb8"/><rect x="492" y="614" width="96" height="54"/>
+      <rect x="300" y="668" width="96" height="54" fill="#a9c7e6"/><rect x="396" y="668" width="96" height="54"/><rect x="492" y="668" width="96" height="54"/>
+      <rect x="300" y="722" width="96" height="54"/><rect x="396" y="722" width="96" height="54"/><rect x="492" y="722" width="96" height="54"/>
+    </g>
+    <text x="444" y="650" text-anchor="middle" style="font-size:26px;font-weight:700;fill:#fff">+1</text>
+    <text x="348" y="704" text-anchor="middle" style="font-size:26px;font-weight:700;fill:#1a1a1a">+0.5</text>
+
+    <g class="small">
+      <text x="40" y="832">Shopper 1: Case right after Phone → <tspan font-weight="700" fill="#1a1a1a">+1</tspan> at (Phone, Case)</text>
+      <text x="40" y="862">and <tspan font-weight="700" fill="#1a1a1a">+0.5</tspan> at (Case, Phone). Hidden reviews are never counted.</text>
+    </g>
+  </g>
+</svg>
+</body>
+</html>

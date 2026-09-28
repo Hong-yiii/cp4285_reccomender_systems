@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Method pipeline</title>
+<!--
+  High-level pipeline for the Proposed Method slide: Data -> Split -> Mix -> Train -> Evaluate.
+  The bottom lane carries the held-out Electronics test straight to evaluation (base task fixed);
+  the Mix step is the only thing that varies. Colours follow the team deck.
+  Export:
+    chrome --headless --screenshot=method-pipeline.png --window-size=1900,500 \
+           --force-device-scale-factor=2 --hide-scrollbars method-pipeline.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .card { fill: #f2f2f2; }
+  .num { font-size: 26px; font-weight: 700; fill: #fff; }
+  .head { font-size: 36px; font-weight: 700; fill: #1a1a1a; }
+  .sub { font-size: 24px; fill: #595959; }
+  .label { font-size: 26px; fill: #1a1a1a; }
+  .small { font-size: 22px; fill: #595959; }
+  .strong { font-size: 24px; font-weight: 700; fill: #1a1a1a; }
+  .chip { fill: #fff; stroke: #a6a6a6; stroke-width: 2; }
+</style>
+</head>
+<body>
+<svg width="1900" height="500" viewBox="0 0 1900 500" role="img"
+     aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+  <title id="t">Proposed method pipeline</title>
+  <desc id="d">1 Data: Amazon Reviews 2023, Electronics as the base task and Movies &amp; TV as mixed-in data. 2 Split: each shopper's reviews in time order; older reviews train, the second-latest tunes settings, the latest is the test. 3 Mix: add Movies &amp; TV at 0, 10, 50 and 100 percent of the Electronics size. 4 Train: a classical model (QR model, fixed size) and a neural model (SASRec, continued training) at every mix level. 5 Evaluate: rank all products for the same held-out Electronics test shoppers, score Hit@10 for the next review and Recall@10 for the next year, and compare each mix level with 0 percent.</desc>
+
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7f7f7f"/>
+    </marker>
+    <marker id="ah-dark" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="16" markerHeight="16" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1a1a1a"/>
+    </marker>
+  </defs>
+
+  <rect width="1900" height="500" fill="#fff"/>
+
+  <!-- step arrows -->
+  <g stroke="#7f7f7f" stroke-width="3.5" marker-end="url(#ah)">
+    <line x1="326"  y1="220" x2="356"  y2="220"/>
+    <line x1="690"  y1="220" x2="720"  y2="220"/>
+    <line x1="1084" y1="220" x2="1114" y2="220"/>
+    <line x1="1528" y1="220" x2="1558" y2="220"/>
+  </g>
+
+  <!-- ───── 1 Data ───── -->
+  <g transform="translate(20 20)">
+    <rect class="card" width="300" height="400" rx="20"/>
+    <circle cx="34" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="34" y="53" text-anchor="middle">1</text>
+    <text class="head" x="68" y="56">Data</text>
+    <text class="sub" x="24" y="100">Amazon Reviews 2023</text>
+
+    <rect x="24" y="130" width="252" height="60" rx="10" fill="#1a6bb8"/>
+    <text x="150" y="169" text-anchor="middle" style="font-size:28px;font-weight:700;fill:#fff">Electronics</text>
+    <text class="small" x="24" y="222">base task</text>
+
+    <rect x="24" y="252" width="252" height="60" rx="10" fill="#bfbfbf"/>
+    <text x="150" y="291" text-anchor="middle" style="font-size:28px;font-weight:700;fill:#1a1a1a">Movies &amp; TV</text>
+    <text class="small" x="24" y="344">mixed in</text>
+  </g>
+
+  <!-- ───── 2 Split ───── -->
+  <g transform="translate(364 20)">
+    <rect class="card" width="320" height="400" rx="20"/>
+    <circle cx="34" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="34" y="53" text-anchor="middle">2</text>
+    <text class="head" x="68" y="56">Split</text>
+    <text class="sub" x="24" y="100">one shopper’s reviews</text>
+
+    <line x1="30" y1="170" x2="290" y2="170" stroke="#a6a6a6" stroke-width="3"/>
+    <g fill="#1a6bb8">
+      <circle cx="44"  cy="170" r="18"/><circle cx="90"  cy="170" r="18"/>
+      <circle cx="136" cy="170" r="18"/><circle cx="182" cy="170" r="18"/>
+    </g>
+    <circle cx="236" cy="170" r="18" fill="#a9c7e6" stroke="#1a6bb8" stroke-width="2"/>
+    <circle cx="290" cy="170" r="18" fill="#1a1a1a"/>
+
+    <g class="small" text-anchor="middle" style="fill:#1a1a1a">
+      <text x="113" y="226">train</text>
+      <text x="236" y="226">tune</text>
+      <text x="290" y="226" style="font-weight:700">test</text>
+    </g>
+    <text class="small" x="24" y="290">oldest → newest</text>
+  </g>
+
+  <!-- ───── 3 Mix ───── -->
+  <g transform="translate(728 20)">
+    <rect class="card" width="350" height="400" rx="20"/>
+    <circle cx="34" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="34" y="53" text-anchor="middle">3</text>
+    <text class="head" x="68" y="56">Mix</text>
+    <text class="sub" x="24" y="100">add Movies &amp; TV reviews</text>
+
+    <g class="label" text-anchor="end">
+      <text x="90" y="157">0%</text>
+      <text x="90" y="211">10%</text>
+      <text x="90" y="265">50%</text>
+      <text x="90" y="319">100%</text>
+    </g>
+    <g fill="#1a6bb8">
+      <rect x="102" y="130" width="110" height="38" rx="3"/>
+      <rect x="102" y="184" width="110" height="38" rx="3"/>
+      <rect x="102" y="238" width="110" height="38" rx="3"/>
+      <rect x="102" y="292" width="110" height="38" rx="3"/>
+    </g>
+    <g fill="#bfbfbf">
+      <rect x="214" y="184" width="11"  height="38" rx="2"/>
+      <rect x="214" y="238" width="55"  height="38" rx="3"/>
+      <rect x="214" y="292" width="110" height="38" rx="3"/>
+    </g>
+    <text class="small" x="24" y="380">% of Electronics size</text>
+  </g>
+
+  <!-- ───── 4 Train ───── -->
+  <g transform="translate(1122 20)">
+    <rect class="card" width="400" height="400" rx="20"/>
+    <circle cx="34" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="34" y="53" text-anchor="middle">4</text>
+    <text class="head" x="68" y="56">Train</text>
+    <text class="sub" x="24" y="100">at every mix level</text>
+
+    <text class="strong" x="24" y="150" style="fill:#595959">Classical</text>
+    <rect class="chip" x="24" y="166" width="170" height="46" rx="23"/>
+    <text class="label" x="109" y="198" text-anchor="middle">QR model</text>
+    <text class="small" x="24" y="250">fixed size:</text>
+    <text class="small" x="24" y="278">k patterns</text>
+
+    <text class="strong" x="216" y="150" style="fill:#595959">Neural</text>
+    <rect class="chip" x="216" y="166" width="160" height="46" rx="23"/>
+    <text class="label" x="296" y="198" text-anchor="middle">SASRec</text>
+    <text class="small" x="216" y="250">continued</text>
+    <text class="small" x="216" y="278">training</text>
+  </g>
+
+  <!-- ───── 5 Evaluate ───── -->
+  <g transform="translate(1566 20)">
+    <rect class="card" width="310" height="400" rx="20"/>
+    <circle cx="34" cy="44" r="22" fill="#1a6bb8"/><text class="num" x="34" y="53" text-anchor="middle">5</text>
+    <text class="head" x="68" y="56">Evaluate</text>
+    <text class="sub" x="24" y="100">same Electronics test</text>
+
+    <g class="strong">
+      <text x="24" y="150">#1</text>
+      <text x="24" y="190">#2</text>
+      <text x="24" y="230">#3</text>
+    </g>
+    <rect x="70" y="126" width="216" height="32" rx="4" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+    <rect x="70" y="166" width="216" height="32" rx="4" fill="#1a1a1a"/>
+    <text x="178" y="189" text-anchor="middle" style="font-size:20px;font-weight:700;fill:#fff">hidden review</text>
+    <rect x="70" y="206" width="216" height="32" rx="4" fill="#fff" stroke="#bfbfbf" stroke-width="2"/>
+    <text class="small" x="24" y="272">rank all products</text>
+
+    <text x="24" y="314" style="font-size:22px;font-weight:700;fill:#1a1a1a">Hit@10: next review</text>
+    <text x="24" y="344" style="font-size:22px;font-weight:700;fill:#1a1a1a">Recall@10: next year</text>
+    <text class="sub" x="24" y="380">each mix vs 0%</text>
+  </g>
+
+  <!-- ───── held-out test lane: never trained on, same for every run ───── -->
+  <path d="M654 258 V458 Q654 470 666 470 H1709 Q1721 470 1721 458 V428"
+        fill="none" stroke="#1a1a1a" stroke-width="3" marker-end="url(#ah-dark)"/>
+  <rect x="742" y="452" width="892" height="36" fill="#fff"/>
+  <g transform="translate(760 457)" fill="none" stroke="#1a1a1a" stroke-width="2.5">
+    <path d="M4 11 V7 a5 5 0 0 1 10 0 V11"/>
+    <rect x="0.5" y="11" width="17" height="13" rx="2.5" fill="#1a1a1a" stroke="none"/>
+  </g>
+  <text x="790" y="479" style="font-size:24px;fill:#1a1a1a"><tspan font-weight="700">Held-out Electronics test:</tspan> never trained on, same for every run</text>
+</svg>
+</body>
+</html>

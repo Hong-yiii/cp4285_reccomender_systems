@@ -29,6 +29,8 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 
 **Slides, 28 September:** the team's Google Slides deck is canonical; [slides/README.md](slides/README.md) links it and sets slide principles for a class audience with no assumed knowledge of SASRec, the dataset or the papers. The HTML narrative was retired. The live deck is at the 20-slide limit and has no neural slides yet. [slides/ISSUES.md](slides/ISSUES.md) lists its problems slide by slide; [SLIDE-FLOW.md](docs/SLIDE-FLOW.md#live-deck-review--28-september-2026) places two neural slides.
 
+**Classical scope, 29 September (stated by Hongyi; confirm with the classical owner):** the full study keeps only the QR model (`MarkovQRSVD`) as the classical model; Popularity and the unfactorised Markov chain are dropped, citing the size of a full Markov table on the whole dataset. Note that the current `MarkovQRSVD` still builds and stores that full sparse transition table (`fit` keeps `T`; `score` computes `rows @ T @ D` before projecting), so dropping `Markov` does not by itself remove that cost. [slides/figures/](slides/figures/README.md) holds the slide diagrams: `method-pipeline` follows this scope, `classical-models` still shows all three models, and all figures use the issue #8 metrics (Hit@10, Recall@10, mix levels up to 100%).
+
 The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.
 
 ## Provisional defaults and invariants

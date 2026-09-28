@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Motivation pipeline</title>
+<!--
+  Figure for the Motivation slide (Google Slides deck, see slides/README.md).
+  Top row: the usual train-once, frozen pipeline. Blue box: continual learning.
+  Export: open in Chrome and screenshot, or run the headless command in the PR/notes:
+    chrome --headless --screenshot=motivation-pipeline.png --window-size=1500,440 \
+           --force-device-scale-factor=2 --hide-scrollbars motivation-pipeline.html
+-->
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  svg { display: block; font-family: Arial, Helvetica, sans-serif; }
+  .title { font-size: 24px; font-weight: 700; fill: #202124; }
+  .sub { font-size: 18px; fill: #5f6368; }
+  .row-label { font-size: 19px; font-weight: 700; }
+  .badge { font-size: 15px; font-weight: 700; }
+</style>
+</head>
+<body>
+<svg width="1500" height="440" viewBox="0 0 1500 440" role="img"
+     aria-labelledby="fig-title fig-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="fig-title">Frozen pipeline versus continual learning</title>
+  <desc id="fig-desc">Usual setup: Dataset 1 trains a classical or neural model, which is frozen, deployed and produces recommendations. Continual learning: new data, which may differ from Dataset 1, continues training from the trained model; the updated model is redeployed and produces recommendations, and this repeats for each new batch of data.</desc>
+
+  <defs>
+    <marker id="ah-grey" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="14" markerHeight="14" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#80868b"/>
+    </marker>
+    <marker id="ah-blue" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse"
+            markerWidth="14" markerHeight="14" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1a73e8"/>
+    </marker>
+  </defs>
+
+  <!-- ───────── Row 1: usual setup (grey = context) ───────── -->
+  <text class="row-label" x="30" y="34" fill="#5f6368">Usual setup: train once, then freeze</text>
+
+  <g fill="#fff" stroke="#9aa0a6" stroke-width="2">
+    <rect x="30"   y="52" width="300" height="110" rx="12"/>
+    <rect x="410"  y="52" width="300" height="110" rx="12"/>
+    <rect x="790"  y="52" width="300" height="110" rx="12"/>
+    <rect x="1170" y="52" width="300" height="110" rx="12"/>
+  </g>
+  <g text-anchor="middle">
+    <text class="title" x="180"  y="98">Dataset 1</text>
+    <text class="sub"   x="180"  y="128">e.g. Electronics reviews</text>
+    <text class="title" x="560"  y="98">Trained model</text>
+    <text class="sub"   x="560"  y="128">classical or neural</text>
+    <text class="title" x="940"  y="98">Deployment</text>
+    <text class="sub"   x="940"  y="128">model is never updated</text>
+    <text class="title" x="1320" y="98">Recommendations</text>
+    <text class="sub"   x="1320" y="128">top-10 products per shopper</text>
+  </g>
+
+  <!-- "frozen" badge on the trained model -->
+  <g transform="translate(598 38)">
+    <rect width="98" height="28" rx="14" fill="#f1f3f4" stroke="#9aa0a6" stroke-width="1.5"/>
+    <g transform="translate(14 6)" fill="none" stroke="#5f6368" stroke-width="2">
+      <path d="M3 8 V5 a3.5 3.5 0 0 1 7 0 V8"/>
+      <rect x="0.5" y="8" width="12" height="9" rx="2" fill="#5f6368" stroke="none"/>
+    </g>
+    <text class="badge" x="36" y="19.5" fill="#5f6368">frozen</text>
+  </g>
+
+  <g stroke="#80868b" stroke-width="2.5" marker-end="url(#ah-grey)">
+    <line x1="338"  y1="107" x2="400"  y2="107"/>
+    <line x1="718"  y1="107" x2="780"  y2="107"/>
+    <line x1="1098" y1="107" x2="1160" y2="107"/>
+  </g>
+
+  <!-- ───────── Row 2: continual learning (blue = our focus) ───────── -->
+  <rect x="14" y="204" width="1472" height="222" rx="18" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1.5"/>
+  <text class="row-label" x="30" y="234" fill="#1a73e8">Continual learning: keep updating the model</text>
+
+  <!-- trained model hands its weights to continued training -->
+  <line x1="560" y1="170" x2="560" y2="242" stroke="#1a73e8" stroke-width="2.5"
+        stroke-dasharray="7 6" marker-end="url(#ah-blue)"/>
+  <text class="sub" x="576" y="192" fill="#1a73e8" style="fill:#1a73e8">starts from the trained model</text>
+
+  <g fill="#fff" stroke="#1a73e8" stroke-width="2">
+    <rect x="30"   y="252" width="300" height="110" rx="12"/>
+    <rect x="410"  y="252" width="300" height="110" rx="12"/>
+    <rect x="790"  y="252" width="300" height="110" rx="12"/>
+    <rect x="1170" y="252" width="300" height="110" rx="12"/>
+  </g>
+  <g text-anchor="middle">
+    <text class="title" x="180"  y="298">New data</text>
+    <text class="sub"   x="180"  y="328">may differ from Dataset 1</text>
+    <text class="title" x="560"  y="298">Continued training</text>
+    <text class="sub"   x="560"  y="328">learn from the new data</text>
+    <text class="title" x="940"  y="298">Redeployment</text>
+    <text class="sub"   x="940"  y="328">updated model replaces old</text>
+    <text class="title" x="1320" y="298">Recommendations</text>
+    <text class="sub"   x="1320" y="328" style="fill:#1a73e8;font-weight:700">does quality change?</text>
+  </g>
+
+  <!-- "learning" badge on continued training -->
+  <g transform="translate(580 238)">
+    <rect width="116" height="28" rx="14" fill="#fff" stroke="#1a73e8" stroke-width="1.5"/>
+    <g transform="translate(12 5)" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round">
+      <path d="M14 9 a6 6 0 1 1 -1.8 -4.3"/>
+      <path d="M13 1 V5 H9"/>
+    </g>
+    <text class="badge" x="36" y="19.5" fill="#1a73e8">learning</text>
+  </g>
+
+  <g stroke="#1a73e8" stroke-width="2.5" marker-end="url(#ah-blue)">
+    <line x1="338"  y1="307" x2="400"  y2="307"/>
+    <line x1="718"  y1="307" x2="780"  y2="307"/>
+    <line x1="1098" y1="307" x2="1160" y2="307"/>
+  </g>
+
+  <!-- loop: repeat for every new batch -->
+  <path d="M1320 366 V388 Q1320 400 1308 400 H192 Q180 400 180 388 V372"
+        fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+  <rect x="598" y="388" width="304" height="26" fill="#e8f0fe"/>
+  <text class="sub" x="750" y="407" text-anchor="middle" style="fill:#1a73e8">repeat for each new batch of data</text>
+</svg>
+</body>
+</html>
