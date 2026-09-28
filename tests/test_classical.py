@@ -182,6 +182,7 @@ def test_hit_and_recall_differ_with_several_targets():
     ideal_two = 1 + 1 / np.log2(3)
     assert s["ndcg"] == pytest.approx([1 / ideal_two, 1 / np.log2(4), 0])
     assert s["rr"] == pytest.approx([1, 1 / 3, 1 / 31])
+    assert per_user(np.array([0, 1, 5]), np.zeros(3, int), k=2)["recall"].tolist() == [1.0]
     with pytest.raises(ValueError, match="adjacent"):
         per_user(ranks, np.array([0, 1, 0, 2, 2]))
 

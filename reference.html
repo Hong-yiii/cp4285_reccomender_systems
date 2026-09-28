@@ -3529,7 +3529,7 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
               <thead><tr><th scope="col">Metric</th><th scope="col">Per user, with m targets</th></tr></thead>
               <tbody>
                 <tr><td>Hit@K</td><td>1 if any target is in the top K</td></tr>
-                <tr><td>Recall@K</td><td>Targets in the top K divided by m</td></tr>
+                <tr><td>Recall@K</td><td>Targets in the top K divided by min(m, K)</td></tr>
                 <tr><td>NDCG@K</td><td>DCG of the targets in the top K over the ideal DCG of min(m, K) hits</td></tr>
                 <tr><td>MRR</td><td>1 / rank of the best-ranked target</td></tr>
               </tbody>

@@ -59,7 +59,7 @@ def per_user(ranks: np.ndarray, user: np.ndarray, k: int = 10) -> dict[str, np.n
 
     ndcg    DCG of the targets in the top K over the ideal DCG of min(targets, K) hits
     hit     1 if any target is in the top K
-    recall  share of the user's targets in the top K
+    recall  targets in the top K / min(targets, K)
     rr      1 / (rank of the best-ranked target), not cut at K
     """
     starts = np.flatnonzero(np.r_[True, user[1:] != user[:-1]])
@@ -73,7 +73,7 @@ def per_user(ranks: np.ndarray, user: np.ndarray, k: int = 10) -> dict[str, np.n
     return {
         "ndcg": dcg / ideal,
         "hit": (hits > 0).astype(np.float64),
-        "recall": hits / n_targets,
+        "recall": hits / np.minimum(n_targets, k),
         "rr": 1 / (np.minimum.reduceat(ranks, starts) + 1),
     }
 
