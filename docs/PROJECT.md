@@ -6,7 +6,7 @@ Latest clarification, 28 September: Hongyi owns the **modern deep-learning recom
 
 ## Runnable scaffold
 
-Use [IMPLEMENTATION.md](IMPLEMENTATION.md) for the uv setup, download/audit commands and bounded A-only pilot. The [HTML diagrams](../slides/index.html) now show the proposed Amazon pair and implementation gates. Software smoke checks use synthetic data; no Amazon experiment has run. The proposed B interfaces and mixed training remain future implementation work.
+Use [IMPLEMENTATION.md](IMPLEMENTATION.md) for the uv setup, download/audit commands and bounded A-only pilot. Slides now live in the team's Google Slides deck ([pointer and principles](../slides/README.md)); [SLIDE-FLOW.md](SLIDE-FLOW.md) holds the neural slide content and diagrams. Software smoke checks use synthetic data; no Amazon experiment has run. The proposed B interfaces and mixed training remain future implementation work.
 
 ## Our current understanding
 
@@ -44,7 +44,7 @@ Then select compatible data/models and run a small pilot. Degradation and neural
 | [MODERN-RECOMMENDER.md](MODERN-RECOMMENDER.md) | Hongyi's confirmed workstream; corrected learning lifecycle, proposed neural architecture and formal update/evaluation protocol |
 | [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md) | Detailed proposed SASRec continuation protocol: preserved weights, batch mixtures, optimizer state, pseudocode, controls and retention metrics |
 | [DEFENSE.md](DEFENSE.md) | 28 September Group 3 deck review: page-specific requirements, neural preparation and rehearsal questions |
-| [SLIDE-FLOW.md](SLIDE-FLOW.md) | Proposed neural slide narrative with editable Mermaid diagrams and speaker notes |
+| [SLIDE-FLOW.md](SLIDE-FLOW.md) | Live-deck review, paste-ready neural slides, Mermaid diagrams and speaker notes |
 | [DATASET-ASSESSMENT.md](DATASET-ASSESSMENT.md) | Documentation-based comparison of Amazon category pairs and DIGINETICA/YOOCHOOSE, with feasibility checks |
 | [SOURCES.md](SOURCES.md) | Source provenance, timestamps and external reading |
 | [AI_LOG.md](AI_LOG.md) | Record of AI assistance for this initialization |

@@ -1,20 +1,54 @@
 # Modern recommender slide flow
 
-Draft for discussion, 28 September 2026. Hongyi's contribution only. These diagrams describe a proposed experiment, not implemented architecture or results. A and B are placeholder domains. No source PDF changes.
+Draft for discussion, 28 September 2026. Hongyi's contribution only. The team deck is edited in [Google Slides](../slides/README.md); this file supplies its neural content. The diagrams below describe a proposed experiment unless a line says it is implemented. They are not results.
+
+## Live deck review — 28 September 2026
+
+Read from the live Google deck's public text export and preview on 28 September; no edits were made to it. Slide numbers are positions in that deck and will shift as it changes. The deck now includes the classical pilot and its results (slides 9–16), which the V1.2 PDF reviewed in [DEFENSE.md](DEFENSE.md) did not. **Every issue found, slide by slide, is in [slides/ISSUES.md](../slides/ISSUES.md).** This section covers only where the neural content goes.
+
+**Slide budget:** the deck has 22 slides. Excluding acknowledgements and references leaves 20, the course maximum. Proposed placement:
+
+1. Slide 7 ("Data — Exploration?", now empty) introduces the dataset for the class. The neural slides depend on it.
+2. Slide 8 (the outdated technical plan) becomes N1.
+3. Hide the version-history slide before export. That frees one place for N2, directly after N1.
+
+**Open decision to settle before the neural slides quote mix levels:** slides 5, 9, 13 and 15 define mixing as Movies & TV volume relative to Electronics (0–140%). The neural code holds the total update count fixed and specifies B's share of updates. 140% of A is a 58.3% B share. See [DEFENSE.md](DEFENSE.md#resolve-the-mixture-denominator).
+
+### Paste-ready neural slides
+
+Written for a classmate who has not met SASRec, the dataset or the papers, following [the slide principles](../slides/README.md#principles-for-making-slides). Change the wording to your own voice. Every status line reflects the repository on 28 September; update it if that changes.
+
+**N1 (replaces slide 8). Title: "6. Neural — Our second model reads each shopper's history in order"**
+
+- Flow, four boxes left to right: *A shopper's last 50 reviewed products, oldest → newest* → *SASRec [1]: at each step, weighs how much each earlier product should count, looking only backward* → *Score every Electronics product* → *Top 10*.
+- Three callouts:
+  - **Why this model:** order matters (phone → case → cable). The Markov chain on slide 10 looks only at the latest product; SASRec looks at the last 50.
+  - **Built:** the original authors' design [1], rebuilt in PyTorch. Training, saving and reloading (identical scores after reload) and further training on Electronics all run, and are tested on made-up data.
+  - **Not yet:** no run on the real Amazon data. Next: Electronics, then mixing in Movies & TV.
+- Footer: *Made-up test data checks the software, not the research question. Results on slides 13–16 are for the classical models only.*
+- Speaker note: Like the compressed Markov chain (QR), SASRec has a fixed set of internal weights that every prediction uses. In our planned design, Movies & TV training would update those same weights, so it could change Electronics predictions, for better or worse. That is what we will measure.
+
+**N2 (new, after N1). Title: "6. Neural — Every version starts from the same model and faces the same test"**
+
+- Diagram: *Train on Electronics reviews before 2021* → *Saved copy of the model* → three versions: *Frozen: no more training* · *Keeps training on 2021 Electronics reviews* · *Keeps training on 2021 Electronics mixed with Movies & TV* → *After every round of training: the same Electronics shoppers, each with one hidden review, all Electronics products ranked*.
+- Caption: *Same starting model · same test shoppers and products · same amount of training for every version that trains.*
+- Callout: *Why keep an Electronics-only version? It shows what extra training does on its own. A mixed version can end below Electronics-only without falling below where it started, so we report both gaps.*
+- Status line: *Built: frozen and Electronics-only. Not built: the Movies & TV mix.*
+- Speaker note: Hidden test reviews are never used for training. Settings are chosen on a separate hidden review, never on the test. See section 4 below for the two comparisons.
 
 ## Story and placement
 
 Question: How does original-domain recommendation quality change when a neural recommender continues training on a changing mixture of interactions?
 
-| Order | Slide title | Purpose | Placement in group deck |
+| Order | Slide title | Purpose | Placement in the live deck |
 | --- | --- | --- | --- |
-| 1 | SASRec next-item recommendation | Establish what the model predicts | Proposed method, expanding p. 5 |
-| 2 | Shared model across two domains | Explain how B updates can affect A | Proposed method, conditional on adopting separate domain interfaces |
-| 3 | Periodic continued training | Distinguish model architecture from the update protocol | Proposed method |
-| 4 | Retention experiment | Show independent controls and fixed evaluation | Proposed evaluation, expanding p. 8 |
-| Closing contribution | Neural implementation plan | Actual progress, resources and dated next steps | Existing pp. 6–7 and 9–10 |
+| 1 | SASRec next-item recommendation | Establish what the model predicts | Neural slide N1 (slide 8) |
+| 2 | Shared model across two domains | Explain how B updates can affect A | Backup, or N1's speaker note; conditional on adopting separate domain interfaces |
+| 3 | Periodic continued training | Distinguish model architecture from the update protocol | Neural slide N2 (after N1) |
+| 4 | Retention experiment | Show independent controls and fixed evaluation | Neural slide N2, plus one line on slide 14 |
+| Closing contribution | Neural implementation plan | Actual progress, resources and dated next steps | Slides 6, 17 and 18–19 |
 
-Four technical slides are a suggested organization, not a course requirement. The group's abstract and motivation establish the research question before these slides. If the allotted speaking time is tight, move slide 2 to backup and retain its shared-parameter explanation on slide 3. Total slide allocation remains a group decision.
+The four technical slides below are the full narrative. The live deck is at the 20-slide limit, so N1 and N2 compress them into two slides; slides 1–4 here serve as speaker notes and backup. Total slide allocation remains a group decision.
 
 ## 1. SASRec next-item recommendation
 
@@ -120,11 +154,12 @@ Contribute to existing group progress/resources/schedule slides rather than repe
 
 | Item | Current evidence or proposed next action |
 | --- | --- |
-| Design preparation | Existing notes specify a candidate model and continuation/evaluation protocol |
-| Actual implementation status | Hongyi to confirm work done outside these notes |
-| First implementation milestone | Train A, save/reload its checkpoint and reproduce its evaluation |
-| Next milestone | Verify A-only continued updates, then add a mixed-domain pilot |
-| Dependencies | Dataset choice, domain identity/schema, shared evaluator, actual compute access |
-| Schedule | Attach team-agreed dates to milestones before submission |
+| Design preparation | Existing notes specify the model and continuation/evaluation protocol |
+| Implemented (28 September) | Original SASRec architecture ported to PyTorch; A-only lifecycle with validation-selected checkpoint, identical-score reload, frozen control and continued training; 36 offline tests on synthetic data ([runbook](IMPLEMENTATION.md)) |
+| Not yet run | Any neural training on Amazon data |
+| Next milestone | Real Electronics A-only pilot: audit, prepare, train, reload and continue |
+| Then | B interfaces and mixed-domain branches |
+| Dependencies | Mixture denominator, split alignment with the classical protocol, storage/compute for full downloads |
+| Schedule | Slides 18–19 of the live deck; Week 8 is the first real run |
 
 Do not present the design notes as evidence that experiments have run. Adapters, replay and distillation remain optional extensions after the baseline protocol works.
