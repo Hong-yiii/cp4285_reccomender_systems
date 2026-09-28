@@ -1,0 +1,30 @@
+# Provisional pilot settings. Paths are resolved from this repository's root.
+[data]
+a = "data/raw/Electronics.csv.gz"
+b = "data/raw/Movies_and_TV.csv.gz"
+prepared = "data/processed/electronics-pilot.json"
+# Explicit exploratory cutoffs, not validated against downloaded data yet.
+initial_cutoff = "2021-01-01"
+update_end = "2022-01-01"
+min_rating = 1.0              # all review events; set 4.0 for a positive-rating-only experiment
+max_users = 500
+max_length = 50
+seed = 4285
+
+[model]
+hidden = 32
+heads = 1
+layers = 2
+dropout = 0.2
+
+[training]
+seed = 4285
+device = "cpu"                      # cpu is reproducible and portable; mps/cuda can be selected explicitly
+epochs = 3
+batch_size = 64
+learning_rate = 0.001
+continuation_learning_rate = 0.0001
+cycles = 3
+updates_per_cycle = 5
+k = 10
+output = "runs/electronics-pilot"

@@ -1,0 +1,32 @@
+# Local-only course material, team sources and agent state (never publish).
+/local/
+.pi/
+.pi-subagents/
+.codex/
+.claude/
+.env
+.env.*
+*.pem
+*.key
+
+# Python environment and tooling.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Downloads, model weights and generated output.
+/data/
+/runs/
+/reports/
+/tmp/
+*.pt
+*.pth
+*.ckpt
+*.csv
+*.csv.gz
+.DS_Store

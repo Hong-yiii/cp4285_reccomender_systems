@@ -1,0 +1,266 @@
+"""Local ID-file ingestion, audit and a bounded familiar-item pilot split."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+import duckdb
+import httpx
+
+DOMAINS = ("Electronics", "Movies_and_TV")
+BASE = "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/5core/rating_only"
+
+
+def save_json(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def millis(date):
+    return int(datetime.fromisoformat(date).replace(tzinfo=UTC).timestamp() * 1000)
+
+
+def download(domain, directory):
+    if domain not in DOMAINS:
+        raise ValueError(f"Choose one of {DOMAINS}")
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    dest = directory / f"{domain}.csv.gz"
+    if dest.exists():
+        raise FileExistsError(f"Already exists: {dest}; use the existing local file")
+    url = f"{BASE}/{domain}.csv.gz"
+    partial = dest.with_suffix(dest.suffix + ".part")
+    with httpx.stream("GET", url, follow_redirects=True, timeout=120) as response:
+        response.raise_for_status()
+        with partial.open("wb") as f:
+            for chunk in response.iter_bytes(1024 * 1024):
+                f.write(chunk)
+    # A completed HTTP response is not sufficient: validate gzip/header before promotion.
+    import csv
+    import gzip
+
+    with gzip.open(partial, "rt") as f:
+        header = next(csv.reader(f))
+    if not {"user_id", "parent_asin", "rating", "timestamp"}.issubset(header):
+        raise ValueError("Downloaded file has an unexpected header")
+    partial.rename(dest)
+    record = {"source_url": url, "bytes": dest.stat().st_size, "sha256": sha256(dest)}
+    save_json(str(dest) + ".manifest.json", record)
+    return record
+
+
+def load(con, path, name):
+    # Only internal constant table names enter SQL; paths use DuckDB's bound reader API.
+    if name not in {"a", "b"}:
+        raise ValueError("Invalid internal table name")
+    if not Path(path).is_file():
+        raise FileNotFoundError(f"Missing ID file: {path}; download it or update the config")
+    relation = con.read_csv(str(Path(path).resolve()), header=True, all_varchar=True)
+    required = {"user_id", "parent_asin", "rating", "timestamp"}
+    if not required.issubset(relation.columns):
+        raise ValueError(f"Missing columns: {required - set(relation.columns)}")
+    relation.create_view("incoming", replace=True)
+    con.execute(f"""CREATE OR REPLACE TABLE {name} AS
+        SELECT user_id, parent_asin, try_cast(rating AS DOUBLE) rating,
+               try_cast(timestamp AS BIGINT) AS "timestamp" FROM incoming""")
+    invalid = con.execute(f"""SELECT count(*) FROM {name} WHERE
+        user_id IS NULL OR trim(user_id) = '' OR parent_asin IS NULL OR trim(parent_asin) = ''
+        OR rating IS NULL OR NOT isfinite(rating) OR rating NOT BETWEEN 1 AND 5
+        OR timestamp IS NULL OR timestamp NOT BETWEEN 631152000000 AND 4102444800000""").fetchone()[
+        0
+    ]
+    if invalid:
+        raise ValueError(
+            f"{invalid} invalid rows in {path}; expected Unix milliseconds and ratings 1–5"
+        )
+
+
+def connection():
+    con = duckdb.connect()
+    con.execute("SET memory_limit='2GB'")
+    con.execute("SET threads=4")
+    con.execute("SET temp_directory='data/.duckdb-spill'")
+    return con
+
+
+def audit(a, b, cutoff, min_rating=1):
+    result = {
+        "scope": "full supplied files; counts are not a training result",
+        "initial_cutoff_utc": cutoff,
+        "min_rating": min_rating,
+        "domains": {},
+    }
+    with connection() as con:
+        for name, path in [("a", a), ("b", b)]:
+            load(con, path, name)
+            count, users, items, first, last = con.execute(f"""SELECT count(*),
+                count(DISTINCT user_id), count(DISTINCT parent_asin),
+                min(timestamp), max(timestamp) FROM {name}""").fetchone()
+            unique = con.execute(
+                f"SELECT count(*) FROM (SELECT DISTINCT * FROM {name})"
+            ).fetchone()[0]
+            pair_unique = con.execute(
+                f"SELECT count(*) FROM (SELECT DISTINCT user_id,parent_asin FROM {name})"
+            ).fetchone()[0]
+            con.execute(
+                f"CREATE TABLE {name}_filtered AS SELECT DISTINCT * FROM {name} WHERE rating >= ?",
+                [min_rating],
+            )
+            ties = con.execute(f"""SELECT coalesce(sum(n),0) FROM
+                (SELECT count(*) n FROM {name}_filtered GROUP BY user_id,timestamp HAVING count(*)>1)""").fetchone()[
+                0
+            ]
+            # Same ambiguity policy as preparation: exclude all tied events, never invent order.
+            con.execute(f"""CREATE TABLE {name}_ordered AS SELECT * FROM {name}_filtered
+                QUALIFY count(*) OVER (PARTITION BY user_id,timestamp)=1""")
+            stats = con.execute(
+                f"""WITH lengths AS (
+                SELECT user_id, count(*) n,
+                count(*) FILTER (WHERE timestamp < ?) initial_n,
+                count(*) FILTER (WHERE timestamp >= ?) later_n
+                FROM {name}_ordered GROUP BY user_id)
+                SELECT count(*), quantile_cont(n,0.5), quantile_cont(n,0.9),
+                count(*) FILTER (WHERE initial_n >= 5),
+                count(*) FILTER (WHERE initial_n >= 5 AND later_n > 0) FROM lengths""",
+                [millis(cutoff), millis(cutoff)],
+            ).fetchone()
+            result["domains"][name] = {
+                "path": str(Path(path).resolve()),
+                "sha256": sha256(path),
+                "rows": count,
+                "users": users,
+                "items": items,
+                "timestamp_ms_range": [first, last],
+                "exact_duplicate_extra_rows": count - unique,
+                "repeated_user_item_extra_rows": count - pair_unique,
+                "tied_rows_after_rating_filter_and_dedup": ties,
+                "after_tie_removal": dict(
+                    zip(
+                        [
+                            "users",
+                            "sequence_length_median",
+                            "sequence_length_p90",
+                            "users_with_at_least_5_initial_events",
+                            "those_users_with_later_events",
+                        ],
+                        stats,
+                    )
+                ),
+            }
+        result["overlap"] = {}
+        for col in ["user_id", "parent_asin"]:
+            result["overlap"][col] = con.execute(f"""SELECT count(*) FROM
+                (SELECT DISTINCT {col} FROM a INTERSECT SELECT DISTINCT {col} FROM b)""").fetchone()[0]
+        result["notes"] = [
+            "Overlap uses original identifiers before reindexing.",
+            "Sequence lengths use the rating filter and exclude ambiguous timestamp ties.",
+            "Five initial events allow three train events, validation and retention targets.",
+            "Further vocabulary and cohort filtering can reduce eligibility.",
+        ]
+    return result
+
+
+def prepare(path, cfg):
+    cutoff, end = millis(cfg["initial_cutoff"]), millis(cfg["update_end"])
+    if end <= cutoff or cfg["max_users"] < 1 or cfg["max_length"] < 1:
+        raise ValueError("Require update_end > initial_cutoff and positive size limits")
+    with connection() as con:
+        load(con, path, "a")
+        con.execute(
+            "CREATE TABLE filtered AS SELECT DISTINCT * FROM a WHERE rating >= ? AND timestamp < ?",
+            [cfg["min_rating"], end],
+        )
+        tied = con.execute("""SELECT coalesce(sum(n),0) FROM (SELECT count(*) n FROM filtered
+                            GROUP BY user_id,timestamp HAVING count(*)>1)""").fetchone()[0]
+        con.execute("""CREATE TABLE ordered AS SELECT * FROM filtered
+                       QUALIFY count(*) OVER (PARTITION BY user_id,timestamp)=1""")
+        # Cohort eligibility depends on the initial period only, never future activity.
+        rows = con.execute(
+            """WITH eligible AS (
+            SELECT user_id FROM ordered WHERE timestamp < ? GROUP BY user_id HAVING count(*) >= 5
+            ORDER BY md5(user_id || ?) LIMIT ?)
+            SELECT user_id,parent_asin,timestamp FROM ordered JOIN eligible USING(user_id)
+            ORDER BY user_id,timestamp""",
+            [cutoff, str(cfg["seed"]), cfg["max_users"]],
+        ).fetchall()
+    histories = {}
+    for user, item, stamp in rows:
+        histories.setdefault(user, []).append((item, stamp))
+    if not histories:
+        raise ValueError(
+            "No eligible histories before cutoff; inspect audit or change the pilot window"
+        )
+    initial = {u: [(i, t) for i, t in h if t < cutoff] for u, h in histories.items()}
+    # Last two pre-cutoff events are held out globally from every training prefix and target.
+    items = sorted({i for h in initial.values() for i, _ in h[:-2]})
+    item_map = {item: idx + 1 for idx, item in enumerate(items)}
+    if len(items) < 2:
+        raise ValueError("Need at least two training items")
+    sets = {k: [] for k in ("train", "validation", "retention", "continuation")}
+    skipped = {"validation_oov": 0, "retention_oov": 0, "continuation_oov": 0}
+
+    def example(user, prefix, target, stamp):
+        return {
+            "user": user,
+            "history": prefix[-cfg["max_length"] :],
+            "target": target,
+            "timestamp": stamp,
+        }
+
+    for user, h in histories.items():
+        before = initial[user]
+        prefix = []
+        for item, stamp in before[:-2]:
+            target = item_map[item]
+            if prefix:
+                sets["train"].append(example(user, prefix, target, stamp))
+            prefix.append(target)
+        for split, (item, stamp) in zip(("validation", "retention"), before[-2:]):
+            if item in item_map:
+                sets[split].append(example(user, prefix, item_map[item], stamp))
+            else:
+                skipped[f"{split}_oov"] += 1
+        for item, stamp in h:
+            if stamp < cutoff:
+                continue
+            if item not in item_map:
+                skipped["continuation_oov"] += 1
+                continue
+            target = item_map[item]
+            sets["continuation"].append(example(user, prefix, target, stamp))
+            prefix.append(target)
+    for examples in sets.values():
+        examples.sort(key=lambda x: (x["timestamp"], x["user"]))
+    for split, examples in sets.items():
+        if not examples:
+            raise ValueError(f"Empty {split} partition; inspect the data/window before training")
+    return {
+        "metadata": {
+            "domain": "Electronics",
+            "source": str(Path(path).resolve()),
+            "source_sha256": sha256(path),
+            "config": cfg,
+            "users": len(histories),
+            "items": len(items),
+            "dropped_tied_rows": tied,
+            "skipped": skipped,
+            "counts": {k: len(v) for k, v in sets.items()},
+            "scope": "bounded familiar-item A-only pilot; unknown later items omitted",
+            "test_rule": "last two pre-cutoff events excluded from all training histories",
+            "global_5core_warning": "upstream 5-core filtering uses full-history activity",
+        },
+        "item_ids": items,
+        **sets,
+    }
