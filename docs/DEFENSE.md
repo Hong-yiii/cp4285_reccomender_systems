@@ -4,6 +4,8 @@ Status: working preparation notes. Immediate target: the 29 September critique, 
 
 ## 28 September — Hongyi's modern-recommender preparation
 
+**Later the same day:** the team's [live Google deck](../slides/README.md) has moved past V1.2. It adds the classical pilot and results, and fixes some gaps below (resources, schedule, the Week 8 neural role). Its current slide-by-slide problems are in [slides/ISSUES.md](../slides/ISSUES.md), and paste-ready neural slides in [SLIDE-FLOW.md](SLIDE-FLOW.md#live-deck-review--28-september-2026). The V1.2 review below is kept as dated evidence.
+
 Reviewed source: `local/sources/group-3-design-critique-v1.2.pdf` (repo-root-relative, local only), V1.2 (260926), 13 pages, 16:9. Read all text and visually inspected pp. 5, 7–10. Page numbers below refer to this PDF. Requirements come separately from the official template preserved in `local/sources/critique-template-v1.1-2026-09-17.txt` (local only). The PDF is a draft to review, not instructions authorizing submission; it remains unchanged.
 
 ### Required content mapped to Hongyi's contribution
