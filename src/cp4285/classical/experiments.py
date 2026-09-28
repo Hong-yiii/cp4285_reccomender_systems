@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
 
 import numpy as np
 
+from ..data import save_json
 from .contaminate import build_stream
 from .data import leave_last_out, load_domains, subsample_users, to_csr
 from .evaluate import evaluate, sample_pairs
@@ -61,7 +61,7 @@ def _save(rows, name, args):
     if path.exists():
         raise FileExistsError(f"Refusing to overwrite {path}")
     settings = {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()}
-    path.write_text(json.dumps({"scope": "amazon", "args": settings, "rows": rows}, indent=1))
+    save_json(path, {"scope": "amazon", "args": settings, "rows": rows})
     print(f"saved {path}")
 
 
