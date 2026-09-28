@@ -153,3 +153,14 @@ def _csr(x):
     import scipy.sparse as sp
 
     return sp.csr_matrix(x.astype(np.float32))
+
+
+def test_paired_change_detects_a_uniform_drop_and_no_change():
+    from cp4285.classical.evaluate import paired_change
+
+    rng = np.random.default_rng(0)
+    base = rng.random(2000)
+    same = paired_change(base, base.copy(), n_boot=200)
+    assert same[0] == pytest.approx(0) and same[1] == pytest.approx(0) and same[3] == 1.0
+    drop = paired_change(base, base * 0.8, n_boot=200)
+    assert drop[0] == pytest.approx(-0.2) and drop[2] < 0 and drop[3] == 0.0

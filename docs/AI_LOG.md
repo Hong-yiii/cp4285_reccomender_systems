@@ -175,3 +175,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Added one executable synthetic worked-example regression in `tests/test_sasrec.py`, covering initial/continuation tensors, full-score dot products, sampled loss, a context-only item's gradient and the rank-4/tie arithmetic. The full suite passed all 36 tests in 3.54s; Ruff lint/format, primary test-file diagnostics, source/wheel builds and public-only Gitleaks checks passed. Byte comparison confirmed earlier sections and formatted CSS remain intact. Browser checks at 1440px/390px confirmed eight captioned diagrams, resolving anchors, no external assets and no page-level horizontal overflow, including the expanded architecture details. Independent source review found no inaccuracies requiring changes.
 
 **Limits:** Production model/data/training code is unchanged. Numerical examples are invented software checks, not measured Amazon performance or TensorFlow parity. The fixed-anchor interpretation, OOV coverage and classical/neural comparability remain research-contract questions. No data acquisition, deployment, submission or PR merge.
+
+## 28 September 2026 — Classical rigour study
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Remove SLIST from the study scope and make the classical analysis more rigorous, then follow the repository instructions after pulling main.
+
+**Assistance:** Added `cp4285 classical study` (`src/cp4285/classical/study.py`): validation-only tuning of the QR rank and popularity weight, test-split refits on train + validation events, a fixed 50K-user paired evaluation sample, three seeds, paired bootstrap confidence intervals and p-values (`evaluate.paired_change`), a rank-grows-with-data mechanism control, create-only outputs through `common/utils.save_json`, and resumable per-(seed, level) checkpoints. Added a bootstrap unit test. Updated `docs/CLASSICAL.md`, `CONTEXT.md` and appended dated section 18 to `reference.html`, keeping earlier sections unchanged.
+
+**Validation:** 37 tests plus Ruff lint and format passed. Smoke runs checked the study end to end and checkpoint resume. Tuning and seed 0 at 0/10/50% B ran on real data in this workspace.
+
+**Limits:** Seeds 1–2, the 100% and 140% levels and the intervals were still running, so the reported numbers are preliminary single-seed values. Tuning picked the largest grid rank. The protocol is still leave-last-out, not the neural cutoff protocol, so classical and neural scores remain incomparable.

@@ -19,7 +19,7 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 | Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
 | Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
 | Synthetic lifecycle tests and six-slide HTML narrative | Final team deck / submission |
-| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; multi-seed classical results |
+| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; the multi-seed classical study (`cp4285 classical study`, validation-tuned, paired CIs) is implemented and partly run, see section 18 of `reference.html` |
 
 **Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
 

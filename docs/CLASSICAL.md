@@ -2,6 +2,29 @@
 
 Status: implemented, with **contributor-reported real Amazon runs from the originating workspace** (28 September 2026). Those runs were not rerun during the SASRec integration; raw logs are not included here. The results are **single-seed, validation-split exploratory results**, not tuned final numbers. The protocol differs from the SASRec pilot (see [Protocol](#protocol)), so the two sets of numbers are not directly comparable yet.
 
+## Rigorous study (in progress, 28 September 2026)
+
+`uv run cp4285 classical study` supersedes the single-seed sweeps below for reporting. SLIST is out of the study scope at the team's request (its code stays in `models.py`).
+
+- **Model selection on validation only:** QR rank k ∈ {32, 64, 128, 256} × popularity weight β ∈ {0, 0.25}, clean data. Observed validation NDCG@10 (best β): 0.0119, 0.0130, 0.0141, 0.0150, so k = 256, β = 0. The best rank is at the edge of the grid.
+- **Test split:** models are refitted on train + validation events and scored on each reviewer's last event, over all 368,228 A items.
+- **Paired design:** the same 50K sampled test users at every seed and level.
+- **Three seeds:** each changes the sampled B reviewers and the QR random start.
+- **Uncertainty:** paired bootstrap 95% CI (1,000 user resamples) and a one-sided p-value for each change against clean (`evaluate.paired_change`).
+- **Mechanism control:** a QR model with rank k × (1 + level). If fixed capacity drives the drop, it should degrade much less.
+- **Artifacts:** create-only JSON and NPZ; per-(seed, level) checkpoints under `reports/classical/study_ckpt_*` let a stopped run resume.
+
+Preliminary, observed in this workspace, seed 0 only, no intervals yet (NDCG@10, test split):
+
+| Model | Clean | B = 10% | B = 50% |
+| --- | --- | --- | --- |
+| Markov chain | 0.0198 | 0.0198 | 0.0198 |
+| QR, k = 256 | 0.0125 | 0.0124 | 0.0118 |
+| QR, k grows with data | 0.0125 | 0.0126 | 0.0123 |
+| Popularity | 0.0064 | 0.0064 | 0.0064 |
+
+The fixed-rank drop at 50% (about −6%) is larger than the growing-rank drop (about −2%), consistent with the capacity explanation. Seeds 1–2, levels 100% and 140%, and the confidence intervals are still to be reported. For scale, published full-ranking SASRec scores on 25K-item Amazon'23 categories are 0.020–0.043 NDCG@10 ([ETEGRec, SIGIR 2025](https://arxiv.org/abs/2409.05546)); A here has 368K items.
+
 ## Question
 
 When interactions from B (Movies & TV) are added to training at increasing volume, how much does next-event ranking on A (Electronics) degrade for classical recommenders? Which model property decides that?

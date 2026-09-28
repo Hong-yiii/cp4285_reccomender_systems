@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#sasrec-architecture"><strong>Latest · SASRec explained</strong></a>
+          <a href="#update-classical-study"><strong>Latest · 18 Classical rigour</strong></a>
+          <a href="#sasrec-architecture">17 · SASRec explained</a>
           <a href="#reviewer-checkpoint">16 · Review this PR</a>
           <a href="#what-i-understand">01 · Where you are</a>
           <a href="#system-diagram">02 · System map</a>
@@ -716,12 +717,10 @@
             role="note"
           >
             <strong>Current review checkpoint — 28 September 2026.</strong> PRs
-            #1 and #2 are merged. Artifact-safety
-            <a
-              href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/3"
-              >PR #3 remains open</a
-            >; this utilities/reference change is stacked on its branch, not yet
-            on main.
+            #1–#4 are merged. The newest checkpoint,
+            <a href="#update-classical-study">section 18: classical rigour</a>, is on branch
+            <code>classical-study</code> and not yet on main; its multi-seed run was still in
+            progress when written.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
@@ -3330,6 +3329,80 @@ uv run pytest -q</code></pre>
           <p class="small"><a href="#review-status">Current PR status</a> · <a href="#sasrec-architecture">Back to this walkthrough</a></p>
         </section>
         <!-- APPENDED SASREC WALKTHROUGH 2026-09-28 END -->
+
+        <!-- APPENDED CLASSICAL RIGOUR CHECKPOINT 2026-09-28 -->
+        <section id="update-classical-study">
+          <span class="section-num">18 / CLASSICAL RIGOUR CHECKPOINT · 28 SEPTEMBER 2026</span>
+          <h2>The classical study now tunes on validation, reports on test and measures uncertainty.</h2>
+          <p>
+            <span class="label fact">FACT</span> A new command,
+            <code>cp4285 classical study</code> (<a href="src/cp4285/classical/study.py">study.py</a>),
+            replaces the single-seed validation sweeps of section 12 with a stricter protocol.
+            SLIST is dropped from the study scope at the team's request; its code remains in
+            <code>models.py</code> for reference.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th scope="col">Protocol element</th><th scope="col">Section 12 sweeps</th><th scope="col">This study</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Model selection</td><td>Rank and weight fixed by hand</td>
+                  <td>QR rank k ∈ {32, 64, 128, 256} and popularity weight β ∈ {0, 0.25} chosen on validation, clean data only</td></tr>
+                <tr><td>Reported split</td><td>Validation</td>
+                  <td>Test (each reviewer's last event), models refitted on train + validation events</td></tr>
+                <tr><td>Evaluation users</td><td>20K sampled validation users</td>
+                  <td>The same 50K sampled test users at every seed and B level (paired design)</td></tr>
+                <tr><td>Repetition</td><td>One seed</td>
+                  <td>Three seeds; each changes which B reviewers are sampled and the QR random start</td></tr>
+                <tr><td>Uncertainty</td><td>None</td>
+                  <td>Paired bootstrap 95% CI (1,000 user resamples) and one-sided p-value per change</td></tr>
+                <tr><td>Mechanism control</td><td>None</td>
+                  <td>A QR model whose rank grows with the data, k × (1 + B level)</td></tr>
+                <tr><td>Artifacts</td><td>JSON per sweep</td>
+                  <td>Create-only JSON via <code>common/utils.save_json</code>; per-(seed, level) checkpoints allow resuming</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <span class="label fact">FACT</span> Observed in this workspace (reports are git-ignored):
+            validation tuning gave NDCG@10 of 0.0119, 0.0130, 0.0141 and 0.0150 for k = 32, 64,
+            128 and 256 (best β), so k = 256 with β = 0 was selected. On the test split, seed 0:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">NDCG@10, test, seed 0</th><th scope="col">Clean</th><th scope="col">B = 10%</th><th scope="col">B = 50%</th></tr></thead>
+              <tbody>
+                <tr><td>Markov chain</td><td>0.0198</td><td>0.0198</td><td>0.0198</td></tr>
+                <tr><td>QR, k = 256</td><td>0.0125</td><td>0.0124</td><td>0.0118</td></tr>
+                <tr><td>QR, k grows with data</td><td>0.0125</td><td>0.0126</td><td>0.0123</td></tr>
+                <tr><td>Popularity</td><td>0.0064</td><td>0.0064</td><td>0.0064</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <span class="label infer">INFERENCE</span> The pattern of section 12 survives tuning:
+            the fixed-rank model loses about 6% at 50% B, while the growing-rank control loses
+            about 2%. This is one seed without intervals; seeds 1–2, the 100% and 140% levels and
+            the confidence intervals were still running at this checkpoint. Tuning chose the
+            largest rank in the grid, so a larger k may score higher and degrade less.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> The protocol is still leave-last-out, not the
+            neural cutoff protocol. These scores remain incomparable with SASRec pilot scores until
+            the team aligns the two (see <a href="#update-classical">section 12</a>).
+          </p>
+          <pre><code>uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz            # tune, then 3 seeds x 5 levels
+uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --beta 0.0   # skip tuning; resumes from checkpoints</code></pre>
+          <p class="ref">
+            Evidence: <a href="src/cp4285/classical/study.py">study.py</a>,
+            <a href="src/cp4285/classical/evaluate.py">evaluate.py</a> (<code>paired_change</code>),
+            <a href="tests/test_classical.py">tests</a> and <a href="docs/CLASSICAL.md">CLASSICAL.md</a>.
+            All 37 tests passed at this checkpoint.
+          </p>
+          <p class="small"><a href="#review-status">Current PR status</a></p>
+        </section>
+        <!-- APPENDED CLASSICAL RIGOUR CHECKPOINT 2026-09-28 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

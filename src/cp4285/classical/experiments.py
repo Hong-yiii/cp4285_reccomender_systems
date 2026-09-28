@@ -202,6 +202,26 @@ def add_arguments(parser, root: Path, data_cfg: dict):
         p.add_argument("--forget", type=float, default=1.0, help="stream: old-data decay")
         p.add_argument("--chunks", type=int, default=10, help="stream: updates per phase")
 
+    st = commands.add_parser("study", help="Tuned, multi-seed test-split study with paired CIs")
+    st.add_argument("--a", type=Path, default=Path(data_cfg["a"]), help="A ID file")
+    st.add_argument("--b", type=Path, default=Path(data_cfg["b"]), help="B ID file")
+    st.add_argument("--cache", type=Path, default=root / "data/processed")
+    st.add_argument("--output", type=Path, default=root / "reports/classical")
+    st.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.1, 0.5, 1.0, 1.4])
+    st.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    st.add_argument("--ks", type=int, nargs="+", default=[32, 64, 128, 256], help="rank grid")
+    st.add_argument("--betas", type=float, nargs="+", default=[0.0, 0.25], help="beta grid")
+    st.add_argument("--k", type=int, default=None, help="skip tuning: use this rank")
+    st.add_argument("--beta", type=float, default=None, help="skip tuning: use this beta")
+    st.add_argument("--eval-users", type=int, default=50000)
+    st.add_argument("--boot", type=int, default=1000, help="bootstrap resamples")
+    st.add_argument("--no-scaled", dest="scaled", action="store_false",
+                    help="skip the rank-grows-with-data control")  # fmt: skip
+
 
 def run(args):
+    if args.classical_command == "study":
+        from .study import study
+
+        return study(args)
     {"stats": stats, "sweep": sweep, "stream": stream}[args.classical_command](args)

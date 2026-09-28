@@ -29,6 +29,25 @@ def evaluate(
     the full width ranks over the whole catalogue, so injected items can crowd out
     the top-K.
     """
+    return metrics(rank_targets(model, query, seen, pairs, n_candidates, batch), ks)
+
+
+def metrics(ranks: np.ndarray, ks: tuple[int, ...] = (10, 20)) -> dict[str, float]:
+    out = {}
+    for k in ks:
+        hit = ranks < k
+        out[f"ndcg@{k}"] = float(np.where(hit, 1 / np.log2(ranks + 2), 0).mean())
+        out[f"recall@{k}"] = float(hit.mean())
+    out["mrr"] = float((1 / (ranks + 1)).mean())
+    return out
+
+
+def ndcg_per_user(ranks: np.ndarray, k: int = 10) -> np.ndarray:
+    return np.where(ranks < k, 1 / np.log2(ranks + 2), 0.0)
+
+
+def rank_targets(model, query, seen, pairs, n_candidates, batch: int = 1000) -> np.ndarray:
+    """0-based rank of each held-out item (see evaluate)."""
     ranks = np.empty(len(pairs), dtype=np.int64)
     popular = np.asarray(seen.sum(axis=0), dtype=np.float32).ravel()[:n_candidates]
     tiebreak = (
@@ -41,10 +60,18 @@ def evaluate(
         s[seen_b.row, seen_b.col] = -np.inf
         target = s[np.arange(len(u)), t]
         ranks[lo : lo + batch] = (s > target[:, None]).sum(axis=1)
-    out = {}
-    for k in ks:
-        hit = ranks < k
-        out[f"ndcg@{k}"] = float(np.where(hit, 1 / np.log2(ranks + 2), 0).mean())
-        out[f"recall@{k}"] = float(hit.mean())
-    out["mrr"] = float((1 / (ranks + 1)).mean())
-    return out
+    return ranks
+
+
+def paired_change(base: np.ndarray, other: np.ndarray, n_boot: int = 1000, seed: int = 0):
+    """Relative change in mean per-user score, other vs base, over the same users.
+
+    Returns (point estimate, 95% bootstrap CI low, high, one-sided p that the true
+    change is >= 0). Users are resampled jointly, so the pairing is kept.
+    """
+    rng = np.random.default_rng(seed)
+    point = other.mean() / base.mean() - 1
+    idx = rng.integers(0, len(base), size=(n_boot, len(base)))
+    boot = other[idx].mean(axis=1) / base[idx].mean(axis=1) - 1
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+    return float(point), float(lo), float(hi), float((boot >= 0).mean())
