@@ -6,6 +6,7 @@
 - Paste-ready neural slides and the full neural narrative: [SLIDE-FLOW.md](../docs/SLIDE-FLOW.md#live-deck-review--28-september-2026).
 - Submission format, rubric and the unresolved deadline: [REQUIREMENTS.md](../docs/REQUIREMENTS.md). In short: 16:9 PDF through Canvas, at most 20 slides excluding acknowledgements and references.
 - Questions to rehearse: [DEFENSE.md](../docs/DEFENSE.md).
+- Diagrams to paste into the deck (HTML sources and PNG exports, no names or IDs): [figures/](figures/README.md).
 - Do not commit exported deck PDFs or screenshots. The deck contains team names and IDs.
 
 The six-slide HTML narrative that used to live here was retired on 28 September 2026. Its story and diagrams remain in [SLIDE-FLOW.md](../docs/SLIDE-FLOW.md); the HTML is in Git history (`git show 79108ff:slides/index.html`).
