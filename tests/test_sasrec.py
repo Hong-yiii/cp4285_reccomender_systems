@@ -9,8 +9,8 @@ import numpy as np
 import pytest
 import torch
 
-from cp4285.model import SASRec
-from cp4285.pilot import initial_sequences, ranking_metrics, tensors, training_tensors
+from cp4285.neural.model import SASRec
+from cp4285.neural.pilot import initial_sequences, ranking_metrics, tensors, training_tensors
 
 
 def reference_states(model, history):

@@ -23,7 +23,9 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 
 **Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
 
-**Shared utilities, 28 September:** `src/cp4285/common/utils.py` owns create-only JSON publication, file SHA-256 and UTC date conversion. Both workstreams import these helpers directly; dataset loading, splitting and evaluation remain separate, with no protocol changes.
+**Shared utilities, 28 September:** `src/cp4285/common/utils.py` owns create-only JSON publication, file SHA-256 and UTC date conversion. Both workstreams import these helpers directly.
+
+**Package layout, 28 September:** the neural workstream lives in `src/cp4285/neural/` (`data.py` cutoff split, `model.py`, `pilot.py`). Protocol-independent download, validated loading and the A/B audit moved to `src/cp4285/common/data.py`. Each workstream keeps its own split and evaluation; the classical loader is unchanged. Import paths changed; CLI, config and behavior did not.
 
 The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.
 

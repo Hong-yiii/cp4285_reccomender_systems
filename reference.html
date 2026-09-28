@@ -670,8 +670,9 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#sasrec-architecture"><strong>Latest · SASRec explained</strong></a>
-          <a href="#reviewer-checkpoint">16 · Review this PR</a>
+          <a href="#layout-checkpoint"><strong>Latest · 18 · Package layout</strong></a>
+          <a href="#sasrec-architecture">17 · SASRec explained</a>
+          <a href="#reviewer-checkpoint">16 · Shared utilities</a>
           <a href="#what-i-understand">01 · Where you are</a>
           <a href="#system-diagram">02 · System map</a>
           <a href="#objective">03 · What you are testing</a>
@@ -716,25 +717,22 @@
             role="note"
           >
             <strong>Current review checkpoint — 28 September 2026.</strong> PRs
-            #1 and #2 are merged. Artifact-safety
-            <a
-              href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/3"
-              >PR #3 remains open</a
-            >; this utilities/reference change is stacked on its branch, not yet
-            on main.
+            #1–#4 are merged into main. The current package-layout change moves
+            the neural workstream into <code>src/cp4285/neural/</code> and shared
+            dataset handling into <code>src/cp4285/common/</code>; it changes
+            import paths, not training or evaluation behavior.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
             >
             their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–16. Read the
-            <a href="#reviewer-checkpoint">reviewer checkpoint</a> for scope, then
-            the new <a href="#sasrec-architecture">section 17: SASRec step by step</a>
+            unfixed-safety statements are superseded by sections 11–18. Read the
+            <a href="#layout-checkpoint">section 18: package layout</a> for the
+            current file map, then
+            <a href="#sasrec-architecture">section 17: SASRec step by step</a>
             for architecture, worked examples and corrected event/item terminology.
-            This follow-up is part of
-            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/4">PR #4</a>;
-            it changes explanations and checks, not training behavior.
-            Status and line references are dated observations; code and the
+            Status and line references in earlier sections are dated observations,
+            including pre-move file paths; code and the
             <a href="docs/IMPLEMENTATION.md">runbook</a> remain authoritative.
           </div>
           <div class="legend" aria-label="Evidence labels">
@@ -2893,8 +2891,8 @@ Question: which item comes next? Not: how many stars will item 4 receive?</code>
             guarantee a useful learned representation or even initial gradient exposure.
           </p>
           <p class="ref">
-            Sources: <a href="src/cp4285/data.py"><code>data.prepare</code></a>,
-            <a href="src/cp4285/model.py"><code>SASRec.__init__</code></a>,
+            Sources: <a href="src/cp4285/neural/data.py"><code>data.prepare</code></a>,
+            <a href="src/cp4285/neural/model.py"><code>SASRec.__init__</code></a>,
             <a href="configs/pilot.toml">pilot defaults</a>.
           </p>
 
@@ -2958,7 +2956,7 @@ r = retention event's item ID, 8</code></pre>
             remain research-design questions.
           </p>
           <p class="ref">
-            Source: <a href="src/cp4285/data.py"><code>prepare</code>, including
+            Source: <a href="src/cp4285/neural/data.py"><code>prepare</code>, including
             <code>example</code>, <code>item_map</code> and <code>skipped</code></a>.
           </p>
 
@@ -3020,8 +3018,8 @@ scores = H[:, -1, :] @ E[1:].T</code></pre>
             applies no catalogue-wide softmax.
           </p>
           <p class="ref">
-            Sources: <a href="src/cp4285/pilot.py"><code>tensors</code></a>;
-            <a href="src/cp4285/model.py"><code>SASRec.forward</code> and <code>scores</code></a>.
+            Sources: <a href="src/cp4285/neural/pilot.py"><code>tensors</code></a>;
+            <a href="src/cp4285/neural/model.py"><code>SASRec.forward</code> and <code>scores</code></a>.
           </p>
 
           <h3 id="sasrec-block">4. Inside a block: attention mixes the prefix; feedforward transforms each position.</h3>
@@ -3105,7 +3103,7 @@ X_next = (Z + F) * history_nonpadding_mask</code></pre>
             </p>
           </details>
           <p class="ref">
-            Sources: <a href="src/cp4285/model.py"><code>SASRecBlock.forward</code></a>,
+            Sources: <a href="src/cp4285/neural/model.py"><code>SASRecBlock.forward</code></a>,
             <a href="tests/test_sasrec.py"><code>reference_states</code> and equation tests</a>,
             <a href="docs/SASREC.md">pinned upstream fidelity checklist</a>.
             NumPy equation checks are not execution of the original TensorFlow runtime or reproduction of its benchmarks.
@@ -3193,9 +3191,9 @@ negative  [0, 0, 0, 0, n]</code></pre>
             is the intended guarantee. A real repeated review can also be a fresh event.
           </div>
           <p class="ref">
-            Sources: <a href="src/cp4285/pilot.py"><code>initial_sequences</code>,
+            Sources: <a href="src/cp4285/neural/pilot.py"><code>initial_sequences</code>,
             <code>training_tensors</code> and <code>update</code></a>;
-            <a href="src/cp4285/model.py"><code>sampled_loss</code></a>.
+            <a href="src/cp4285/neural/model.py"><code>sampled_loss</code></a>.
           </p>
 
           <h3 id="sasrec-retention">6. Retention is a ranking metric, not the training loss.</h3>
@@ -3244,7 +3242,7 @@ negative  [0, 0, 0, 0, n]</code></pre>
             obtains rank by comparisons, without needing to sort the full list.
           </p>
           <p class="ref">
-            Source: <a href="src/cp4285/pilot.py"><code>ranking_metrics</code>,
+            Source: <a href="src/cp4285/neural/pilot.py"><code>ranking_metrics</code>,
             <code>evaluate</code> and validation selection in <code>run</code></a>.
           </p>
 
@@ -3319,9 +3317,9 @@ uv run pytest -q</code></pre>
               causal B interference or improvement.</p>
           </details>
           <p class="ref">
-            Evidence: inspected <a href="src/cp4285/data.py">preparation</a>,
-            <a href="src/cp4285/model.py">model</a>,
-            <a href="src/cp4285/pilot.py">pilot</a>,
+            Evidence: inspected <a href="src/cp4285/neural/data.py">preparation</a>,
+            <a href="src/cp4285/neural/model.py">model</a>,
+            <a href="src/cp4285/neural/pilot.py">pilot</a>,
             <a href="configs/pilot.toml">configuration</a> and
             <a href="tests/test_sasrec.py">equation/example tests</a>.
             See <a href="docs/SASREC.md">SASRec source provenance and explicit differences</a>
@@ -3330,6 +3328,105 @@ uv run pytest -q</code></pre>
           <p class="small"><a href="#review-status">Current PR status</a> · <a href="#sasrec-architecture">Back to this walkthrough</a></p>
         </section>
         <!-- APPENDED SASREC WALKTHROUGH 2026-09-28 END -->
+        <!-- APPENDED LAYOUT CHECKPOINT 2026-09-28 START -->
+        <section id="layout-checkpoint">
+          <span class="section-num"
+            >18 / PACKAGE LAYOUT CHECKPOINT — 28 SEPTEMBER 2026</span
+          >
+          <h2>One folder per workstream. Shared data handling in common.</h2>
+          <p class="lead">
+            This change moves existing modules. It does not change the model,
+            dataset split, training protocol, checkpoints or research
+            conclusions.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Package</th>
+                  <th scope="col">Owns</th>
+                  <th scope="col">Moved from</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="src/cp4285/common/data.py"
+                      ><code>common/data.py</code></a
+                    >
+                  </td>
+                  <td>
+                    Official download with full gzip validation, validated
+                    DuckDB loading and the A/B audit. Not tied to either
+                    workstream's split.
+                  </td>
+                  <td><code>data.py</code>: <code>download</code>,
+                    <code>load</code>, <code>connection</code>,
+                    <code>audit</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="src/cp4285/common/utils.py"
+                      ><code>common/utils.py</code></a
+                    >
+                  </td>
+                  <td>Create-only JSON, file SHA-256, UTC dates.</td>
+                  <td>Unchanged (section 16)</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="src/cp4285/neural/data.py"
+                      ><code>neural/data.py</code></a
+                    >
+                  </td>
+                  <td>
+                    The bounded familiar-item cutoff split: train, validation,
+                    retention and continuation lists.
+                  </td>
+                  <td><code>data.py</code>: <code>prepare</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="src/cp4285/neural/model.py"
+                      ><code>neural/model.py</code></a
+                    >,
+                    <a href="src/cp4285/neural/pilot.py"
+                      ><code>neural/pilot.py</code></a
+                    >
+                  </td>
+                  <td>SASRec port; training, checkpoints and retention metrics.</td>
+                  <td><code>model.py</code>, <code>pilot.py</code></td>
+                </tr>
+                <tr>
+                  <td><code>classical/</code></td>
+                  <td>
+                    Classical comparator, including its own leave-last-out
+                    loader and split.
+                  </td>
+                  <td>Unchanged</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <strong>Placement choice (open to team review):</strong> the neural
+            <code>prepare</code> split stays in <code>neural/</code> rather than
+            <code>common/</code>: placing it there would imply the classical
+            workstream had adopted the cutoff protocol, which the team has not
+            decided. Likewise, the classical loader was not merged with the
+            validated common loader, because the two apply different row checks.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> All 36 tests pass after the move,
+            with only import paths and this page's source links updated. Function
+            bodies are unchanged. The CLI commands and configuration are unchanged.
+          </p>
+          <p class="small">
+            <a href="#review-status">Back to current status</a> ·
+            <a href="#sasrec-architecture">SASRec walkthrough</a>
+          </p>
+        </section>
+        <!-- APPENDED LAYOUT CHECKPOINT 2026-09-28 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

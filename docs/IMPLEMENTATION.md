@@ -96,7 +96,7 @@ Offline regressions in `tests/test_artifact_safety.py` cover corrupt/truncated d
 
 ### Model scope
 
-`src/cp4285/model.py` now ports the **original kang205/SASRec architecture** to PyTorch, replacing the generic encoder. The source commit, architecture checklist, license, tests and deliberate protocol differences are documented in [SASREC.md](SASREC.md). Upstream uses Python 2 / TensorFlow 1.12; we are not running that legacy runtime or claiming its benchmark scores. The demo uses the full configured architecture, with only its data/update budget reduced.
+`src/cp4285/neural/model.py` now ports the **original kang205/SASRec architecture** to PyTorch, replacing the generic encoder. The source commit, architecture checklist, license, tests and deliberate protocol differences are documented in [SASREC.md](SASREC.md). Upstream uses Python 2 / TensorFlow 1.12; we are not running that legacy runtime or claiming its benchmark scores. The demo uses the full configured architecture, with only its data/update budget reduced.
 
 Initial training uses upstream-style sequence-wise loss and user sampling. Our fixed-A evaluator and fresh-event continuation are separate experimental choices. Checkpoints/metrics record implementation identity and upstream commit; old generic-model checkpoints are incompatible and must not be resumed as SASRec.
 
@@ -108,8 +108,9 @@ The frozen control and A-only continued training are implemented. Before adding 
 | --- | --- |
 | `pyproject.toml`, `uv.lock`, `.python-version` | Managed environment and console command |
 | `src/cp4285/common/utils.py` | Standard-library helpers: `save_json`, file `sha256`, UTC `millis` |
-| `src/cp4285/data.py` | Official download, ID audit and pilot partitions |
-| `src/cp4285/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
+| `src/cp4285/common/data.py` | Official download, validated ID-file loading and A/B audit |
+| `src/cp4285/neural/data.py` | Neural cutoff pilot partitions (`prepare`) |
+| `src/cp4285/neural/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
 | `src/cp4285/cli.py` | `cp4285` command |
 | `src/cp4285/classical/` | Classical comparator; see [CLASSICAL.md](CLASSICAL.md) |
 | `tests/test_pipeline.py` | Meaningful data/evaluator/lifecycle checks |
@@ -118,6 +119,6 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `slides/index.html` | Six-slide narrative with data and implementation status |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |
 
-Import shared helpers from `cp4285.common.utils`. Keep neural and classical loaders, splits and evaluators in their own modules: their research protocols differ. The shared utilities do not import database or model dependencies.
+Import shared helpers from `cp4285.common.utils` and protocol-independent dataset handling (download, validated loading, audit) from `cp4285.common.data`. Keep each workstream's split construction and evaluation in its own package (`neural/`, `classical/`): their research protocols differ. `common.utils` imports only the standard library; `common.data` uses DuckDB and HTTPX but no model libraries.
 
 The project now lives in its own repository, separate from the course archive. See [MIGRATION.md](MIGRATION.md) for the layout change. No deployment or course submission is configured.

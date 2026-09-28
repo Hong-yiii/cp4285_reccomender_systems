@@ -12,7 +12,7 @@ This checkout is the canonical **group-project** home, not the whole course work
 - `docs/REQUIREMENTS.md`, `docs/DEFENSE.md`, `docs/SLIDE-FLOW.md`, `slides/index.html`: critique preparation and editable slides.
 - `docs/SOURCES.md`: primary references, official course links and local-only source locations.
 - `docs/SASREC.md`: selected original architecture, pinned upstream code, license and explicit training/evaluation differences.
-- `src/cp4285/`, `tests/`: Python CLI and lifecycle tests.
+- `src/cp4285/` (`common/`, `neural/`, `classical/`), `tests/`: Python CLI and lifecycle tests.
 - `docs/AI_LOG.md`: collective AI-use documentation.
 
 ## Working rules
