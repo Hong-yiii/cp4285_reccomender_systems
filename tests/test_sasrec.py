@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from cp4285.model import SASRec
-from cp4285.pilot import initial_sequences, training_tensors
+from cp4285.pilot import initial_sequences, ranking_metrics, tensors, training_tensors
 
 
 def reference_states(model, history):
@@ -107,3 +107,57 @@ def test_sequence_training_and_fresh_event_continuation_masks():
     assert fresh.tolist() == [[0, 0, 0, 4], [0, 0, 0, 2]]
     with pytest.raises(ValueError, match="No eligible negative"):
         training_tensors(sequences[:1], 4, "cpu", 4, random.Random(1), all_positions=True)
+
+
+def test_reference_walkthrough_tensors_and_ranking():
+    """Executable toy example from reference.html; no real data or optimizer run."""
+    rows = [
+        {"user": "u", "history": [1], "target": 2},
+        {"user": "u", "history": [1, 2], "target": 3},
+        {"user": "u", "history": [1, 2, 3], "target": 4},
+    ]
+    initial = initial_sequences(rows)
+    assert len(initial) == 1 and initial[0]["seen"] == {1, 2, 3, 4}
+    h, p, n = training_tensors(initial, 20, "cpu", 5, random.Random(4285), all_positions=True)
+    assert h.tolist() == [[0, 0, 1, 2, 3]]
+    assert p.tolist() == [[0, 0, 2, 3, 4]]
+    assert set(n[0, -3:].tolist()) <= set(range(5, 21))
+    assert torch.equal(n.eq(0), p.eq(0))
+
+    later = [
+        {"history": [1, 2, 3, 4], "target": 5},
+        {"history": [1, 2, 3, 4, 5], "target": 6},
+    ]
+    ch, cp, cn = training_tensors(later, 20, "cpu", 5, random.Random(4285))
+    assert ch.tolist() == [[0, 1, 2, 3, 4], [1, 2, 3, 4, 5]]
+    assert cp.tolist() == [[0, 0, 0, 0, 5], [0, 0, 0, 0, 6]]
+    assert torch.equal(cn.eq(0), cp.eq(0))
+    retention, target = tensors([{"history": [1, 2, 3, 4], "target": 8}], "cpu", 5)
+    assert retention.tolist() == [[0, 1, 2, 3, 4]] and target.tolist() == [8]
+
+    torch.manual_seed(4285)
+    model = SASRec(20, 5, dropout=0).eval()
+    with torch.no_grad():
+        states = model(retention)
+        assert states.shape == (1, 5, 50)
+        assert model.scores(retention).shape == (1, 20)
+        torch.testing.assert_close(
+            model.scores(retention), states[:, -1] @ model.items.weight[1:].T
+        )
+        active = p.ne(0)
+        vectors = model(h)[active]
+        pos = (vectors * model.items(p[active])).sum(-1).numpy()
+        neg = (vectors * model.items(n[active])).sum(-1).numpy()
+        expected = (np.logaddexp(0, -pos) + np.logaddexp(0, neg)).mean()
+        assert model.sampled_loss(h, p, n).item() == pytest.approx(expected)
+
+    # Item 1 is only context here, not a positive or negative, yet receives a gradient.
+    model.sampled_loss(ch[:1], cp[:1], cn[:1]).backward()
+    assert model.items.weight.grad is not None
+    assert torch.count_nonzero(model.items.weight.grad[1]) > 0
+    assert torch.count_nonzero(model.items.weight.grad[0]) == 0
+
+    scores = torch.full((1, 20), -1.0)
+    scores[0, [1, 10, 2, 7]] = torch.tensor([0.9, 0.7, 0.4, 0.4])
+    metrics = ranking_metrics(scores, target, 10)
+    assert metrics == pytest.approx({"ndcg": 1 / np.log2(5), "recall": 1, "count": 1})

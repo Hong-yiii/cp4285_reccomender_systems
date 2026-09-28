@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..data import save_json
+from ..common.utils import save_json
 from .contaminate import build_stream
 from .data import leave_last_out, load_domains, subsample_users, to_csr
 from .evaluate import evaluate, sample_pairs

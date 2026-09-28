@@ -1,6 +1,8 @@
 """Protect the standalone layout without downloading data or training a model."""
 
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 import pytest
 
@@ -27,6 +29,42 @@ def test_repository_defaults(monkeypatch):
             {"inputs": (cfg["data"]["a"], cfg["data"]["b"])},
         )
     ]
+
+
+def test_reviewer_reference_is_self_contained_and_links_resolve():
+    root = Path(__file__).resolve().parents[1]
+    html = (root / "reference.html").read_text(encoding="utf-8")
+    ids, links = [], []
+
+    class ReferenceParser(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            assert tag not in {"script", "link", "iframe", "object", "embed", "base"}
+            assert not any(key.startswith("on") or key in {"src", "srcset"} for key in attrs)
+            if "id" in attrs:
+                ids.append(attrs["id"])
+            if "href" in attrs:
+                links.append(attrs["href"])
+
+    parser = ReferenceParser()
+    parser.feed(html)
+    parser.close()
+    assert len(ids) == len(set(ids))
+    assert {"review-status", "reviewer-checkpoint"} <= set(ids)
+    for href in links:
+        target = urlsplit(href)
+        assert target.scheme in {"", "https"}
+        if target.scheme:
+            continue
+        assert not target.netloc
+        if target.path:
+            path = (root / unquote(target.path)).resolve()
+            assert path.is_relative_to(root) and path.is_file()
+        else:
+            assert unquote(target.fragment) in ids
+    assert "@import" not in html.lower() and "url(" not in html.lower()
+    for private in ("/Users/", "file://", "localhost:", "Delete this page when finished"):
+        assert private not in html
 
 
 @pytest.mark.parametrize("malformed", [False, True])

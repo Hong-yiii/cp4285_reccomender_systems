@@ -8,6 +8,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 ## Start here
 
+- [Reviewer reference](reference.html): project walkthrough, diagrams and dated checkpoints. Open `reference.html` locally from the checkout; GitHub displays its source.
 - [Current context and next steps](CONTEXT.md)
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
@@ -38,10 +39,12 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | Path | Purpose |
 | --- | --- |
 | `src/cp4285/` | CLI, ingestion/audit, model and A-only training |
+| `src/cp4285/common/utils.py` | Shared create-only JSON writer, file hashing and UTC date conversion |
 | `src/cp4285/classical/` | Classical comparator (`cp4285 classical ...`) |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
 | `docs/` | Research context, requirements, protocol, provenance and AI log |
+| `reference.html` | Self-contained reviewer walkthrough; preserve the structure and append dated updates |
 | `slides/index.html` | Editable six-slide technical narrative; open directly in a browser |
 | `local/` | **Ignored** course PDFs, private team sources and local migration notes |
 | `data/`, `runs/`, `reports/` | **Ignored** downloaded data and generated artifacts |

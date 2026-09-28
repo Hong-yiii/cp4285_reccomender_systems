@@ -11,17 +11,30 @@ import httpx
 import pytest
 
 from cp4285 import cli, data
+from cp4285.common import utils
+
+
+def test_common_file_hash_and_utc_dates(tmp_path):
+    payload = b"common helpers\n" * 100_000  # Exercise more than one hash chunk.
+    path = tmp_path / "data.bin"
+    path.write_bytes(payload)
+    assert utils.sha256(path) == hashlib.sha256(payload).hexdigest()
+    assert utils.millis("2021-01-01") == 1609459200000
+    with pytest.raises(FileNotFoundError):
+        utils.sha256(tmp_path / "missing.bin")
+    with pytest.raises(ValueError):
+        utils.millis("not-a-date")
 
 
 def test_json_preserves_existing_artifacts_and_rejects_invalid_payloads(tmp_path):
     path = tmp_path / "report.json"
-    data.save_json(path, {"original": True})
+    utils.save_json(path, {"original": True})
     original = path.read_bytes()
     with pytest.raises(FileExistsError):
-        data.save_json(path, {"replacement": True})
+        utils.save_json(path, {"replacement": True})
     assert path.read_bytes() == original
     with pytest.raises(ValueError):
-        data.save_json(tmp_path / "invalid.json", {"score": float("nan")})
+        utils.save_json(tmp_path / "invalid.json", {"score": float("nan")})
     assert list(tmp_path.iterdir()) == [path]
 
 
@@ -36,7 +49,7 @@ def test_json_publication_is_complete_and_does_not_replace_a_racing_writer(tmp_p
 
     monkeypatch.setattr("os.link", race)
     with pytest.raises(FileExistsError):
-        data.save_json(path, {"new": True})
+        utils.save_json(path, {"new": True})
     assert path.read_text() == "other writer"
     assert list(tmp_path.iterdir()) == [path]
 

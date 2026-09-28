@@ -1,0 +1,3344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>CP4285 — What exists, what it proves, what comes next</title>
+    <style>
+      :root {
+        --ink: #182c3a;
+        --muted: #506471;
+        --paper: #f4f6f3;
+        --card: #fff;
+        --line: #d7e0db;
+        --green: #14644e;
+        --green-bg: #eaf5ee;
+        --blue: #205889;
+        --blue-bg: #eef4fb;
+        --amber: #805114;
+        --amber-bg: #fff6e5;
+        --red: #942f34;
+        --red-bg: #fff0ef;
+        --radius: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 24px;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          16px/1.65 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      a {
+        color: var(--blue);
+        text-underline-offset: 3px;
+      }
+      a:hover {
+        color: var(--green);
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 4px;
+      }
+      .skip {
+        position: absolute;
+        left: 16px;
+        top: -100px;
+        background: white;
+        padding: 12px;
+        z-index: 2;
+      }
+      .skip:focus {
+        top: 12px;
+      }
+      .layout {
+        max-width: 1280px;
+        margin: auto;
+        padding: 36px 30px 70px;
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 38px;
+      }
+      aside {
+        align-self: start;
+        position: sticky;
+        top: 30px;
+        font-size: 13px;
+      }
+      aside .brand {
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        margin-bottom: 20px;
+      }
+      nav a {
+        display: block;
+        text-decoration: none;
+        padding: 7px 0;
+        color: var(--muted);
+      }
+      nav a:hover {
+        color: var(--green);
+      }
+      .nav-group {
+        margin-top: 20px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+      }
+      main {
+        min-width: 0;
+      }
+      header {
+        padding: 4px 0 25px;
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        font-size: 11px;
+        font-weight: 750;
+        color: var(--green);
+      }
+      h1 {
+        font-size: clamp(32px, 4vw, 48px);
+        line-height: 1.12;
+        letter-spacing: -0.04em;
+        margin: 16px 0 20px;
+        max-width: 850px;
+      }
+      h2 {
+        font-size: 27px;
+        line-height: 1.25;
+        letter-spacing: -0.025em;
+        margin: 0 0 17px;
+      }
+      h3 {
+        font-size: 19px;
+        line-height: 1.35;
+        margin: 24px 0 10px;
+      }
+      h4 {
+        font-size: 16px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 10px 0 15px;
+      }
+      section {
+        margin-top: 42px;
+      }
+      .lead {
+        font-size: 19px;
+        line-height: 1.6;
+        color: var(--muted);
+        max-width: 790px;
+      }
+      .small,
+      .ref,
+      figcaption {
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+      .ref {
+        margin-top: 10px;
+      }
+      .ref code {
+        font-size: 12px;
+      }
+      .label {
+        display: inline-block;
+        border-radius: 5px;
+        padding: 2px 7px;
+        font-size: 11px;
+        letter-spacing: 0.03em;
+        font-weight: 750;
+        vertical-align: middle;
+        margin-right: 5px;
+      }
+      .fact {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .infer {
+        background: var(--blue-bg);
+        color: var(--blue);
+      }
+      .recommend {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .unchecked {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        margin-top: 20px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin: 20px 0;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 19px;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+      }
+      .card ul {
+        padding-left: 18px;
+        font-size: 14px;
+      }
+      .card p {
+        font-size: 14px;
+      }
+      .callout {
+        padding: 18px 21px;
+        border-radius: 10px;
+        border-left: 4px solid var(--green);
+        background: var(--green-bg);
+        margin: 20px 0;
+      }
+      .callout.warn {
+        border-color: var(--amber);
+        background: var(--amber-bg);
+      }
+      .callout.risk {
+        border-color: var(--red);
+        background: var(--red-bg);
+      }
+      .callout p:last-child,
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+      .callout strong {
+        color: inherit;
+      }
+      ul,
+      ol {
+        padding-left: 24px;
+      }
+      li {
+        margin: 7px 0;
+      }
+      code {
+        font:
+          13px/1.5 ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+        background: #edf1ef;
+        padding: 2px 5px;
+        border-radius: 4px;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        background: #182c3a;
+        color: #eff5f3;
+        border-radius: 10px;
+        padding: 18px 20px;
+        overflow: auto;
+        font:
+          13px/1.65 ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+      }
+      pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+        overflow-wrap: normal;
+      }
+      figure {
+        margin: 22px 0;
+        padding: 22px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+      figcaption {
+        border-top: 1px solid var(--line);
+        padding-top: 13px;
+        margin-top: 16px;
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+      .node {
+        padding: 15px;
+        border: 1.5px solid #8eb7a6;
+        border-radius: 9px;
+        background: var(--green-bg);
+        font-size: 14px;
+      }
+      .node b {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .node small {
+        display: block;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+      .node.planned {
+        border: 1.5px dashed #9faebd;
+        background: var(--blue-bg);
+      }
+      .arrow {
+        color: var(--green);
+        font-size: 25px;
+        text-align: center;
+      }
+      .branch {
+        margin: 20px 0 0 24px;
+        padding-left: 24px;
+        border-left: 2px solid var(--line);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .branch .node {
+        position: relative;
+      }
+      .branch .node:before {
+        content: "";
+        position: absolute;
+        left: -25px;
+        top: 22px;
+        width: 24px;
+        border-top: 2px solid var(--line);
+      }
+      .diagram-title {
+        margin: 0 0 15px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .timeline {
+        display: grid;
+        grid-template-columns: 2.2fr 1fr 1fr 0.2fr 1.6fr;
+        gap: 8px;
+        align-items: stretch;
+        font-size: 13px;
+        text-align: center;
+      }
+      .event {
+        padding: 14px 7px;
+        border-radius: 8px;
+        background: var(--green-bg);
+        border: 1px solid #b2d3c2;
+      }
+      .event.hold {
+        background: var(--amber-bg);
+        border-color: #e4ca94;
+      }
+      .cutoff {
+        border-left: 2px dashed var(--muted);
+        margin-left: 4px;
+      }
+      .timeline-note {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 10px;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .trunk {
+        margin: 12px auto;
+        max-width: 450px;
+        text-align: center;
+        background: var(--blue-bg);
+        border: 1.5px dashed #9faebd;
+        border-radius: 10px;
+        padding: 18px;
+      }
+      .formula {
+        padding: 15px 18px;
+        background: #edf1ef;
+        border-radius: 9px;
+        font-size: 16px;
+        line-height: 1.8;
+        margin: 15px 0;
+      }
+      .table-wrap {
+        overflow: auto;
+        margin: 17px 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: white;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      th {
+        text-align: left;
+        background: #eef2ef;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+      td,
+      th {
+        padding: 13px 15px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td:first-child {
+        font-weight: 600;
+      }
+      td ul {
+        padding-left: 16px;
+        margin: 0;
+      }
+      td code {
+        font-weight: 400;
+        font-size: 12px;
+      }
+      .evidence-table td:first-child {
+        width: 29%;
+        font-weight: 400;
+      }
+      .evidence-table td:last-child {
+        width: 20%;
+      }
+      details {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 15px 19px;
+        margin: 15px 0;
+      }
+      summary {
+        font-weight: 650;
+        cursor: pointer;
+      }
+      details[open] summary {
+        margin-bottom: 14px;
+      }
+      .steps {
+        list-style: none;
+        padding: 0;
+        counter-reset: step;
+      }
+      .steps > li {
+        counter-increment: step;
+        position: relative;
+        padding: 0 0 25px 54px;
+        margin: 0;
+        border-left: 1px solid var(--line);
+        margin-left: 17px;
+      }
+      .steps > li:before {
+        content: counter(step);
+        position: absolute;
+        left: -17px;
+        top: 0;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--ink);
+        color: white;
+        font-weight: 750;
+        font-size: 14px;
+      }
+      .steps > li:last-child {
+        border-left: 0;
+        padding-bottom: 0;
+      }
+      .steps h3 {
+        margin: 0 0 8px;
+      }
+      .number {
+        font-size: 30px;
+        font-weight: 750;
+        letter-spacing: -0.025em;
+        color: var(--green);
+      }
+      .question {
+        background: var(--ink);
+        color: white;
+        padding: 27px;
+        border-radius: var(--radius);
+        font-size: 20px;
+        line-height: 1.65;
+      }
+      .question .eyebrow {
+        color: #abddc9;
+      }
+      .question code {
+        background: #36505c;
+        color: white;
+      }
+      footer {
+        margin-top: 45px;
+        border-top: 1px solid var(--line);
+        padding-top: 22px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      footer code {
+        font-size: 11px;
+      }
+      .section-num {
+        color: var(--green);
+        font:
+          12px/1.4 ui-monospace,
+          monospace;
+        display: block;
+        margin-bottom: 7px;
+      }
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 20px;
+          padding: 24px;
+        }
+        aside {
+          position: static;
+        }
+        aside .brand {
+          margin-bottom: 8px;
+        }
+        nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px 18px;
+        }
+        nav a {
+          padding: 2px 0;
+        }
+        .nav-group,
+        aside .small {
+          display: none;
+        }
+        .cards {
+          gap: 10px;
+        }
+        .card {
+          padding: 15px;
+        }
+      }
+      @media (max-width: 620px) {
+        body {
+          font-size: 15px;
+        }
+        .layout {
+          padding: 22px 16px;
+        }
+        .cards,
+        .two,
+        .branch {
+          grid-template-columns: 1fr;
+        }
+        .flow {
+          grid-template-columns: 1fr;
+        }
+        .arrow {
+          transform: rotate(90deg);
+          line-height: 1;
+        }
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+        .cutoff {
+          border: 0;
+          border-top: 2px dashed var(--muted);
+          margin: 7px 0;
+        }
+        .timeline-note {
+          display: block;
+        }
+        figure {
+          padding: 16px;
+        }
+        .branch {
+          margin-left: 8px;
+        }
+        h2 {
+          font-size: 24px;
+        }
+        td,
+        th {
+          padding: 10px;
+          font-size: 12px;
+        }
+        .evidence-table {
+          min-width: 630px;
+        }
+        .steps > li {
+          padding-left: 34px;
+        }
+        .question {
+          padding: 20px;
+          font-size: 18px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+          font-size: 11pt;
+        }
+        .layout {
+          display: block;
+          padding: 0;
+        }
+        aside,
+        .skip {
+          display: none;
+        }
+        header,
+        section {
+          break-inside: auto;
+        }
+        h2,
+        h3 {
+          break-after: avoid;
+        }
+        figure,
+        .card,
+        .callout {
+          break-inside: avoid;
+        }
+        a {
+          color: inherit;
+        }
+        pre {
+          white-space: pre-wrap;
+        }
+        .table-wrap {
+          overflow: visible;
+        }
+        details {
+          break-inside: avoid;
+        }
+        .question {
+          background: #edf1ef;
+          color: var(--ink);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#review-status">Skip to current review status</a>
+    <div class="layout">
+      <aside aria-label="Page navigation">
+        <div class="brand">CP4285 / FIELD GUIDE</div>
+        <nav aria-label="Contents">
+          <a href="#sasrec-architecture"><strong>Latest · SASRec explained</strong></a>
+          <a href="#reviewer-checkpoint">16 · Review this PR</a>
+          <a href="#what-i-understand">01 · Where you are</a>
+          <a href="#system-diagram">02 · System map</a>
+          <a href="#objective">03 · What you are testing</a>
+          <a href="#story">04 · How it actually runs</a>
+          <a href="#evidence">05 · What the checks prove</a>
+          <a href="#future-design">06 · How B would fit</a>
+          <a href="#review-notes">07 · Risks and tradeoffs</a>
+          <a href="#next">08 · What happens next</a>
+          <a href="#source-map">09 · Evidence map</a>
+          <a href="#teach-back">10 · Your review judgment</a>
+          <a href="#update-20260928-1821">11–15 · Integration &amp; safety</a>
+        </nav>
+        <div class="nav-group">Guide + dated checkpoints</div>
+        <p class="small">
+          28 September 2026<br />Reviewer reference<br />Historical evidence
+          preserved<br />Read the latest checkpoint first
+        </p>
+      </aside>
+      <main>
+        <header>
+          <div class="eyebrow">
+            Reviewer reference · the experiment pipeline, evidence and next
+            gates
+          </div>
+          <h1>From a working SASRec pilot<br />to a defensible experiment.</h1>
+          <p class="lead">
+            Understand what your project already does, what the evidence
+            actually supports, and what must happen before you can compare
+            retention under A/B continued training.
+          </p>
+          <p class="small">
+            Published reference: <code>reference.html</code> at the repository
+            root · <a href="README.md">README</a> ·
+            <a href="CONTEXT.md">Current context</a><br />A guide to the
+            evidence, not a new experiment specification or authorization to
+            download data.
+          </p>
+          <div
+            class="callout warn"
+            id="review-status"
+            tabindex="-1"
+            role="note"
+          >
+            <strong>Current review checkpoint — 28 September 2026.</strong> PRs
+            #1 and #2 are merged. Artifact-safety
+            <a
+              href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/3"
+              >PR #3 remains open</a
+            >; this utilities/reference change is stacked on its branch, not yet
+            on main.
+            <strong
+              >Sections 01–10 are an earlier historical snapshot, not current
+              instructions:</strong
+            >
+            their uncommitted-SASRec, missing-classical, 11-test and
+            unfixed-safety statements are superseded by sections 11–16. Read the
+            <a href="#reviewer-checkpoint">reviewer checkpoint</a> for scope, then
+            the new <a href="#sasrec-architecture">section 17: SASRec step by step</a>
+            for architecture, worked examples and corrected event/item terminology.
+            This follow-up is part of
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/4">PR #4</a>;
+            it changes explanations and checks, not training behavior.
+            Status and line references are dated observations; code and the
+            <a href="docs/IMPLEMENTATION.md">runbook</a> remain authoritative.
+          </div>
+          <div class="legend" aria-label="Evidence labels">
+            <span
+              ><span class="label fact">FACT</span> inspected source or observed
+              execution</span
+            ><span
+              ><span class="label infer">INFERENCE</span> consequence of that
+              evidence</span
+            ><span
+              ><span class="label recommend">RECOMMENDATION</span> proposed next
+              action</span
+            ><span
+              ><span class="label unchecked">UNCHECKED</span> not established
+              here</span
+            >
+          </div>
+        </header>
+
+        <section id="what-i-understand">
+          <span class="section-num">01 / THE BIG PICTURE</span>
+          <h2>
+            You have the neural starting point—not the comparative result.
+          </h2>
+          <p>
+            This is an <strong>offline recommender study</strong>, not an app or
+            a live recommendation service. Start by training on domain
+            <strong>A</strong>; keep learning from later A events or mixtures of
+            A and a second domain <strong>B</strong>; repeatedly measure the
+            same original A task. Ultimately, compare a classical recommender
+            with the neural model under an agreed evaluation protocol.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Hongyi owns the neural
+            workstream. The selected model is the original
+            <strong>kang205/SASRec architecture, ported to PyTorch</strong>.
+            Dataset selection, the classical model, broader team ownership and
+            final budgets remain open. The proposed pair is Electronics / Movies
+            &amp; TV, not a confirmed experimental finding.
+          </p>
+          <div class="cards">
+            <div class="card">
+              <h3>Built</h3>
+              <ul>
+                <li>Python 3.12 + uv package and CLI.</li>
+                <li>
+                  Amazon ID-file download, audit and bounded A preparation.
+                </li>
+                <li>SASRec, validation selection, checkpoint reload.</li>
+                <li>Frozen control and fresh A-only updates.</li>
+                <li>Tests and a six-slide HTML narrative.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Verified so far</h3>
+              <ul>
+                <li>11 tests pass in this review.</li>
+                <li>SASRec equations checked against NumPy.</li>
+                <li>Synthetic lifecycle runs end to end.</li>
+                <li>
+                  Saved model reloads without score drift in the smoke check.
+                </li>
+                <li>Frozen evaluation stays fixed.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Not established</h3>
+              <ul>
+                <li>Real Amazon feasibility or convergence.</li>
+                <li>B interfaces or mixed training.</li>
+                <li>Classical comparison or multi-seed results.</li>
+                <li>Forgetting, improvement or model superiority.</li>
+                <li>Final team deck and submission details.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Confidence boundary:</strong> high confidence in the
+            inspected code path and synthetic checks; no empirical confidence
+            yet about the real-data outcome. A working loop is a prerequisite
+            for an experiment, not its conclusion.
+          </div>
+          <p class="ref">
+            <code>CONTEXT.md:5–23</code> defines the question, your ownership
+            and the implemented/proposed boundary.
+            <code>src/cp4285/pilot.py:255–259</code> explicitly records B,
+            classical and multi-seed work as unimplemented.
+          </p>
+          <details>
+            <summary>
+              Local versus GitHub: which project are you looking at?
+            </summary>
+            <p>
+              The public repository is
+              <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems"
+                >Hong-yiii/cp4285_reccomender_systems</a
+              >. The standalone migration is published. The current SASRec
+              replacement and related docs/tests are still
+              <strong>local, unstaged changes</strong>; this page explains that
+              working tree, not just the published commit.
+            </p>
+            <p>
+              <code>git ls-remote origin refs/heads/main</code> returned
+              <code>ed8e67fad1a32e010323adc4177571d3a698fd1d</code> in this
+              review. <code>git status --short</code> showed the
+              model/pilot/docs changes plus untracked SASRec notice, license,
+              source note and tests. No commit or push was performed.
+            </p>
+            <p>
+              Code, config, public notes and slides belong in Git. Private
+              sources, course/team PDFs, transcripts, datasets, checkpoints and
+              agent sessions do not. A collaborator cloning GitHub today will
+              not automatically receive these new uncommitted changes or your
+              ignored run artifacts.
+            </p>
+          </details>
+        </section>
+
+        <section id="system-diagram">
+          <span class="section-num">02 / SYSTEM MAP</span>
+          <h2>
+            There are two boundaries: runnable code and research evidence.
+          </h2>
+          <figure>
+            <p class="diagram-title">
+              Solid boxes: implemented path · dashed box: proposed extension
+            </p>
+            <div class="flow">
+              <div class="node">
+                <b>1. Audit A and B</b
+                ><small
+                  >IDs · duplicates · timestamp ties · eligibility<br />Code
+                  exists; real Amazon audit not run here.</small
+                >
+              </div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node">
+                <b>2. Prepare A only</b
+                ><small
+                  >Initial training · validation · fixed retention · fresh
+                  continuation</small
+                >
+              </div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node">
+                <b>3. Train and select</b
+                ><small
+                  >SASRec learns A.<br />Validation selects the initial
+                  checkpoint.</small
+                >
+              </div>
+            </div>
+            <div class="branch">
+              <div class="node">
+                <b>Frozen checkpoint</b
+                ><small>No updates. Score the fixed A anchor repeatedly.</small>
+              </div>
+              <div class="node">
+                <b>A-only continuation</b
+                ><small
+                  >Carry weights forward. Consume fresh A targets. Re-evaluate
+                  the same anchor.</small
+                >
+              </div>
+              <div class="node planned">
+                <b>Future: independent A/B branches</b
+                ><small
+                  >New B interface, mixture sampler, B evaluation, classical
+                  comparator and repeated seeds.</small
+                >
+              </div>
+              <div class="node">
+                <b>Artifacts</b
+                ><small
+                  ><code>initial.pt</code>, <code>cycle-N.pt</code>,
+                  <code>metrics.json</code><br />Generated locally; not
+                  committed.</small
+                >
+              </div>
+            </div>
+            <figcaption>
+              This map shows which stages connect in the actual pipeline; it
+              deliberately does not imply that auditing B already makes B
+              trainable or that real Amazon results exist.
+            </figcaption>
+          </figure>
+          <p class="ref">
+            <code>src/cp4285/cli.py:100–125</code> dispatches these independent
+            stages; <code>src/cp4285/data.py:175–266</code> prepares only A;
+            <code>src/cp4285/pilot.py:119–262</code> implements selection,
+            reload and the two current controls.
+          </p>
+        </section>
+
+        <section id="objective">
+          <span class="section-num">03 / OBJECTIVE AND METHOD</span>
+          <h2>Keep the measuring stick fixed while the model changes.</h2>
+          <p>
+            <strong>Retention</strong> means maintaining quality on the original
+            task after further training. <strong>Adaptation</strong> means
+            learning the new task. A frozen model can retain perfectly by
+            refusing to learn anything; that is why a future B experiment also
+            needs a B metric.
+          </p>
+          <p>
+            The solution method is controlled branching: select one A
+            checkpoint, make independent copies for each condition, then keep A
+            histories, targets, candidate items and ranking rules identical
+            across checkpoints. The incoming training stream changes; the test
+            does not.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h4>Loss of initial capability</h4>
+              <div class="formula">
+                Retention loss =<br /><strong
+                  >A score at start − A score now</strong
+                >
+              </div>
+              <p>
+                Positive means worse than the initial model. Negative means
+                improvement.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Effect versus continued A training</h4>
+              <div class="formula">
+                Mixture effect =<br /><strong
+                  >mixed A score − A-only A score</strong
+                >
+              </div>
+              <p>
+                Negative means worse than A-only at the same update budget. That
+                is not automatically forgetting relative to the start.
+              </p>
+            </div>
+          </div>
+          <p>
+            <span class="label infer">INFERENCE</span> A model can improve over
+            its initial score yet improve less than A-only. Calling both
+            comparisons “forgetting” would hide what you actually measured.
+            Improvement or no detectable change is an acceptable outcome; do not
+            choose data to force a decline.
+          </p>
+          <p class="ref">
+            <code>docs/CONTINUED-TRAINING.md</code>, “Evaluation and
+            comparison,” defines the two signed quantities and the fixed-A
+            contract; <code>docs/EXPERIMENT.md</code>, “Comparison conditions,”
+            explains the reduced-A-exposure confound.
+          </p>
+        </section>
+
+        <section id="story">
+          <span class="section-num">04 / END TO END</span>
+          <h2>Follow one event from a CSV to a retention score.</h2>
+          <h3>1. Ingest observations, not assumed preferences.</h3>
+          <p>
+            The official ID-only input is
+            <code>user_id,parent_asin,rating,timestamp</code>. The default task
+            uses all ratings to predict the <strong>next reviewed item</strong>.
+            A one-star review is still a review event, not an endorsement.
+            Review time is not necessarily purchase or viewing time.
+          </p>
+          <p>
+            The audit checks schema, ratings and Unix milliseconds; counts exact
+            duplicate rows, repeated user-item pairs, ambiguous same-user
+            timestamp ties and original-ID overlap. It estimates usable history
+            lengths. Reindexed “user 17” in two files does not prove the same
+            person; overlap must use original IDs.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/data.py:64–87</code> validates input values;
+            <code>src/cp4285/data.py:98–172</code> builds the audit. The
+            <a
+              href="https://amazon-reviews-2023.github.io/data_processing/5core.html#before-data-splitting"
+              >official 5-core documentation</a
+            >
+            confirms the ID-file schema and lists approximately 15.5M
+            Electronics and 7.4M Movies &amp; TV ratings—publisher statistics,
+            not your audit results.
+          </p>
+
+          <h3>2. Construct a familiar-item, fixed-A task.</h3>
+          <p>
+            Preparation removes exact duplicates and all ambiguous tied events.
+            It selects at most 500 reviewers using initial-period eligibility
+            and a seeded hash, not whether they happen to return later. For each
+            user, the last two events before the cutoff are held out. The
+            earlier prefix supplies initial training and the item vocabulary—the
+            list of item IDs the model knows.
+          </p>
+          <figure>
+            <div class="timeline">
+              <div class="event">
+                <strong>Initial training prefix</strong><br />x₁ → x₂ → x₃ → …
+              </div>
+              <div class="event hold">
+                <strong>v</strong><br />Validation event
+              </div>
+              <div class="event hold">
+                <strong>r</strong><br />Retention event
+              </div>
+              <div class="cutoff" aria-label="Initial cutoff"></div>
+              <div class="event">
+                <strong>Later A stream</strong><br />a₁ → a₂ → …
+              </div>
+            </div>
+            <div class="timeline-note">
+              <span>Before 2021-01-01 by default</span
+              ><span>2021-01-01 ≤ later events &lt; 2022-01-01</span>
+            </div>
+            <p class="small">
+              <strong>Actual construction:</strong> validation predicts
+              <code>v</code> from the training prefix; retention predicts
+              <code>r</code> from that <em>same</em> prefix. Later training
+              prefixes omit both held-out events, then grow with permitted later
+              events.
+            </p>
+            <figcaption>
+              The timeline proves the holdouts are reserved before continuation
+              and excluded from training histories; it intentionally exposes the
+              skipped validation event rather than depicting a standard
+              immediate-next-item test.
+            </figcaption>
+          </figure>
+          <p>
+            Unknown held-out or later items are omitted and counted. Unknown
+            later items also stay out of histories. This makes the first pilot a
+            <strong>familiar-item</strong> experiment, not a new-item cold-start
+            study. The same product may legitimately appear in another event;
+            isolation is about held-out events, not banning that product ID from
+            the whole dataset.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/data.py:189–208</code> selects users and reserves
+            events; <code>src/cp4285/data.py:230–243</code> builds the
+            shared-prefix holdouts and later stream;
+            <code>src/cp4285/data.py:249–263</code> records omissions and the
+            global-5-core caveat.
+          </p>
+
+          <h3>3. SASRec turns a history into item scores.</h3>
+          <p>
+            <strong>SASRec</strong> is a self-attentive sequential recommender:
+            learned item vectors and position vectors represent the history;
+            causal attention allows each position to use earlier positions but
+            not future ones. The final position represents the user's current
+            sequence. Its dot product with each candidate item's vector produces
+            a ranking score. There is no separately learned user-ID embedding in
+            this implementation.
+          </p>
+          <figure>
+            <div class="flow">
+              <div class="node">
+                <b>Left-padded history</b
+                ><small
+                  ><code>[0, 0, x₁, x₂, x₃]</code><br />0 = padding, not an
+                  item.</small
+                >
+              </div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node">
+                <b>Item + position vectors</b
+                ><small
+                  >Two original SASRec attention/feedforward blocks by
+                  default.</small
+                >
+              </div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node">
+                <b>Final vector · item table</b
+                ><small
+                  >One score for every initial-catalogue item; the input/output
+                  item table is shared.</small
+                >
+              </div>
+            </div>
+            <figcaption>
+              This diagram explains the scoring mechanism and why the latest
+              event occupies a fixed final position; it leaves out batching,
+              dropout and the individual attention equations.
+            </figcaption>
+          </figure>
+          <p>
+            The original architecture is not just a generic Transformer with the
+            SASRec name. This port preserves normalized queries with raw
+            keys/values, normalized-input residuals, no attention output
+            projection, hidden→hidden→hidden feedforward layers, and layer
+            normalization epsilon <code>1e-8</code>.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/model.py:20–53</code> implements the original
+            block; <code>src/cp4285/model.py:81–98</code> enforces fixed
+            left-padding and scores using the final representation.
+            <code>docs/SASREC.md:7–34</code> pins source commit
+            <code>e3738967fddab206d6eeb4fda433e7a7034dd8b1</code> and documents
+            the fidelity checklist.
+          </p>
+          <details>
+            <summary>
+              What “original SASRec” does—and does not—mean here
+            </summary>
+            <p>
+              <strong>Preserved:</strong> the original architecture, tied item
+              scoring, sampled binary next-item objective, upstream-style user
+              sampling, Adam betas <code>(0.9, 0.98)</code> and the default
+              architecture size.
+            </p>
+            <p>
+              <strong>Different:</strong> PyTorch/Python 3.12 rather than Python
+              2/TensorFlow 1.12; different random initialization draws and
+              optimizer arithmetic; stable softplus loss rather than
+              epsilon-clipped logarithms; this project's temporal split,
+              full-catalogue evaluator, validation selection and continuation
+              policy.
+            </p>
+            <p>
+              <strong>Not claimed:</strong> a TensorFlow execution, bitwise
+              cross-framework parity, conversion of TF checkpoints, or
+              reproduction of the paper's benchmark numbers. The NumPy reference
+              test is useful equation evidence, not a live TensorFlow
+              comparison. Earlier generic
+              <code>SequentialRecommender</code> checkpoints are incompatible.
+            </p>
+            <p class="ref">
+              <code>docs/SASREC.md:36–64</code> makes these boundaries explicit.
+              The inspected upstream
+              <a
+                href="https://github.com/kang205/SASRec/blob/e3738967fddab206d6eeb4fda433e7a7034dd8b1/modules.py"
+                >modules.py</a
+              >
+              supplies the attention/residual equations;
+              <a
+                href="https://github.com/kang205/SASRec/blob/e3738967fddab206d6eeb4fda433e7a7034dd8b1/sampler.py"
+                >sampler.py</a
+              >
+              supplies sequence construction.
+            </p>
+          </details>
+
+          <h3>
+            4. Initial training and continuation intentionally supervise
+            different positions.
+          </h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    Given history [0, 0, 1, 2, 3], new target 4
+                  </th>
+                  <th scope="col">Supervised targets</th>
+                  <th scope="col">Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Initial training</td>
+                  <td><code>[0, 0, 2, 3, 4]</code></td>
+                  <td>
+                    Train all valid next-item positions in a sampled user's
+                    final window.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Continuation</td>
+                  <td><code>[0, 0, 0, 0, 4]</code></td>
+                  <td>
+                    Use old positions as context; learn only from the fresh
+                    target.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Each active position gets one negative—an unobserved alternative,
+            not a confirmed dislike. Initial negatives exclude that user's
+            entire initial item set; continuation negatives exclude the supplied
+            history and fresh target. The loss raises observed-item scores and
+            lowers sampled-alternative scores.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Reusing all-position
+            supervision during continuation would silently re-train on old
+            targets. That is historical replay, not the promised
+            fresh-target-only condition.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/pilot.py:31–61</code> builds the initial user
+            sequences and target masks;
+            <code>src/cp4285/model.py:100–114</code> averages the sampled loss
+            over active targets;
+            <code>tests/test_sasrec.py:92–109</code> verifies the distinction.
+          </p>
+
+          <h3>
+            5. Select once, reload, then continue without resetting the model.
+          </h3>
+          <p>
+            Initial epochs are evaluated on validation NDCG. The best validation
+            checkpoint is saved, evaluated on retention, reloaded and checked
+            for matching scores. One copy stays frozen. Another consumes
+            chronological A batches, preserving model weights and Adam's running
+            optimization statistics across cycles. Adam resets <em>once</em> at
+            the initial-to-continuation boundary, not every cycle.
+          </p>
+          <p>
+            A cycle is a configured block of optimizer updates, not a day of
+            real time. Each cycle saves model, optimizer, stream position and
+            recorded RNG state.
+            <strong
+              >Saving state is not the same as having a resume command:</strong
+            >
+            interruption/restart is not wired into the CLI yet.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/pilot.py:158–196</code> selects and verifies the
+            checkpoint; <code>src/cp4285/pilot.py:197–232</code> performs fresh
+            updates, frozen checks and saves;
+            <code>docs/IMPLEMENTATION.md:85</code> explicitly limits restart
+            support.
+          </p>
+
+          <h3>6. Rank against the same original catalogue.</h3>
+          <p>
+            At each checkpoint, the evaluator scores the same A prefixes and
+            targets against every nonpadding item in the initial training
+            catalogue. It does not remove previously seen items, because
+            repeated review events are allowed. Exact score ties use the lower
+            item index consistently.
+          </p>
+          <p>
+            <strong>Recall@10</strong> is the proportion of targets that reach
+            the top 10 here; with one target per example, this is also Hit@10.
+            <strong>NDCG@10</strong> rewards a higher rank: a single target at
+            rank 1 scores 1, rank 3 scores 0.5, and rank 11 scores 0. Average
+            over retained examples.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> These scores measure
+            retention on a fixed historical anchor—not accuracy on an evolving
+            population of future users. Adding B candidates to A evaluation
+            would change the measuring stick and constitute a different
+            experiment.
+          </p>
+          <p class="ref">
+            <code>src/cp4285/pilot.py:64–100</code> defines deterministic
+            ranking and averaging;
+            <code>src/cp4285/model.py:97–98</code> constructs the full score
+            matrix.
+          </p>
+        </section>
+
+        <section id="evidence">
+          <span class="section-num">05 / ACTUAL EVIDENCE</span>
+          <h2>
+            The green tests are real. The Amazon results are not here yet.
+          </h2>
+          <div class="cards">
+            <div class="card">
+              <div class="number">11 / 11</div>
+              <h4>Tests passed again</h4>
+              <p>
+                Fresh run in this review; 3.23 seconds. Software and equation
+                checks, not research conclusions.
+              </p>
+            </div>
+            <div class="card">
+              <div class="number">0.0</div>
+              <h4>Reload score difference</h4>
+              <p>
+                Recorded synthetic smoke: the checked scores match after
+                checkpoint reload.
+              </p>
+            </div>
+            <div class="card">
+              <div class="number">24 / 97</div>
+              <h4>Synthetic users / A items</h4>
+              <p>
+                One initial epoch; two cycles of two updates. Not an Amazon
+                sample.
+              </p>
+            </div>
+          </div>
+          <p>
+            The existing
+            <code>runs/original-sasrec-smoke/pilot/metrics.json</code>
+            explicitly labels itself
+            <strong>“synthetic software smoke test.”</strong> Its A-only top-10
+            metrics stayed unchanged during that tiny run; this does not show
+            that parameters failed to change or that forgetting is impossible.
+            Ranking metrics are coarse: scores can move without crossing a
+            top-10 rank boundary.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h4>Supported checks</h4>
+              <ul>
+                <li>Input timestamp units and original-ID overlap.</li>
+                <li>Padding invariance, causal isolation and stable ties.</li>
+                <li>One/two-head equations and masked loss versus NumPy.</li>
+                <li>
+                  Holdout isolation in the nonrepeating synthetic fixture.
+                </li>
+                <li>
+                  Reload, frozen control, changed trained weights and saved
+                  optimizer state.
+                </li>
+                <li>Refusal to overwrite an existing demo run.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Not established by those checks</h4>
+              <ul>
+                <li>Amazon coverage, sparsity or useful initial quality.</li>
+                <li>Real-data convergence or a suitable final budget.</li>
+                <li>Every repeated-item/holdout edge case.</li>
+                <li>Live TensorFlow equivalence.</li>
+                <li>B learning, mixture fairness or classical superiority.</li>
+                <li>General validity of the split or causal interpretation.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="ref">
+            <code>tests/test_pipeline.py:21–125</code> checks
+            data/evaluation/lifecycle properties;
+            <code>tests/test_sasrec.py:54–109</code> checks equations and target
+            masks.
+            <code
+              >runs/original-sasrec-smoke/pilot/metrics.json:2–3, 56–72,
+              82–124</code
+            >
+            gives the smoke scope, counts, reload check and unchanged ranking
+            metrics.
+          </p>
+          <details>
+            <summary>Exact validation and scope of this teaching pass</summary>
+            <pre><code>PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q \
+  -p no:cacheprovider --basetemp=/tmp/pi-teach-tests-20260928-1654
+# 11 passed in 3.23s</code></pre>
+            <p>
+              The existing uv-managed Python 3.12 environment was used; no
+              global Python changes. Primary LSP diagnostics for the model,
+              pilot and SASRec test file reported no diagnostics earlier in this
+              pass. That is not a claim that every cached/project-wide
+              diagnostic is clean.
+            </p>
+            <p>
+              Two read-only scouts/reviewers supplied evidence; the parent
+              inspected the load-bearing code and reconciled their findings. No
+              implementation edits, commits, full data downloads or course
+              submissions were made. The configured <code>data/raw</code>,
+              <code>data/processed</code> and <code>reports</code> paths were
+              absent when checked. This is not a search for data elsewhere on
+              your computer.
+            </p>
+          </details>
+        </section>
+
+        <section id="future-design">
+          <span class="section-num"
+            >06 / PROPOSED EXTENSION — NOT IMPLEMENTED</span
+          >
+          <h2>
+            For B to affect A, you need a real path through shared parameters.
+          </h2>
+          <p>
+            The proposed neural design has separate A/B item interfaces and a
+            shared SASRec sequence encoder. The encoder is the learned function
+            that transforms a history into a vector. B can change this shared
+            function even when A and B have no common people or products.
+          </p>
+          <figure>
+            <div class="two">
+              <div class="node planned">
+                <b>A histories → A item vectors</b
+                ><small>A identities stay in their own namespace.</small>
+              </div>
+              <div class="node planned">
+                <b>B histories → B item vectors</b
+                ><small>B identities stay in their own namespace.</small>
+              </div>
+            </div>
+            <div class="arrow" aria-hidden="true">↓</div>
+            <div class="trunk">
+              <strong>Shared SASRec blocks + positional parameters</strong
+              ><br /><span class="small"
+                >Either domain can update this shared computation.</span
+              >
+            </div>
+            <div class="arrow" aria-hidden="true">↓</div>
+            <div class="two">
+              <div class="node planned">
+                <b>A scoring with A item table</b
+                ><small>Fixed A catalogue → A retention metric.</small>
+              </div>
+              <div class="node planned">
+                <b>B scoring with B item table</b
+                ><small>Fixed B task → B adaptation metric.</small>
+              </div>
+            </div>
+            <figcaption>
+              This proposed topology shows how B gradients could change A scores
+              without inventing shared identities; it omits implementation and
+              must not be read as a completed two-domain model.
+            </figcaption>
+          </figure>
+          <p>
+            Do not concatenate unrelated users' histories or make unrelated
+            local item IDs coincide. An A example must still represent a real A
+            history. Adding a freshly initialized B interface should leave A's
+            initial scores unchanged; this needs a regression check before
+            comparing branches.
+          </p>
+          <p>
+            For <strong>matrix factorisation</strong>, a classical model that
+            scores a user-item pair with learned user and item vectors, the
+            influence path can differ. If A and B factors are disjoint and B
+            updates truly leave every A-scoring parameter untouched, A scores
+            cannot change. That flat curve is an isolation control, not proof
+            that classical models generally resist forgetting. Genuine shared
+            users, shared parameters, decay or optimizer behavior can change the
+            conclusion.
+          </p>
+          <p class="ref">
+            <code>docs/CONTINUED-TRAINING.md</code>, “Model and training
+            examples” and “Stage 1,” specifies the proposed interfaces and
+            unchanged-A requirement. <code>docs/DATASET-ASSESSMENT.md</code>,
+            “Mechanism and group-comparison implications,” explains the separate
+            classical sharing audit.
+          </p>
+          <h3>Mixing ratios need a denominator and an exposure control.</h3>
+          <div class="formula">
+            <strong
+              >α = B supervised targets / all continued-training supervised
+              targets</strong
+            ><br />If a draft instead says B/A = 200%, then α = 2 / (1 + 2) = ⅔,
+            not 200%.
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Illustrative condition</th>
+                  <th scope="col">A targets</th>
+                  <th scope="col">B targets</th>
+                  <th scope="col">Total targets</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>A-only, α = 0</td>
+                  <td>1,920</td>
+                  <td>0</td>
+                  <td>1,920</td>
+                </tr>
+                <tr>
+                  <td>Mixed, α = 0.5</td>
+                  <td>960</td>
+                  <td>960</td>
+                  <td>1,920</td>
+                </tr>
+                <tr>
+                  <td>B-only, α = 1</td>
+                  <td>0</td>
+                  <td>1,920</td>
+                  <td>1,920</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">
+            Arithmetic illustration using the current continuation budget: 128 ×
+            5 updates × 3 cycles. Only A-only currently runs; these are not
+            executed mixture results or a validated budget.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> More B under fixed total
+            updates also means less A practice. A mixed-versus-A-only gap
+            measures stream composition, not harmful B gradients alone. An extra
+            control can use the mixed run's exact A examples while skipping B
+            updates; that matches A exposure but not compute, so
+            optimizer/scheduler timing must be documented.
+          </p>
+          <p>
+            <span class="label recommend">RECOMMENDATION</span> Before
+            implementing mixtures, agree how to count targets, preserve
+            per-domain chronological order, initialize B identically across
+            branches, handle inactive-domain optimizer parameters, evaluate B
+            learning and repeat across seeds. Average a correctly sampled
+            mixture once; do not apply the mixture coefficient again to each
+            example's loss.
+          </p>
+        </section>
+
+        <section id="review-notes">
+          <span class="section-num">07 / REVIEW NOTES</span>
+          <h2>
+            Some issues are bugs; others define what your result would mean.
+          </h2>
+          <p>
+            The reviewer raised five major readiness issues. Source inspection
+            confirms two persistence/download defects and several
+            protocol/scaling limits. The shared-prefix issue is a
+            <em>design concern</em>, not evidence that held-out labels entered
+            gradient updates.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Issue and evidence</th>
+                  <th scope="col">Why it matters</th>
+                  <th scope="col">Smallest next step / safe defer</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    Download checks the header, not full gzip completion.<br /><code
+                      >data.py:54–58</code
+                    >
+                  </td>
+                  <td>
+                    This is bad design because a readable header is weaker than
+                    validating the entire compressed body/trailer. Corruption
+                    beyond the parsed portion can evade promotion checks;
+                    SHA-256 alone is just a fingerprint.
+                  </td>
+                  <td>
+                    Read/validate through EOF before promoting
+                    <code>.part</code>, with a corrupt-tail regression check.
+                    Defer only while using synthetic/local already-validated
+                    inputs. No corrupt-download reproduction was run here.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Audit and prepared JSON can overwrite previous artifacts.<br /><code
+                      >data.py:17–20</code
+                    >; <code>cli.py:100–107</code>
+                  </td>
+                  <td>
+                    This is bad design because a rerun can replace the exact
+                    split/report that an existing experiment depended on. Pilot
+                    run-directory refusal does not protect those upstream files.
+                  </td>
+                  <td>
+                    Refuse an existing output unless replacement is explicitly
+                    requested; keep distinct versioned paths. Fix before locking
+                    real runs. Throwaway synthetic fixtures can tolerate
+                    replacement.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Validation and retention use the same prefix.<br /><code
+                      >data.py:230–233</code
+                    >
+                  </td>
+                  <td>
+                    They score different labels for the same user-state.
+                    Retention skips the validation event, so it is not standard
+                    immediate-next prediction. Correlated evaluation conditions
+                    weaken an “independent test” description, but do not by
+                    themselves prove leakage.
+                  </td>
+                  <td>
+                    Choose an explicit fixed-anchor interpretation or a
+                    separately defined retention construction, potentially
+                    separate held-out sequences/users. Test the chosen contract
+                    before final claims; acceptable for the current lifecycle
+                    smoke.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Initial-only vocabulary removes unknown targets.<br /><code
+                      >data.py:230–243</code
+                    >
+                  </td>
+                  <td>
+                    Validation/retention cohorts can differ after omissions.
+                    Easy-to-cover familiar items may dominate; the result says
+                    nothing about new items.
+                  </td>
+                  <td>
+                    Report retained users/examples and
+                    OOV—out-of-vocabulary—rates per split. Decide cohort
+                    comparability explicitly. Cold-start modeling can wait if
+                    familiar-item scope is honest.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Full-catalogue scores have no memory preflight.<br /><code
+                      >model.py:97–98</code
+                    >
+                  </td>
+                  <td>
+                    A batch of B rows over I items creates B × I scores. At
+                    float32, the score array alone needs 4BI bytes; embeddings,
+                    optimizer state and ranking temporaries add more.
+                  </td>
+                  <td>
+                    Inspect prepared item count, estimate memory and dry-run
+                    evaluation. Keep cohort/batch bounded; add a fail-fast
+                    budget check before scaling. A 500-user cap does not bound
+                    raw-file audit size or each user's full history.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Three epochs is an extremely small initial budget.<br /><code
+                      >pilot.py:161</code
+                    >; <code>configs/pilot.toml:25–31</code>
+                  </td>
+                  <td>
+                    At 500 users and batch 128, floor(500/128) = 3 batches per
+                    epoch: only 9 initial optimizer steps. No basis for assuming
+                    useful convergence.
+                  </td>
+                  <td>
+                    Inspect a validation learning curve and choose a feasible
+                    development budget. Do not blindly copy the authors' 201
+                    epochs or tune on retention curves. Fine for feasibility
+                    only.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <details>
+            <summary>
+              Other assumptions and boring failure modes worth remembering
+            </summary>
+            <ul>
+              <li>
+                <strong>Five-core is not five usable pre-cutoff events.</strong>
+                The provided population was filtered using full-history
+                activity. Disclose that selection limitation; a strict
+                temporal-population study would need training-period eligibility
+                from less globally filtered inputs.
+              </li>
+              <li>
+                <strong>The audit is not the prepared population.</strong> Its
+                later-activity count does not apply the full configured end
+                window and familiar-item/cohort constraints. The default pilot
+                requires at least
+                <strong>1,920 fresh continuation examples</strong>; the gate
+                uses the actual prepared stream, not raw counts.
+              </li>
+              <li>
+                <strong>Empty splits stop execution.</strong> Too strict a
+                rating threshold, too much OOV loss or sparse histories can
+                leave no validation/retention/continuation data. Inspect counts
+                rather than silently recycling examples.
+              </li>
+              <li>
+                <strong>Negatives can run out.</strong> If a history's exclusion
+                set fills the catalogue, training raises an error.
+                Near-exhausted catalogues make rejection sampling inefficient.
+                Adjust the legitimate cohort/catalogue, not held-out labels.
+              </li>
+              <li>
+                <strong>Run protection is not restart support.</strong> After
+                interruption, an existing run directory is refused. Do not
+                delete checkpoints to force a rerun; use a new output directory.
+                Implement resume only if longer runs need it.
+              </li>
+              <li>
+                <strong
+                  >DuckDB spill is relative to the working directory.</strong
+                >
+                <code>src/cp4285/data.py:90–95</code> sets
+                <code>data/.duckdb-spill</code>, while config inputs are rooted
+                to the repository. Run from the documented root; root the spill
+                path before promising arbitrary-directory use. The 2GB DuckDB
+                limit is not a cap on all Python/Torch memory.
+              </li>
+              <li>
+                <strong
+                  >B-only optimization must really leave A-only parameters
+                  inactive.</strong
+                >
+                A zero-valued loss is not always enough when optimizer momentum
+                or decay exists. Test unchanged A item parameters and changed
+                shared/B parameters under the agreed policy.
+              </li>
+              <li>
+                <strong>Offline logs omit feedback loops.</strong> They cannot
+                establish how recommendations would change what people encounter
+                or review. Error analysis should include sparse versus frequent
+                users/items; category B is not inherently malicious
+                “contamination.”
+              </li>
+            </ul>
+            <p class="ref">
+              <code>src/cp4285/pilot.py:51–59, 128–132</code> contains the
+              negative/budget gates;
+              <code>src/cp4285/data.py:246–263</code> checks partitions and
+              records scope. <code>docs/CONTINUED-TRAINING.md</code> specifies
+              inactive-domain and offline-interpretation limitations.
+            </p>
+          </details>
+          <div class="callout warn">
+            <strong>Documentation reconciliation.</strong>
+            <code>docs/EXPERIMENT.md:3</code> still says “No experiments have
+            run,” and its model choices remain generic/open. That is stale if
+            read as “no code or synthetic execution exists.” The newer
+            <code>CONTEXT.md</code>, <code>docs/SASREC.md</code>, inspected code
+            and smoke artifacts establish the narrower truth:
+            <strong
+              >SASRec is selected and synthetic checks ran; no real-data
+              comparative study is established.</strong
+            >
+            Historical right-padding concerns are also superseded by the current
+            left-padding code/tests. The gzip and artifact-overwrite concerns
+            remain current. This teaching pass did not edit those notes.
+          </div>
+        </section>
+
+        <section id="next">
+          <span class="section-num">08 / REVIEW NEXT</span>
+          <h2>
+            The next milestone is a credible A-only real-data pilot—not another
+            model.
+          </h2>
+          <p>
+            <span class="label recommend">RECOMMENDATION</span> Use evidence
+            gates rather than coding every proposed extension at once. Hongyi
+            can own neural implementation; team-level dataset, classical-model
+            and submission decisions need joint confirmation.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Resolve the immediate critique and team contract.</h3>
+              <p>
+                Confirm the Canvas deadline and approved dataset options. Agree
+                A/B meaning, all reviews versus positive-rating-only events,
+                mixture denominator, split interpretation, classical model and
+                real parameter-sharing path. Assign missing ownership
+                explicitly.
+              </p>
+              <p>
+                <strong>Done when:</strong> the team can state the task,
+                intervention, evaluation population and controls without
+                incompatible definitions.
+              </p>
+              <div class="callout warn">
+                <strong>Deadline is unchecked.</strong> Local requirements notes
+                place the critique on <strong>29 September 2026</strong>, but
+                the template says “Mon, 29 Sep 2026, 23:59 SGT”—a weekday/date
+                conflict. Do not infer the upload deadline. The notes record
+                16:9 PDF, at most 20 slides excluding
+                acknowledgements/references, and methodology weighted 60%;
+                verify the current assignment before submission.
+              </div>
+              <p class="ref">
+                <code>docs/REQUIREMENTS.md:5–24</code> records the source links,
+                format and unresolved deadline.
+                <code>slides/index.html</code> is a six-slide narrative aid, not
+                a complete team submission covering every required section.
+              </p>
+            </li>
+            <li>
+              <h3>Make real-run artifacts safe; freeze the intended split.</h3>
+              <p>
+                Fix full gzip validation and audit/prepared-output preservation
+                with targeted checks. Decide the retention construction before
+                treating its curves as final evidence. Review the local SASRec
+                diff and publish it only when you choose to commit/push; keep
+                private and generated artifacts ignored.
+              </p>
+              <p>
+                <strong>Done when:</strong> damaged downloads are rejected,
+                reruns cannot silently replace input evidence, and
+                split/provenance tests encode the actual research contract.
+              </p>
+            </li>
+            <li>
+              <h3>
+                Approve acquisition, then audit and prepare a bounded cohort.
+              </h3>
+              <p>
+                Review storage and compute before explicitly downloading full
+                category ID files. Audit both originals, then inspect actual
+                prepared A counts, OOV losses, retained evaluation cohorts,
+                catalogue size and available fresh targets. Raw overlap alone is
+                insufficient if the classical design requires overlapping users
+                after the split.
+              </p>
+              <p>
+                <strong>Done when:</strong> a versioned report and prepared
+                snapshot show that the chosen population and budget are
+                feasible. Reduce a budget explicitly if needed; never recycle an
+                exhausted stream silently.
+              </p>
+            </li>
+            <li>
+              <h3>Run and inspect a real A-only pilot.</h3>
+              <p>
+                Use a new run directory. Examine validation learning, useful
+                initial quality, fixed evaluation, exact reload behavior,
+                fresh-example consumption and frozen stability. Increase the
+                initial training budget based on development evidence, not
+                because the synthetic loop passed.
+              </p>
+              <p>
+                <strong>Done when:</strong> a reproducible, labeled
+                <em>single-seed bounded A-only pilot</em> exists with
+                hashes/config/counts, and its limitations are understood. A
+                retention decline is not a success criterion.
+              </p>
+            </li>
+            <li>
+              <h3>Add the minimum valid B/classical comparison.</h3>
+              <p>
+                Implement domain-aware B preparation and item scoring, common
+                shared parameters, identical initial branches and fresh-target
+                mixture accounting. Verify B learns, attaching B preserves
+                initial A scores, and inactive A-only parameters stay inactive
+                on B-only batches. Establish a comparable classical
+                input/evaluation/sharing contract.
+              </p>
+              <p>
+                <strong>Done when:</strong> frozen, A-only, mixed and B-only
+                branches use the agreed common protocol; no branch is
+                initialized from another branch's final weights.
+              </p>
+            </li>
+            <li>
+              <h3>
+                Run the study; add mechanisms only after the baseline is
+                defensible.
+              </h3>
+              <p>
+                Repeat across seeds; report absolute A/B scores, signed
+                retention change and variation. Use A-exposure matching before
+                attributing a gap specifically to B interference. Include
+                coverage, sparse/frequent-group error analysis, compute and
+                limitations. Replay, adapters or distillation are optional later
+                comparisons—not prerequisites for continued training.
+              </p>
+              <p>
+                <strong>Done when:</strong> the claims are supported by the
+                controls, not merely by a downward-looking curve. Update the
+                collective AI-use disclosure when this analysis is incorporated
+                into project work.
+              </p>
+            </li>
+          </ol>
+          <details>
+            <summary>
+              Command map for the next person—not commands executed by this page
+            </summary>
+            <p>
+              Run from the canonical repository root. These are the existing
+              entry points, not a script to run blindly.
+            </p>
+            <pre><code># Local environment and a new synthetic lifecycle check
+uv sync --locked
+uv run cp4285 doctor
+uv run pytest -q
+uv run cp4285 demo --output runs/sasrec-check-02</code></pre>
+            <p class="small">
+              The demo output path must not exist. It downloads nothing.
+            </p>
+            <pre><code># ONLY after explicit download approval and the safety/protocol gates above
+uv run cp4285 download --domain both
+uv run cp4285 --config configs/pilot.toml audit --output reports/audit-01.json
+
+# Review/change provisional config; ensure data.prepared names a NEW snapshot.
+uv run cp4285 --config configs/pilot.toml prepare
+uv run cp4285 --config configs/pilot.toml pilot --output runs/electronics-pilot-01</code></pre>
+            <p>
+              Current <code>prepare</code> takes its output path from
+              <code>data.prepared</code> in TOML, not a
+              <code>--output</code> flag. Config paths resolve from the repo
+              root; explicit CLI output paths resolve from the working
+              directory. Until overwrite guards are fixed, choosing a new path
+              is your responsibility.
+            </p>
+            <p class="ref">
+              <code>src/cp4285/cli.py:15–21, 62–113</code> establishes argument
+              names, path resolution and command effects.
+            </p>
+          </details>
+          <div class="callout">
+            <strong>The lazier valid path:</strong> keep the existing SASRec and
+            bounded full-catalogue evaluator; get one trustworthy real A-only
+            run before adding B. No serving stack, FAISS index, cache layer or
+            mitigation framework is needed for that milestone.
+          </div>
+        </section>
+
+        <section id="source-map">
+          <span class="section-num">09 / SOURCE AND CONFIDENCE MAP</span>
+          <h2>What each source establishes—and what it does not.</h2>
+          <p class="small">
+            References are to the inspected <strong>local working tree</strong>;
+            line numbers can shift after edits. No local/private PDFs or agent
+            transcripts are embedded. Remote links are references, not scripts
+            or assets.
+          </p>
+          <div class="table-wrap">
+            <table class="evidence-table">
+              <thead>
+                <tr>
+                  <th scope="col">Source / role</th>
+                  <th scope="col">What it establishes</th>
+                  <th scope="col">Confidence / limit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <code>AGENTS.md</code> and <code>CONTEXT.md:5–45</code
+                    ><br />Project rules and current status.
+                  </td>
+                  <td>
+                    Offline question, neural ownership, safeguards, chosen
+                    SASRec, provisional dataset and next actions.
+                  </td>
+                  <td>
+                    High for recorded project intent; not independent proof of
+                    team agreement.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>src/cp4285/cli.py:15–21, 62–125</code><br />Entry
+                    points.
+                  </td>
+                  <td>
+                    Independent commands, config resolution, A-only preparation
+                    and the explicitly synthetic demo.
+                  </td>
+                  <td>
+                    High: personally read code; synthetic route executed by
+                    tests.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>src/cp4285/data.py:35–60, 64–266</code
+                    ><br />Input-to-split boundary.
+                  </td>
+                  <td>
+                    Download promotion, schema audit, initial-only
+                    selection/vocabulary, shared holdout prefix, OOV and
+                    overwrite behavior.
+                  </td>
+                  <td>
+                    High for code behavior; real category-scale execution not
+                    performed.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>src/cp4285/model.py:16–114</code><br />Neural scoring
+                    and loss.
+                  </td>
+                  <td>
+                    Model identity, custom SASRec blocks, fixed left-padding,
+                    full-catalogue scores and active-position loss.
+                  </td>
+                  <td>
+                    High for inspected implementation; no live TF equivalence.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>src/cp4285/pilot.py:20–262</code><br />Training
+                    lifecycle.
+                  </td>
+                  <td>
+                    Supervision masks, negative policy, budgets, validation
+                    selection, reload, frozen control, continuation and saved
+                    state.
+                  </td>
+                  <td>High for implemented A-only flow; no B branch exists.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>tests/test_pipeline.py:21–125</code>,
+                    <code>tests/test_sasrec.py:54–109</code><br />Runnable
+                    checks.
+                  </td>
+                  <td>
+                    11 tests passed in the fresh suite, including equation,
+                    mask, data and lifecycle properties.
+                  </td>
+                  <td>
+                    Direct execution evidence; fixture coverage is not universal
+                    validity.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      >runs/original-sasrec-smoke/pilot/metrics.json:2–143</code
+                    ><br />Existing run artifact.
+                  </td>
+                  <td>
+                    Synthetic scope, 24 users / 97 items, zero reload difference
+                    and unchanged frozen metrics.
+                  </td>
+                  <td>
+                    High for this recorded smoke; not Amazon research evidence.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>configs/pilot.toml:1–32</code>,
+                    <code>docs/IMPLEMENTATION.md:52–93</code><br />Defaults and
+                    runbook.
+                  </td>
+                  <td>
+                    50 hidden / 50 history / 2 blocks / 1 head / dropout 0.5; 3
+                    epochs, batch 128, 3×5 continuation updates; no resume CLI.
+                  </td>
+                  <td>Verified defaults, not validated hyperparameters.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>docs/SASREC.md:7–64</code> + pinned
+                    <a
+                      href="https://github.com/kang205/SASRec/tree/e3738967fddab206d6eeb4fda433e7a7034dd8b1"
+                      >upstream model/modules/sampler</a
+                    ><br />Architecture provenance.
+                  </td>
+                  <td>
+                    Original block and sequence/loss design; explicit framework,
+                    numerical and protocol differences.
+                  </td>
+                  <td>
+                    Inspected source + NumPy tests; not a benchmark
+                    reproduction.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>docs/CONTINUED-TRAINING.md</code>,
+                    <code>docs/EXPERIMENT.md</code><br />Proposed experiment.
+                  </td>
+                  <td>
+                    Future sharing, branches, mixture accounting, A/B metrics,
+                    exposure confound and optional controls.
+                  </td>
+                  <td>
+                    Proposal, not execution. Generic “no experiments” wording is
+                    stale.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a
+                      href="https://amazon-reviews-2023.github.io/data_processing/5core.html"
+                      >Official Amazon 5-core processing page</a
+                    ><br />External dataset format.
+                  </td>
+                  <td>
+                    Deduplicated ID files, schema, pre-split category counts and
+                    provided split options.
+                  </td>
+                  <td>
+                    Fetched directly; does not establish your retained cohort or
+                    chosen cutoff.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>docs/REQUIREMENTS.md:5–24</code><br />Course-source
+                    summary.
+                  </td>
+                  <td>
+                    Recorded critique requirements and explicit weekday/date
+                    conflict, with official links.
+                  </td>
+                  <td>
+                    Documentary evidence; current Canvas deadline/approved list
+                    remain unchecked.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>git status --short</code>,
+                    <code>git ls-remote origin refs/heads/main</code
+                    ><br />Publication state.
+                  </td>
+                  <td>
+                    Unstaged local SASRec changes; remote main remains initial
+                    <code>ed8e67f…</code> at review time.
+                  </td>
+                  <td>Direct command observations; snapshot can change.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="teach-back">
+          <span class="section-num">10 / YOUR REVIEW JUDGMENT</span>
+          <h2>One question to take back to the team.</h2>
+          <div class="question">
+            <div class="eyebrow">
+              Hypothetical numbers — not project results
+            </div>
+            <p>
+              A starts at NDCG@10 <strong>0.10</strong>. After the same number
+              of updates, A-only reaches <strong>0.14</strong> and a 50% B
+              mixture reaches <strong>0.12</strong>.
+            </p>
+            <p>
+              <strong
+                >What can—and can't—you conclude from those three
+                numbers?</strong
+              >
+            </p>
+          </div>
+          <p class="small">
+            Explain the baseline you are comparing against and the alternative
+            explanation you would need a control to separate. The goal is
+            experimental judgment, not remembering a model definition.
+          </p>
+        </section>
+        <!-- APPENDED UPDATE 2026-09-28T18:21+08:00 START -->
+        <section id="update-20260928-1821">
+          <header>
+            <div class="eyebrow">
+              Append-only update · 28 September 2026, 18:21 SGT · after the PR
+              and safety checkpoint
+            </div>
+            <h2>
+              Two workstreams now coexist. The safety checkpoint is ready for
+              review.
+            </h2>
+            <p class="lead">
+              SASRec is published on main, the teammate's classical comparator
+              is integrated, and a separate PR protects downloads and experiment
+              artifacts. The remaining research problem is making the two
+              workstreams comparable.
+            </p>
+          </header>
+          <div class="callout warn">
+            <strong>The original guide above is preserved unchanged.</strong> It
+            records an earlier snapshot. Statements there that SASRec is
+            uncommitted, the classical comparator is absent, or the safety
+            defects are unfixed have been superseded as described below.
+            <strong>PR #3 is still open:</strong> its fixes exist on the
+            follow-up branch, not yet on main.
+          </div>
+          <p class="small">
+            <a href="#update-pr-status">Publication status</a> ·
+            <a href="#update-classical">Classical versus neural</a> ·
+            <a href="#update-safety">Safety mechanism</a> ·
+            <a href="#update-checks">Verification</a> ·
+            <a href="#update-next">Next gate</a> ·
+            <a href="#what-i-understand">Original guide</a>
+          </p>
+
+          <section id="update-pr-status">
+            <span class="section-num"
+              >11 / WHAT CHANGED SINCE THE ORIGINAL SNAPSHOT</span
+            >
+            <h3>Published does not mean everything is merged.</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Work</th>
+                    <th scope="col">Current status</th>
+                    <th scope="col">What that means</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Teammate's classical comparator<br /><a
+                        href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/1"
+                        >PR #1</a
+                      >
+                    </td>
+                    <td><span class="label fact">MERGED</span></td>
+                    <td>
+                      Main gained classical models, CLI commands, SciPy, tests
+                      and exploratory-result documentation while the SASRec PR
+                      was being prepared. That contribution was preserved.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Original-architecture SASRec<br /><a
+                        href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/2"
+                        >PR #2</a
+                      >
+                    </td>
+                    <td>
+                      <span class="label fact">MERGED</span><br />28 September,
+                      17:33 SGT<br /><code>5c87842</code>
+                    </td>
+                    <td>
+                      The PyTorch port, source/license notices, tests and
+                      updated project context are on main. Conflicting status
+                      notes were reconciled without dropping the classical work
+                      or either AI log.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Download and artifact safety<br /><a
+                        href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/3"
+                        >PR #3</a
+                      >
+                    </td>
+                    <td>
+                      <span class="label recommend">OPEN FOR REVIEW</span
+                      ><br /><code>494688d</code>
+                    </td>
+                    <td>
+                      Implemented and pushed on
+                      <code>fix/real-run-artifact-safety</code>. The working
+                      tree is clean. Main does not gain these protections until
+                      this PR is merged.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="ref">
+              GitHub PR #2/#3 states were rechecked for this appendix with
+              <code>gh pr view</code>; local branch, commit and clean status
+              were checked with Git. <code>docs/AI_LOG.md:119–143</code> records
+              the integration and subsequent safety checkpoint. The earlier
+              page's publication table is historical, not current.
+            </p>
+          </section>
+
+          <section id="update-classical">
+            <span class="section-num">12 / THE IMPORTANT RESEARCH UPDATE</span>
+            <h3>
+              The classical baseline is no longer missing. A fair comparison
+              still is.
+            </h3>
+            <p>
+              <span class="label fact">FACT</span> The repository now contains
+              popularity, Markov transition, QR-factorised transition,
+              PureSVD/incremental QR-SVD and SLIST implementations under
+              <code>src/cp4285/classical/</code>. Their CLI is
+              <code>cp4285 classical</code>. The contribution reports real
+              Amazon exploratory sweeps; those originating-workspace runs were
+              <strong>not rerun during our integration</strong>, and their raw
+              logs are not included in the published notes.
+            </p>
+            <p>
+              The right status is therefore
+              <strong
+                >“synthetic neural checks plus contributor-reported classical
+                real-data exploration,”</strong
+              >
+              not “the whole project has only synthetic results.” This does not
+              turn the classical results into verified head-to-head evidence.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Protocol choice</th>
+                    <th scope="col">Current neural pilot</th>
+                    <th scope="col">Documented classical sweeps</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Split and population</td>
+                    <td>
+                      Explicit time cutoff; bounded familiar-item cohort; fixed
+                      retention anchor.
+                    </td>
+                    <td>
+                      Per-user leave-last-out: final event is test, penultimate
+                      event validation. Reported sweeps use sampled validation
+                      users.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Previously seen items</td>
+                    <td>
+                      Remain candidates, because a repeated review event is
+                      allowed.
+                    </td>
+                    <td>
+                      The user's training items are excluded during ranking.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Learning lifecycle</td>
+                    <td>
+                      Carry one A-trained model forward through fresh A-only
+                      updates. Neural B mixtures remain unimplemented.
+                    </td>
+                    <td>
+                      Sweep models are refitted at each B-volume level. A
+                      separate streaming command currently covers PureSVD.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Mixture denominator</td>
+                    <td>
+                      Proposed B share of all supervised continuation targets.
+                    </td>
+                    <td>
+                      Reported B volume relative to A training volume. “100%
+                      B/A” means half the combined volume, not a wholly B
+                      stream.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              <span class="label infer">INFERENCE</span> Two scores called
+              NDCG@10 need not measure the same problem. Different populations,
+              exclusions, histories and training lifecycles can change the score
+              independently of model quality. Agreement on the metric name alone
+              is insufficient.
+            </p>
+            <p class="ref">
+              <code>docs/CLASSICAL.md:3, 21–33</code> qualifies result
+              provenance and defines the classical protocol.
+              <code>docs/IMPLEMENTATION.md</code>, “Split and evaluation
+              contract,” defines the neural counterpart.
+              <code>docs/CLASSICAL.md:65–70</code> explicitly lists
+              common-protocol alignment as open work.
+            </p>
+          </section>
+
+          <section id="update-safety">
+            <span class="section-num"
+              >13 / WHAT THE NEXT CHECKPOINT ACTUALLY FIXES — PR #3</span
+            >
+            <h3>Protect the evidence before spending compute.</h3>
+            <p>
+              <strong>Objective:</strong> a damaged download must not look
+              complete, and a repeat command must not silently replace the
+              report or split behind an existing result. These are
+              software-integrity requirements, separate from whether the
+              research design is valid.
+            </p>
+            <p>
+              The old header-only promotion was bad design because readable
+              first bytes do not prove a complete gzip. Directly rewriting
+              prepared JSON was bad design because it could erase the exact
+              experimental input while leaving old model results behind. The
+              smallest shared fix is stricter publication at those two
+              boundaries, not a new experiment framework.
+            </p>
+            <figure>
+              <p class="diagram-title">
+                Implemented on the safety branch · publication = making the
+                final local filename visible
+              </p>
+              <div class="flow">
+                <div class="node">
+                  <b>Unique temporary download</b
+                  ><small
+                    >Refuse existing data/manifest first.<br />Keep attempts
+                    separate.</small
+                  >
+                </div>
+                <div class="arrow" aria-hidden="true">→</div>
+                <div class="node">
+                  <b>Validate through EOF</b
+                  ><small
+                    >Expected CSV header, UTF-8 decoding and full gzip
+                    checksum/trailer.<br />Read in bounded chunks.</small
+                  >
+                </div>
+                <div class="arrow" aria-hidden="true">→</div>
+                <div class="node">
+                  <b>Publish without replacement</b
+                  ><small
+                    >Make the verified data filename visible.<br />Then publish
+                    its provenance manifest.</small
+                  >
+                </div>
+              </div>
+              <figcaption>
+                This flow shows why a valid header can no longer conceal a
+                truncated or corrupt trailer; it deliberately does not claim
+                that publishing data and its manifest is one indivisible
+                transaction.
+              </figcaption>
+            </figure>
+            <p>
+              The JSON path uses the existing <code>save_json</code> helper:
+              serialize a complete document and reject nonfinite values such as
+              NaN, write it to a temporary file in the destination directory,
+              then use <code>os.link</code>. A <strong>hardlink</strong> gives
+              the completed file another filesystem name; creating that name
+              fails if a file or symlink already occupies it. That final check
+              also protects against another writer arriving after the
+              preliminary existence check.
+            </p>
+            <p>
+              The same helper now protects audit reports, prepared snapshots,
+              download manifests, neural metrics and classical JSON reports.
+              Failed ordinary attempts clean up their own temporary files. No
+              overwrite flag, new dependency, dataset download or model/protocol
+              change was added.
+            </p>
+            <p class="ref">
+              <a
+                href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/494688d44bf2c3bfd62c1b73d9c1a3612acb39e3/src/cp4285/data.py#L22-L34"
+                ><code>src/cp4285/data.py:22–34</code></a
+              >
+              owns create-only JSON publication;
+              <a
+                href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/494688d44bf2c3bfd62c1b73d9c1a3612acb39e3/src/cp4285/data.py#L48-L80"
+                ><code>src/cp4285/data.py:48–80</code></a
+              >
+              validates and publishes downloads.
+              <code>src/cp4285/classical/experiments.py:57–65</code> reuses the
+              shared writer rather than maintaining a second JSON-write
+              implementation.
+            </p>
+            <details>
+              <summary>Assumptions, tradeoffs and recovery limits</summary>
+              <ul>
+                <li>
+                  <strong>Hardlink support is required.</strong> Unsupported
+                  filesystems fail rather than fall back to an unsafe overwrite.
+                </li>
+                <li>
+                  <strong
+                    >Atomic visibility is not power-loss durability.</strong
+                  >
+                  A complete final filename becomes visible at once; this is not
+                  a claim that all bytes survive an abrupt machine failure.
+                </li>
+                <li>
+                  <strong>Data and manifest are separate publications.</strong>
+                  If the manifest write fails afterward, validated raw data is
+                  deliberately retained. Inspect the situation; do not delete it
+                  blindly to force a retry.
+                </li>
+                <li>
+                  <strong
+                    >Process termination can leave temporary files.</strong
+                  >
+                  Normal error paths clean up; a killed process may leave an
+                  unpromoted file. A new attempt uses a new temporary filename.
+                </li>
+                <li>
+                  <strong
+                    >Integrity is not authenticity or semantic validity.</strong
+                  >
+                  Gzip checks detect damaged compressed content. The recorded
+                  SHA-256 is provenance, not a publisher-authenticated checksum;
+                  row/value checks still belong to the audit.
+                </li>
+                <li>
+                  <strong>New output paths remain necessary.</strong> Repeat
+                  audits use a new <code>--output</code>; a new prepared split
+                  needs a new <code>data.prepared</code> config path. Existing
+                  model run directories remain protected. Cache and
+                  checkpoint-resume behavior is unchanged.
+                </li>
+              </ul>
+              <p class="ref">
+                <code>docs/IMPLEMENTATION.md:76</code>, “Artifact safety
+                checkpoint,” documents these assumptions and the safe repeat-run
+                procedure. These limitations are explicit boundaries, not hidden
+                promises.
+              </p>
+            </details>
+          </section>
+
+          <section id="update-checks">
+            <span class="section-num">14 / WHAT WE VERIFIED</span>
+            <h3>
+              The test count grew because the scope grew—not because the
+              research finished.
+            </h3>
+            <div class="cards">
+              <div class="card">
+                <div class="number">21</div>
+                <h4>Tests at the merged checkpoint</h4>
+                <p>
+                  11 original neural/workspace checks + 8 classical checks + 2
+                  missing/malformed-config CLI regressions.
+                </p>
+              </div>
+              <div class="card">
+                <div class="number">33</div>
+                <h4>Tests on the safety branch</h4>
+                <p>
+                  12 additional offline safety cases. Before the fix, 10 failed;
+                  afterward, the complete suite passed.
+                </p>
+              </div>
+              <div class="card">
+                <div class="number">0.0</div>
+                <h4>Synthetic reload difference</h4>
+                <p>
+                  The new end-to-end smoke still reproduced its checked scores
+                  after checkpoint reload. Still not Amazon evidence.
+                </p>
+              </div>
+            </div>
+            <p>
+              The safety tests deliberately corrupt a gzip trailer beyond the
+              initial header-read buffer, truncate it, return bad/empty headers
+              or an HTTP error, attempt to replace existing artifacts/manifests,
+              simulate a competing JSON writer, and call the real audit/prepare
+              CLI persistence paths with local stubs.
+            </p>
+            <p>
+              <span class="label fact">FACT</span> The preceding implementation
+              pass also passed Ruff lint/format, source/wheel builds,
+              changed-file primary diagnostics, public-only secret scanning and
+              independent read-only review. Those results were not rerun merely
+              to append this page. No full Amazon download or real neural
+              training was performed in that pass.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Evidence</th>
+                    <th scope="col">What it supports</th>
+                    <th scope="col">Confidence boundary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Live GitHub PR state + Git status</td>
+                    <td>
+                      PR #2 merged; #3 open; clean follow-up working tree.
+                    </td>
+                    <td>Directly rechecked at this appendix's timestamp.</td>
+                  </tr>
+                  <tr>
+                    <td><code>tests/test_artifact_safety.py:16–113</code></td>
+                    <td>
+                      Preservation, integrity validation, local races and CLI
+                      refusal behavior.
+                    </td>
+                    <td>
+                      Source reread now; execution verified in the preceding
+                      implementation pass. HTTP is mocked, not a production
+                      transfer.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>docs/AI_LOG.md:131–143</code></td>
+                    <td>
+                      Checkpoint validation and declared limits; agrees with the
+                      earlier observed command outputs.
+                    </td>
+                    <td>
+                      Software checks, not convergence or research validity.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>docs/CLASSICAL.md:31–49</code></td>
+                    <td>
+                      The contributor's exploratory classical results and stated
+                      experimental conditions.
+                    </td>
+                    <td>
+                      Reported provenance; raw runs not independently reproduced
+                      here.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="update-next">
+            <span class="section-num">15 / THE NEXT GATE</span>
+            <h3>
+              Review the safety PR, then settle the shared experiment contract.
+            </h3>
+            <ol>
+              <li>
+                <strong>Review and merge PR #3 when ready.</strong> Its
+                protections are not yet on main. There is no additional model to
+                build for this checkpoint.
+              </li>
+              <li>
+                <strong>Align the classical/neural comparison.</strong> Agree
+                the prediction task, retained users, holdout construction,
+                candidates and seen-item rule, mixture denominator, and
+                refitting versus warm-started continuation. Resolve the neural
+                shared-prefix retention interpretation explicitly.
+              </li>
+              <li>
+                <strong>Approve actual data access and resources.</strong>
+                Coordinate access to the teammate's existing files and
+                provenance before downloading duplicate categories. No automatic
+                search through private workspaces or acquisition is implied.
+              </li>
+              <li>
+                <strong>Run one defensible real A-only neural pilot.</strong>
+                Inspect usable counts, omitted unknown items, catalogue memory,
+                fresh-example availability and validation learning before
+                selecting a larger budget. Only then add neural B interfaces and
+                common-protocol comparisons.
+              </li>
+            </ol>
+            <p>
+              <span class="label recommend">RECOMMENDATION</span> The simplest
+              valid next step is not adapters or another recommender. It is a
+              written common evaluation contract and one real neural lifecycle
+              run under that contract. Canvas timing and team approvals remain
+              unchecked; the earlier deadline warning still applies.
+            </p>
+            <div class="question">
+              <div class="eyebrow">Teach-back for this update</div>
+              <p>
+                <strong
+                  >What must be aligned before comparing the classical and
+                  neural NDCG scores, even after all 33 software tests
+                  pass?</strong
+                >
+              </p>
+            </div>
+          </section>
+        </section>
+        <!-- APPENDED UPDATE 2026-09-28T18:21+08:00 END -->
+        <!-- APPENDED REVIEWER CHECKPOINT 2026-09-28 START -->
+        <section id="reviewer-checkpoint">
+          <span class="section-num"
+            >16 / LATEST REVIEWER CHECKPOINT — 28 SEPTEMBER 2026</span
+          >
+          <h2>One shared utilities module. One reviewer entry point.</h2>
+          <p class="lead">
+            This change reorganises existing helpers and promotes the field
+            guide into the repository. It does not change the model, dataset
+            split, training protocol or research conclusions.
+          </p>
+          <div class="callout">
+            <strong>Review scope:</strong> compare
+            <code>refactor/common-utils</code> against
+            <code>fix/real-run-artifact-safety</code>. This is a stacked PR:
+            review/merge
+            <a
+              href="https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/3"
+              >PR #3</a
+            >
+            first, then rebase this branch onto the updated main and retarget
+            its PR before merging. No PR is merged by adding this reference.
+          </div>
+          <h3>What moved—and what deliberately stayed separate</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Shared helper</th>
+                  <th scope="col">Preserved contract</th>
+                  <th scope="col">Where to inspect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>save_json(path, value)</code></td>
+                  <td>
+                    Complete finite JSON; same-directory temporary file; atomic
+                    hardlink publication that refuses existing files, symlinks
+                    and racing destinations.
+                  </td>
+                  <td rowspan="3">
+                    <a href="src/cp4285/common/utils.py"
+                      ><code>src/cp4285/common/utils.py</code></a
+                    ><br />Standard library only. All three function bodies are
+                    unchanged from the safety checkpoint.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>sha256(path)</code></td>
+                  <td>
+                    Hash file contents in 1 MiB chunks. Filesystem errors
+                    propagate to the caller.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>millis(date)</code></td>
+                  <td>
+                    Convert configured ISO dates to UTC Unix milliseconds.
+                    Invalid dates still raise an error.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Neural ingestion, the CLI, the pilot and classical report output now
+            import from <code>cp4285.common.utils</code>. Loading these helpers
+            alone no longer imports DuckDB or HTTP/model libraries. Neural and
+            classical loaders, split construction and evaluation stay in their
+            respective modules because their protocols differ. The classical
+            cache-key hash is a different operation, not a file checksum.
+          </p>
+          <h3>Evidence and limits</h3>
+          <ul>
+            <li>
+              <strong>Utility checkpoint:</strong> 34 tests passed, including
+              the new multi-chunk file-hash, UTC-date and error-propagation
+              check. Existing download-integrity, JSON-race and no-overwrite
+              tests still exercise the shared behavior.
+            </li>
+            <li>
+              <strong>Verification:</strong> Ruff lint/format, primary
+              diagnostics and source/wheel builds passed. Function-body AST
+              comparison confirmed a behavior-preserving move; an isolated wheel
+              import exercised the packaged helpers and overwrite refusal.
+              Independent read-only code review found no issues.
+            </li>
+            <li>
+              <strong>Reference maintenance:</strong> a separate offline check
+              in
+              <a href="tests/test_workspace.py"
+                ><code>tests/test_workspace.py</code></a
+              >
+              verifies anchors, local links, self-containment and absence of
+              local-machine publication metadata. Together with the utility
+              checkpoint this gives 35 tests, not 35 research findings.
+            </li>
+            <li>
+              <strong>No new experiment:</strong> no full dataset acquisition or
+              real neural training occurred. Classical results remain
+              contributor-reported; a fair classical/neural comparison, B
+              interfaces and multi-seed neural results remain open.
+            </li>
+            <li>
+              <strong>Historical sources:</strong> earlier test counts, Git
+              states, file/line references and generated-run paths are retained
+              as dated evidence. Ignored run artifacts are not shipped with this
+              page; consult the code and current documentation for present
+              behavior.
+            </li>
+          </ul>
+          <h3>How to use and maintain this reference</h3>
+          <p>
+            Open <code>reference.html</code> from a repository checkout in a
+            browser; no build, server or remote assets are required. The
+            original ten-section narrative, five diagrams and integration/safety
+            appendix retain their structure. Only the publication
+            framing/navigation was adapted, with the personal checkout path and
+            disposable-page deletion instruction removed. The original temporary
+            teaching copy was left untouched.
+          </p>
+          <p>
+            For later checkpoints, append a dated section, add navigation and
+            update the top status notice. Do not silently rewrite earlier
+            execution evidence or treat proposals as team approval. This guide
+            supplements <a href="CONTEXT.md">CONTEXT.md</a>, the
+            <a href="docs/IMPLEMENTATION.md">runbook</a> and the
+            <a href="docs/AI_LOG.md">AI-use log</a>; it is not the course
+            submission deck.
+          </p>
+          <p class="small">
+            <a href="#review-status">Back to current status</a> ·
+            <a href="#what-i-understand">Original project walkthrough</a> ·
+            <a href="#update-classical"
+              >Why the model scores are not comparable yet</a
+            >
+          </p>
+        </section>
+        <!-- APPENDED REVIEWER CHECKPOINT 2026-09-28 END -->
+        <!-- APPENDED SASREC WALKTHROUGH 2026-09-28 START -->
+        <section id="sasrec-architecture">
+          <span class="section-num">17 / SASREC, FROM EVENTS TO SCORES — 28 SEPTEMBER 2026</span>
+          <h2>What goes into SASRec, what it learns, and what retention measures.</h2>
+          <p class="lead">
+            SASRec means self-attentive sequential recommendation. It turns a sequence
+            of item IDs into context-dependent vectors. We use those vectors to learn
+            from observed next items, then rank a fixed held-out item after learning
+            continues. The model architecture and our experimental timeline are two
+            different parts of that story.
+          </p>
+          <div class="callout">
+            <strong>Scope:</strong> this explains the implemented original-architecture
+            PyTorch port and our current A-only pilot, not a new model or an Amazon result.
+            The small numbers below are invented for tracing tensors. The earlier
+            walkthrough remains intact; this appendix sharpens its terminology and adds detail.
+          </div>
+          <p class="small">
+            <a href="#sasrec-events">Events and vocabulary</a> ·
+            <a href="#sasrec-example">One reviewer</a> ·
+            <a href="#sasrec-shapes">Tensor shapes</a> ·
+            <a href="#sasrec-block">Inside attention</a> ·
+            <a href="#sasrec-loss">Training objective</a> ·
+            <a href="#sasrec-retention">Retention arithmetic</a> ·
+            <a href="#sasrec-updates">What changes</a> ·
+            <a href="#sasrec-check">Runnable check and sources</a>
+          </p>
+
+          <h3 id="sasrec-events">1. The model sees item IDs—not stars, ASIN strings or user embeddings.</h3>
+          <p>
+            A source row is <code>(user_id, parent_asin, rating, timestamp)</code>.
+            Preparation filters ratings, removes exact duplicate rows and ambiguous
+            same-user timestamp ties, chooses the bounded cohort from initial-period
+            eligibility, and orders the remaining events. The default
+            <code>min_rating = 1.0</code> keeps every valid 1–5-star review as an event.
+            A one-star review is still an observed next item, not a positive endorsement.
+          </p>
+          <p>
+            User identity groups the sequence; timestamps determine ordering, the cutoff
+            and the continuation window. Neither becomes a model feature. Ratings do not
+            enter the tensor or serve as regression labels. Learned sequence positions
+            encode slot order, <strong>not elapsed days</strong>. There is no learned
+            user-ID table in this SASRec implementation.
+          </p>
+          <pre><code>Raw, chronologically ordered reviews:
+(user, product A, 5 stars, t1)
+(user, product B, 1 star,  t2)
+(user, product C, 3 stars, t3)
+
+After mapping these products to illustrative IDs:
+history = [1, 2]    target = 4
+Question: which item comes next? Not: how many stars will item 4 receive?</code></pre>
+          <p>
+            The catalogue is the sorted union of products in the selected users'
+            <strong>initial training prefixes</strong>, excluding their final two
+            pre-cutoff events as vocabulary-building observations. If
+            <code>item_ids[i]</code> is an original ASIN, its model ID is
+            <code>i + 1</code>. With <code>N = len(item_ids)</code>, IDs run from
+            <code>1</code> to <code>N</code>; ID <code>0</code> is padding only.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h4>The item table stays the same size</h4>
+              <p><code>E.shape = [N + 1, d]</code>. Every real catalogue row is allocated
+                immediately and initialized with random Glorot/Xavier values. Row 0 is
+                set to zero and stays zero under the normal training path. There are
+                no null rows reserved for future products.</p>
+            </div>
+            <div class="card">
+              <h4>The permitted history can grow</h4>
+              <p>A later review of a known item can extend that user's prefix. An unseen
+                ASIN has no ID or embedding here: its event is counted as out of vocabulary
+                (OOV), skipped, and never appended. New products require a different,
+                explicitly designed catalogue-expansion experiment.</p>
+            </div>
+          </div>
+          <p>
+            <strong>Allocated does not mean well trained.</strong> A product's initial
+            review qualifies it for the catalogue, but final-window truncation and
+            stochastic user sampling can leave a row without an update in the short
+            pilot. With default embedding L2 of zero, merely having a row does not
+            guarantee a useful learned representation or even initial gradient exposure.
+          </p>
+          <p class="ref">
+            Sources: <a href="src/cp4285/data.py"><code>data.prepare</code></a>,
+            <a href="src/cp4285/model.py"><code>SASRec.__init__</code></a>,
+            <a href="configs/pilot.toml">pilot defaults</a>.
+          </p>
+
+          <h3 id="sasrec-example">2. Trace one reviewer through the four prepared lists.</h3>
+          <p>
+            Assume the cleaned timeline below, with the three later events inside the
+            configured update window. Use a toy catalogue of <strong>N = 20</strong> and
+            history width <strong>L = 5</strong>; the real default is L = 50. Every numeric
+            ID already exists in the cohort's initial vocabulary, including 5, 6, 7 and 8
+            through other initial training observations. <code>Z</code> is an unknown
+            ASIN, not an allocated item ID.
+          </p>
+          <pre><code>time:   1   2   3   4  |  7  |  8  |  2021-01-01  |  5   Z   6
+role:   training prefix |  v  |  r  |     cutoff    |  later stream
+
+v = validation event's item ID, 7
+r = retention event's item ID, 8</code></pre>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Prepared list</th><th scope="col">Stored history</th><th scope="col">Target</th><th scope="col">Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>train</td><td><code>[1]</code></td><td>2</td><td>Next training event after item 1.</td></tr>
+                <tr><td>train</td><td><code>[1, 2]</code></td><td>3</td><td>Previous target is now permitted context.</td></tr>
+                <tr><td>train</td><td><code>[1, 2, 3]</code></td><td>4</td><td>Final initial-training row for this user.</td></tr>
+                <tr><td>validation</td><td><code>[1, 2, 3, 4]</code></td><td>7</td><td>Full training prefix; validation target held out.</td></tr>
+                <tr><td>retention</td><td><code>[1, 2, 3, 4]</code></td><td>8</td><td>Same prefix; the validation event is not inserted.</td></tr>
+                <tr><td>continuation</td><td><code>[1, 2, 3, 4]</code></td><td>5</td><td>One fresh known-item event.</td></tr>
+                <tr><td>No row for Z</td><td>Unchanged</td><td>None</td><td><code>continuation_oov += 1</code>; no prefix append.</td></tr>
+                <tr><td>continuation</td><td><code>[1, 2, 3, 4, 5]</code></td><td>6</td><td>Context grows only with permitted known-item events.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Each actual record also keeps <code>user</code> and <code>timestamp</code>;
+            the model-facing fields are a one-dimensional <code>history</code> list and
+            one integer <code>target</code>. Preparation clips each stored history to
+            its last L IDs and sorts examples by timestamp then user. It constructs
+            these rows before training: <strong>SASRec does not append its predictions
+            to the observed history</strong> in this pilot.
+          </p>
+          <p>
+            If 7 or 8 were OOV, that corresponding validation or retention example
+            would be omitted and counted; one split can keep a user whom the other
+            drops. Other examples for that user need not disappear. An entirely empty
+            partition stops preparation rather than producing a meaningful zero score.
+          </p>
+          <div class="callout warn">
+            <strong>Hold out events, not product IDs.</strong> The reserved review events
+            do not become training targets or training history entries. Their products
+            are not globally forbidden: a retained target must already be familiar from
+            some initial training observation, possibly an earlier review by this same
+            user. A different, later review of that same product can also be a legitimate
+            continuation event. Equal item IDs do not identify equal review events.
+          </div>
+          <p>
+            Both validation and retention ask from the training prefix ending at 4.
+            Retention is therefore a <strong>fixed historical-anchor task</strong> that
+            skips the validation event, not the usual immediate-next-item test from a
+            prefix including 7. This is our current experiment contract, not a requirement
+            of SASRec. Its interpretation and potentially different retained cohorts
+            remain research-design questions.
+          </p>
+          <p class="ref">
+            Source: <a href="src/cp4285/data.py"><code>prepare</code>, including
+            <code>example</code>, <code>item_map</code> and <code>skipped</code></a>.
+          </p>
+
+          <h3 id="sasrec-shapes">3. From integers to contextual vectors to catalogue scores.</h3>
+          <p>
+            Let <strong>b</strong> be batch size (not domain B), <strong>L</strong> history
+            width, <strong>d</strong> hidden size, and <strong>N</strong> catalogue size.
+            Defaults: L = 50, d = 50, two blocks, one attention head and dropout 0.5.
+            L and d happen to share a value; sequence length and vector width are
+            different axes and can be configured separately.
+          </p>
+          <figure>
+            <p class="diagram-title">Same architecture for initial training, continuation and evaluation</p>
+            <div class="flow">
+              <div class="node"><b>History IDs [b, L]</b><small>Left-pad with zero.<br />Keep the latest item at slot L − 1.</small></div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node"><b>Contextual states [b, L, d]</b><small>Item + position vectors.<br />Two causal SASRec blocks + final normalization.</small></div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node"><b>Scores [b, N]</b><small>Last state [b, d] × real item table transpose [d, N].</small></div>
+            </div>
+            <figcaption>The full-score route uses only the last contextual state. Training instead gathers states at supervised positions and scores their sampled positive/negative items.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Object</th><th scope="col">Shape</th><th scope="col">Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>History tensor</td><td><code>[b, L]</code>, integer</td><td>IDs, not one-hot vectors or ratings.</td></tr>
+                <tr><td>Item table E</td><td><code>[N + 1, d]</code></td><td>Shared by every user and by input lookup/output scoring.</td></tr>
+                <tr><td>Position table P</td><td><code>[L, d]</code></td><td>Learned vectors for slots 0 through L − 1.</td></tr>
+                <tr><td>Forward states</td><td><code>[b, L, d]</code></td><td>One context-dependent vector per input position.</td></tr>
+                <tr><td>Last state h</td><td><code>[b, d]</code></td><td>Not merely the last item's embedding: it incorporates permitted earlier context.</td></tr>
+                <tr><td>Full scores</td><td><code>[b, N]</code></td><td>Column j − 1 scores model item ID j; no padding candidate.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <pre><code># One retention example, actual default dimensions:
+history: [0, 0, ..., 0, 1, 2, 3, 4]   [1, 50]
+target:  [8]                          [1]
+forward(history):                    [1, 50, 50]
+scores(history):                     [1, N]
+
+X = Dropout(sqrt(d) * E[history] + P[0:L])
+X = X * history_nonpadding_mask
+H = FinalLayerNorm(two_SASRec_blocks(X))
+scores = H[:, -1, :] @ E[1:].T</code></pre>
+          <p>
+            The input item vectors are scaled by √d; position vectors are not.
+            Positions are learned absolute sequence slots, not sinusoidal features.
+            Fixed left-padding keeps the latest item at index 49 for L = 50 regardless
+            of other examples in the batch. Empty histories and internal padding gaps
+            are rejected by the model.
+          </p>
+          <p>
+            <code>forward</code> returns states, <code>scores</code> returns raw real-valued
+            scores, and <code>sampled_loss</code> returns a scalar objective. None returns
+            predicted stars. Sorting scores would give a recommendation order, but the
+            evaluator only counts which items outrank the target. A high score is
+            <strong>not a calibrated next-item probability</strong>; the scoring API
+            applies no catalogue-wide softmax.
+          </p>
+          <p class="ref">
+            Sources: <a href="src/cp4285/pilot.py"><code>tensors</code></a>;
+            <a href="src/cp4285/model.py"><code>SASRec.forward</code> and <code>scores</code></a>.
+          </p>
+
+          <h3 id="sasrec-block">4. Inside a block: attention mixes the prefix; feedforward transforms each position.</h3>
+          <p>
+            A <strong>query</strong> represents what one position is looking for;
+            <strong>keys</strong> represent what the available positions offer;
+            <strong>values</strong> carry the information to combine. These are learned
+            linear projections, not separate raw input fields. Similar query/key vectors
+            receive larger attention weights, which mix the corresponding value vectors.
+          </p>
+          <figure>
+            <p class="diagram-title">One original SASRec block · repeated twice by default</p>
+            <div class="flow">
+              <div class="node"><b>Normalize for queries</b><small>U = LayerNorm(X)<br />Q from U; K and V from X.</small></div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node"><b>Causal attention + U</b><small>Mask, softmax, dropout, weighted values.<br />Concatenate heads; add normalized residual.</small></div>
+              <div class="arrow" aria-hidden="true">→</div>
+              <div class="node"><b>Normalize → feedforward</b><small>d → d → d, ReLU and dropout.<br />Add normalized residual; remask padding.</small></div>
+            </div>
+            <figcaption>This is not a generic TransformerEncoderLayer: normalized-query/raw-key-value inputs, normalized residuals, equal-width feedforward and no attention output projection are deliberate fidelity choices.</figcaption>
+          </figure>
+          <p>
+            Attention may look at the current input item and earlier permitted items,
+            never a later input position. In the toy initial history, the state at item 1
+            predicts 2 without attending to the later input 2; the state at 2 predicts 3
+            without attending to input 3. This causal mask lets several next-item losses
+            be computed in parallel without giving an earlier prediction its future input.
+          </p>
+          <pre><code>Real query position     May attend to      Supervised next item
+item 1                 1                  2
+item 2                 1, 2               3
+item 3                 1, 2, 3            4
+
+Item 4 is a label in this initial window, not an input to it.</code></pre>
+          <details>
+            <summary>The exact block equations and masks used by this port</summary>
+            <p>
+              For H attention heads, each head has width <code>d_h = d / H</code>;
+              d must be divisible by H. Q, K and V become
+              <code>[b, H, L, d_h]</code>, and attention logits have shape
+              <code>[b, H, L, L]</code>. The default H = 1 uses all 50 features in one head.
+              Each Linear below includes a learned bias.
+            </p>
+            <pre><code>U = LN_attention(X)                    # normalize each d-feature vector
+Q = Linear_Q(U)
+K = Linear_K(X)
+V = Linear_V(X)
+
+A = softmax(mask(Q @ K.transpose(-2, -1) / sqrt(d_h)))
+A = A * query_present_mask
+Y = concat_heads(Dropout(A) @ V) + U   # no attention output projection
+
+Z = LN_feedforward(Y)
+F = Dropout(Linear_2(Dropout(ReLU(Linear_1(Z)))))
+X_next = (Z + F) * history_nonpadding_mask</code></pre>
+            <ul>
+              <li><strong>Normalization:</strong> layer norms have learned scale/bias and
+                epsilon <code>1e-8</code>; they normalize features within a position, not across users.</li>
+              <li><strong>Key mask:</strong> upstream-style presence is computed from nonzero
+                incoming sequence vectors. It is combined with a lower-triangular causal mask.</li>
+              <li><strong>Query mask:</strong> presence is computed from normalized queries.
+                The original history-ID mask is reapplied after every block so padded
+                computations do not become context for the next block.</li>
+              <li><strong>All-masked rows:</strong> masked logits use finite
+                <code>−(2**32) + 1</code>, avoiding all-negative-infinity softmax NaNs.
+                Padded results are subsequently discarded by remasking.</li>
+              <li><strong>Feedforward:</strong> two pointwise d→d linear layers with ReLU
+                between them, equivalent to width-1 convolutions. Attention mixes positions;
+                these layers transform each position's features separately.</li>
+              <li><strong>Residuals:</strong> attention adds U, not raw X; feedforward adds Z,
+                not its unnormalized input. Concatenated heads have no extra output projection.</li>
+              <li><strong>Dropout:</strong> used on input embeddings, attention weights and both
+                feedforward stages during training; disabled by <code>model.eval()</code>.
+                Attention softmax is over history positions, not catalogue items.</li>
+            </ul>
+            <p>
+              A final layer norm follows the blocks. Its learned bias means final padded
+              output vectors need not be identically zero; this is harmless here because
+              padded targets are excluded and scoring uses the nonpadding last position.
+              The item-table padding row itself remains zero.
+            </p>
+          </details>
+          <p class="ref">
+            Sources: <a href="src/cp4285/model.py"><code>SASRecBlock.forward</code></a>,
+            <a href="tests/test_sasrec.py"><code>reference_states</code> and equation tests</a>,
+            <a href="docs/SASREC.md">pinned upstream fidelity checklist</a>.
+            NumPy equation checks are not execution of the original TensorFlow runtime or reproduction of its benchmarks.
+          </p>
+
+          <h3 id="sasrec-loss">5. Training scores two items per active position—not the whole catalogue.</h3>
+          <p>
+            At a supervised position the contextual vector is <code>h ∈ R^d</code>.
+            The positive is an observed next item; the negative is one randomly sampled
+            eligible item, <strong>not a known dislike</strong>. Both scores use the same
+            item table E that supplied the input embeddings, with no separate output table.
+          </p>
+          <div class="formula">
+            s+ = h · E[positive]<br />
+            s− = h · E[negative]<br />
+            ℓ = softplus(−s+) + softplus(s−)<br />
+            = −log σ(s+) − log σ(−s−)
+          </div>
+          <p>
+            Here σ is sigmoid, and <code>softplus(x) = log(1 + exp(x))</code>, evaluated
+            with PyTorch's numerically stable implementation. Averaging this sum over
+            M active positions yields one loss; it is not divided by all padded slots
+            or by 2M. At both scores zero, a position contributes 2 log 2 ≈ 1.3863.
+          </p>
+          <p>
+            This is <strong>two independent binary logistic terms</strong>, not a BPR
+            objective on <code>s+ − s−</code>, a margin constraint, or full-catalogue
+            cross-entropy. Its direct score gradients encourage s+ upward and s− downward;
+            finite shared-parameter updates do not guarantee the positive outranks every
+            alternative, or that retention improves after each step.
+          </p>
+          <pre><code>loss = mean_over_active_positions(softplus(-s_positive) + softplus(s_negative))
+     + 0.5 * l2_emb * (sum(E**2) + sum(P**2))</code></pre>
+          <p>
+            The optional L2 term penalizes item and position embeddings only. With
+            <code>l2_emb = 0.0</code> it contributes zero. It is not blanket weight decay
+            over the encoder. Dropout is still active during training.
+          </p>
+          <h4>Initial phase: one final window per sampled user, with shifted labels</h4>
+          <p>
+            The three stored training rows above are not trained as three overlapping
+            windows. <code>initial_sequences</code> chooses the final row for this user
+            and reconstructs their entire initial seen-item set from all stored rows.
+            Users are sampled uniformly with replacement; their final windows provide
+            all-position supervision. Earlier items beyond the window are not repeatedly
+            supervised merely because the prepared JSON contains earlier rows.
+          </p>
+          <pre><code># Toy L = 5. Each line has exactly five positions.
+history   [0, 0,  1,  2,  3]
+positive  [0, 0,  2,  3,  4]
+negative  [0, 0, n1, n2, n3]
+active    [0, 0,  1,  1,  1]
+                  1→2 2→3 3→4</code></pre>
+          <p>
+            Each n is a separate uniform draw from 1…N rejecting this user's
+            <em>entire initial training item set</em>, here {1,2,3,4}, even when some
+            of those items lie outside the final visible window. Draws can repeat.
+            Sampling never consults held-out labels to exclude their IDs: an otherwise
+            eligible validation/retention product can be sampled as a negative.
+            If no eligible negative exists, the code raises an error rather than looping forever.
+          </p>
+          <h4>Continuation: only the fresh final target has a loss</h4>
+          <pre><code># First later known event: item 5
+history   [0, 1, 2, 3, 4]
+positive  [0, 0, 0, 0, 5]
+negative  [0, 0, 0, 0, n]
+
+# Z is dropped. Next known event: item 6
+history   [1, 2, 3, 4, 5]
+positive  [0, 0, 0, 0, 6]
+negative  [0, 0, 0, 0, n]</code></pre>
+          <p>
+            Continued negatives reject the supplied history and fresh target, not the
+            entire historical user set or future observations. Here the exclusions are
+            {1,2,3,4,5}, then {1,2,3,4,5,6}. After a history is truncated, older omitted
+            IDs are not automatically excluded. Positive zero marks an inactive loss slot;
+            it is not training against padding as a real product.
+          </p>
+          <div class="callout warn">
+            <strong>Context is not frozen just because its label is masked.</strong>
+            Earlier positions have no separate replayed target losses during continuation,
+            but the fresh-target gradient still flows through attention and the embeddings
+            of historical context items. The input/output table is tied. Thus “old items
+            are not trained again” is too strong; “old target losses are not replayed”
+            is the intended guarantee. A real repeated review can also be a fresh event.
+          </div>
+          <p class="ref">
+            Sources: <a href="src/cp4285/pilot.py"><code>initial_sequences</code>,
+            <code>training_tensors</code> and <code>update</code></a>;
+            <a href="src/cp4285/model.py"><code>sampled_loss</code></a>.
+          </p>
+
+          <h3 id="sasrec-retention">6. Retention is a ranking metric, not the training loss.</h3>
+          <p>
+            Validation uses <code>[0,1,2,3,4] → 7</code>; retention uses
+            <code>[0,1,2,3,4] → 8</code>. Evaluation switches off dropout and gradients,
+            scores every real item in the initial catalogue, and does not exclude seen
+            products. The target score is column <code>8 − 1</code>, because score column
+            zero corresponds to item ID 1 rather than padding.
+          </p>
+          <p>
+            “Training never uses full ranking” needs qualification: the <em>gradient loss</em>
+            uses sampled items, but full-catalogue <strong>validation runs after each initial
+            epoch</strong> and selects the checkpoint. The first best validation NDCG checkpoint
+            is kept; ties do not replace it. Retention is never used to select that checkpoint.
+          </p>
+          <div class="formula">
+            rank(r) = 1 + count(s<sub>j</sub> &gt; s<sub>r</sub>)<br />
+            &nbsp; + count(s<sub>j</sub> = s<sub>r</sub> and j &lt; r)<br />
+            Recall@10 = 1 if rank ≤ 10, otherwise 0<br />
+            NDCG@10 = 1 / log₂(rank + 1) if rank ≤ 10, otherwise 0
+          </div>
+          <p>
+            These are per-example quantities with one relevant target. Recall@10 is
+            therefore also Hit@10. Reported metrics are their mean over the retained
+            evaluation examples, <strong>not over all originally selected users</strong>.
+            OOV omissions can change that denominator before training; it stays fixed
+            across continuation checkpoints.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Invented item score</th><th scope="col">Value</th><th scope="col">Effect on target 8's rank</th></tr></thead>
+              <tbody>
+                <tr><td>Item 2</td><td>0.9</td><td>Strictly higher: add 1.</td></tr>
+                <tr><td>Item 11</td><td>0.7</td><td>Strictly higher: add 1.</td></tr>
+                <tr><td>Item 3</td><td>0.4</td><td>Equal score, lower ID: add 1.</td></tr>
+                <tr><td>Target item 8</td><td>0.4</td><td>Its own position contributes the initial 1.</td></tr>
+                <tr><td>Every other item in 1…20</td><td>−1.0</td><td>Lower score: add 0.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Hence rank = 1 + 2 + 1 = <strong>4</strong>, Recall@10 = <strong>1</strong>,
+            and NDCG@10 = 1/log₂(5) ≈ <strong>0.4307</strong>. These are invented scores
+            for checking arithmetic, not output from a trained project model. The code
+            obtains rank by comparisons, without needing to sort the full list.
+          </p>
+          <p class="ref">
+            Source: <a href="src/cp4285/pilot.py"><code>ranking_metrics</code>,
+            <code>evaluate</code> and validation selection in <code>run</code></a>.
+          </p>
+
+          <h3 id="sasrec-updates">7. What changes when the stream continues?</h3>
+          <figure>
+            <p class="diagram-title">Fixed question, changing learned parameters</p>
+            <div class="two">
+              <div class="node"><b>Frozen retention example</b><small>History [1,2,3,4] · target 8.<br />Same item-ID map, candidates and tie rule.<br />Later events never extend this evaluation prefix.</small></div>
+              <div class="node"><b>Fresh continuation examples</b><small>[1,2,3,4] → 5<br />[1,2,3,4,5] → 6<br />Loss updates existing parameters, not catalogue size.</small></div>
+            </div>
+            <div class="callout"><strong>Target logit at cycle c = f(history; θ<sub>c</sub>) · E<sub>c</sub>[8]</strong><br /><span class="small">Compare this logit with every other catalogue score to obtain the rank. The fixed inputs can produce a new rank because the encoder and tied item table can change.</span></div>
+            <figcaption>The retention question is fixed while parameters move. A separate frozen model keeps the selected initial parameters; neither a downward curve nor improvement is guaranteed.</figcaption>
+          </figure>
+          <p>
+            Adam can update the item table, positional table, attention projections,
+            feedforward layers and normalization parameters through the fresh loss;
+            no layer is deliberately frozen in the A-only continuation branch. Sparse
+            example exposure does not imply every row changes on every step. Model weights
+            carry forward; Adam is reset once at the phase boundary and retained across
+            later cycles. Default learning rates are 0.001 initially and 0.0001 for continuation.
+          </p>
+          <p>
+            Prefix growth belongs to data construction: after observing known item 6,
+            the permitted full prefix is [1,2,3,4,5,6]; the next L=5 window would be
+            [2,3,4,5,6]. The retention row still uses [0,1,2,3,4] and target 8.
+            Conceptually its cohort has an [R,L] history matrix for R retained examples,
+            but <code>evaluate</code> actually builds and scores it batch by batch each time.
+          </p>
+          <p>
+            The pipeline saves the validation-selected initial checkpoint, verifies reload
+            scores and evaluates two branches: an unchanged frozen copy and fresh A-only
+            continuation. Default cycles consume 128 × 5 × 3 = 1,920 fresh targets, without
+            silently recycling an exhausted stream. Default three initial epochs give just
+            nine updates at 500 initial users—not evidence of convergence or thorough catalogue coverage.
+          </p>
+          <p>
+            B-domain interfaces, mixed neural updates and a common-protocol classical/neural
+            comparison remain unimplemented. This architecture explanation neither resolves
+            the fixed-anchor split question nor demonstrates forgetting on real data.
+          </p>
+
+          <h3 id="sasrec-check">8. Check the worked example instead of trusting the diagram.</h3>
+          <p>
+            <a href="tests/test_sasrec.py"><code>test_reference_walkthrough_tensors_and_ranking</code></a>
+            checks the five-wide initial/continuation tensors, full-score dot products,
+            sampled loss, a history-only item's gradient and the rank-4 arithmetic above.
+            It is an offline synthetic check,
+            not a new experiment. The existing NumPy reference checks additionally cover
+            one/two-head equations, causal isolation, finite gradients and padding behavior.
+          </p>
+          <pre><code>uv run pytest -q tests/test_sasrec.py -k reference_walkthrough
+uv run pytest -q</code></pre>
+          <p>
+            This appendix adds one worked-example regression to the previous 35 checks;
+            <strong>all 36 tests passed at this checkpoint</strong>.
+            The historical counts in sections 05, 14 and 16 describe their own checkpoints;
+            they are not statements of the latest suite size.
+          </p>
+          <div class="question">
+            <div class="eyebrow">Explain it back — hypothetical events, not results</div>
+            <p>A later product Z has no initial ID; a later review repeats product 8, whose
+              earlier review is the retention event. Which event can train? Can its update
+              change retention even though the retention prefix never grows?</p>
+          </div>
+          <details>
+            <summary>Answer and the distinction to preserve</summary>
+            <p>Z is omitted. The separate later review of known product 8 can be a fresh
+              training target if it passes the data rules; the reserved earlier event
+              remains excluded. Updating shared encoder parameters and the tied item table
+              can change the score/rank of item 8 from the fixed retention history. That
+              possibility is the retention question—not proof of leakage, degradation,
+              causal B interference or improvement.</p>
+          </details>
+          <p class="ref">
+            Evidence: inspected <a href="src/cp4285/data.py">preparation</a>,
+            <a href="src/cp4285/model.py">model</a>,
+            <a href="src/cp4285/pilot.py">pilot</a>,
+            <a href="configs/pilot.toml">configuration</a> and
+            <a href="tests/test_sasrec.py">equation/example tests</a>.
+            See <a href="docs/SASREC.md">SASRec source provenance and explicit differences</a>
+            for the pinned original architecture and limits of the port.
+          </p>
+          <p class="small"><a href="#review-status">Current PR status</a> · <a href="#sasrec-architecture">Back to this walkthrough</a></p>
+        </section>
+        <!-- APPENDED SASREC WALKTHROUGH 2026-09-28 END -->
+        <footer>
+          <strong>Repository reviewer reference.</strong> Self-contained HTML
+          with no remote scripts, styles, fonts or analytics.<br />
+          Preserve the narrative and append dated updates; implementation
+          contracts remain in the source,
+          <a href="CONTEXT.md">current context</a> and
+          <a href="docs/IMPLEMENTATION.md">runbook</a>.
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

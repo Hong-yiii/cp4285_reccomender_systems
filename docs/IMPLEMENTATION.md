@@ -75,7 +75,7 @@ Paths within the config resolve from the repository root. CLI output paths resol
 
 ### Artifact safety checkpoint
 
-Audit reports, prepared snapshots, download manifests, neural metrics and classical JSON reports use the same **create-only** writer. It serializes finite JSON before publication, writes a same-directory temporary file, then links the completed file into place without replacing an existing file or symlink—even if another writer wins the destination race. Failed publication cleans its temporary file. The filesystem must support hardlinks; unsupported filesystems fail rather than fall back to overwriting. Atomic visibility is not a guarantee of power-loss durability or a multi-file transaction.
+Audit reports, prepared snapshots, download manifests, neural metrics and classical JSON reports use the same **create-only** writer, `save_json` in `src/cp4285/common/utils.py`. It serializes finite JSON before publication, writes a same-directory temporary file, then links the completed file into place without replacing an existing file or symlink—even if another writer wins the destination race. Failed publication cleans its temporary file. The filesystem must support hardlinks; unsupported filesystems fail rather than fall back to overwriting. Atomic visibility is not a guarantee of power-loss durability or a multi-file transaction.
 
 For repeat audits, choose a new `audit --output reports/audit-02.json`. For a new split, change `data.prepared` to a new snapshot path in the config; `prepare` has no `--output` or `--overwrite` flag. Pilot runs still require a new run directory. Existing research artifacts are never silently replaced by these JSON writers. Classical caches and model-checkpoint restart semantics are unchanged.
 
@@ -107,6 +107,7 @@ The frozen control and A-only continued training are implemented. Before adding 
 | Path | Purpose |
 | --- | --- |
 | `pyproject.toml`, `uv.lock`, `.python-version` | Managed environment and console command |
+| `src/cp4285/common/utils.py` | Standard-library helpers: `save_json`, file `sha256`, UTC `millis` |
 | `src/cp4285/data.py` | Official download, ID audit and pilot partitions |
 | `src/cp4285/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
 | `src/cp4285/cli.py` | `cp4285` command |
@@ -116,5 +117,7 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `configs/pilot.toml` | Reviewable experiment defaults |
 | `slides/index.html` | Six-slide narrative with data and implementation status |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |
+
+Import shared helpers from `cp4285.common.utils`. Keep neural and classical loaders, splits and evaluators in their own modules: their research protocols differ. The shared utilities do not import database or model dependencies.
 
 The project now lives in its own repository, separate from the course archive. See [MIGRATION.md](MIGRATION.md) for the layout change. No deployment or course submission is configured.
