@@ -2,6 +2,29 @@
 
 Status: implemented, with **contributor-reported real Amazon runs from the originating workspace** (28 September 2026). Those runs were not rerun during the SASRec integration; raw logs are not included here. The results are **single-seed, validation-split exploratory results**, not tuned final numbers. The protocol differs from the SASRec pilot (see [Protocol](#protocol)), so the two sets of numbers are not directly comparable yet.
 
+## Rigorous study (in progress, 28 September 2026)
+
+`uv run cp4285 classical study` supersedes the single-seed sweeps below for reporting. SLIST is out of the study scope at the team's request (its code stays in `models.py`).
+
+- **Model selection on validation only:** QR rank k ∈ {32, 64, 128, 256} × popularity weight β ∈ {0, 0.25}, clean data. Observed validation NDCG@10 (best β): 0.0119, 0.0130, 0.0141, 0.0150, so k = 256, β = 0. The best rank is at the edge of the grid.
+- **Test split:** models are refitted on train + validation events and scored on each reviewer's last event, over all 368,228 A items.
+- **Paired design:** the same 50K sampled test users at every seed and level.
+- **Three seeds:** each changes the sampled B reviewers and the QR random start.
+- **Uncertainty:** paired bootstrap 95% CI (1,000 user resamples) and a one-sided p-value for each change against clean (`evaluate.paired_change`).
+- **Mechanism control:** a QR model with rank k × (1 + level). If fixed capacity drives the drop, it should degrade much less.
+- **Artifacts:** create-only JSON and NPZ; per-(seed, level) checkpoints under `reports/classical/study_ckpt_*` let a stopped run resume.
+
+Preliminary, observed in this workspace, seed 0 only, no intervals yet (NDCG@10, test split):
+
+| Model | Clean | B = 10% | B = 50% |
+| --- | --- | --- | --- |
+| Markov chain | 0.0198 | 0.0198 | 0.0198 |
+| QR, k = 256 | 0.0125 | 0.0124 | 0.0118 |
+| QR, k grows with data | 0.0125 | 0.0126 | 0.0123 |
+| Popularity | 0.0064 | 0.0064 | 0.0064 |
+
+The fixed-rank drop at 50% (about −6%) is larger than the growing-rank drop (about −2%), consistent with the capacity explanation. Seeds 1–2, levels 100% and 140%, and the confidence intervals are still to be reported. For scale, published full-ranking SASRec scores on 25K-item Amazon'23 categories are 0.020–0.043 NDCG@10 ([ETEGRec, SIGIR 2025](https://arxiv.org/abs/2409.05546)); A here has 368K items.
+
 ## Question
 
 When interactions from B (Movies & TV) are added to training at increasing volume, how much does next-event ranking on A (Electronics) degrade for classical recommenders? Which model property decides that?
@@ -22,10 +45,12 @@ The `EXPERIMENT.md` note that isolated MF factors are an isolation control appli
 
 - Input: official Amazon'23 5-core ID files, the same files `cp4285 download` fetches. `--b data/raw/0core/Movies_and_TV.csv.gz` uses the unfiltered B file (17.3M events), because the 5-core B file only supplies 61% of A's training volume.
 - Every rating counts as an event. Leave-last-out per user (the official Amazon'23 rule): last event is test, second-to-last validation, the rest training. This is **not** the pilot's cutoff/cohort protocol.
+- `--targets m` (default 1) holds out each user's last m events as test targets and the m before them as validation targets; a repeated item counts once. m = 1 reproduces the rule above exactly. Users with fewer than 2m + 1 events are kept but lose training events first, then validation targets, so a large m leaves many users ranked with little or no history; a time-cutoff split suits the next-items task better (issue #8).
+- Test scoring (`study`, and `sweep`/`stream --split test`) refits on train + validation events, so the first test target is one step ahead of the history, as in the original SASRec evaluation. Before 28 September 2026 `sweep --split test` skipped the validation event and so predicted two steps ahead; reported sweeps used the validation split and are unaffected.
 - Designs (`contaminate.py`):
   - `disjoint`: whole B timelines become new users.
   - `shared`: the 168,901 A users (10.3%) who also appear in B get their B events from before their validation event merged into their timeline. This is capped at about 15% of A volume.
-- Evaluation: full ranking over all 368,228 A items (or A + B with `--full-catalog`), excluding the user's training items. Metrics are NDCG@10/20, Recall@10/20 and MRR on 20K sampled validation users. `base_share` reports how much of each model's capacity sits on A.
+- Evaluation: full ranking over all 368,228 A items (or A + B with `--full-catalog`), excluding the user's training items. Metrics are NDCG@10/20, Hit@10/20, Recall@10/20 and MRR on 20K sampled validation users. Hit@K is 1 if any of a user's targets reaches the top K; Recall@K is the number that do divided by min(m, K); NDCG@K divides by the ideal DCG of min(m, K) hits; MRR uses the best-ranked target. With m = 1, Hit@K equals Recall@K (older reports label it Recall). `base_share` reports how much of each model's capacity sits on A.
 - The models are refitted at each level. `classical stream` streams users instead, but so far only for PureSVD.
 
 ## Results: disjoint B (0-core Movies & TV), k=64, SLIST N=20K

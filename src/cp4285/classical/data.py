@@ -88,29 +88,68 @@ def load_domains(a, b, cache) -> tuple[Domain, Domain, int]:
 
 @dataclass
 class Split:
-    """Leave-last-out split of domain A."""
+    """Leave-last-out split of domain A.
+
+    valid and test hold one row per target, sorted by user, so a user's rows are adjacent.
+    """
 
     train_user: np.ndarray  # sorted by (user, time)
     train_item: np.ndarray
     train_ts: np.ndarray
     valid: np.ndarray  # (n, 2) user, item
     test: np.ndarray  # (n, 2) user, item
-    cutoff: np.ndarray  # (n, 2) user, timestamp of the validation event (end of training)
+    cutoff: np.ndarray  # (n, 2) user, timestamp of the first validation event (end of training)
+    valid_events: np.ndarray  # (n, 3) user, item, timestamp of every validation event
 
 
-def leave_last_out(d: Domain) -> Split:
+def leave_last_out(d: Domain, n_targets: int = 1) -> Split:
+    """Per user, the last n_targets events are test and the n_targets before are validation.
+
+    n_targets = 1 is the official Amazon'23 rule. Users with fewer events lose training
+    events first, then validation targets. A user's repeated item counts as one target.
+    """
+    m = n_targets
+    if m < 1:
+        raise ValueError("n_targets must be at least 1")
     order = np.lexsort((d.ts, d.user))
     u, i, t = d.user[order], d.item[order], d.ts[order]
-    last = np.r_[u[1:] != u[:-1], True]  # last event of each user
-    second = np.r_[last[1:], False] & ~last
-    train = ~(last | second)
+    starts = np.flatnonzero(np.r_[True, u[1:] != u[:-1]])
+    lens = np.diff(np.r_[starts, len(u)])
+    from_end = np.repeat(starts + lens, lens) - 1 - np.arange(len(u))  # 0 = last event
+    test = from_end < m
+    valid = (from_end >= m) & (from_end < 2 * m)
+    train = ~(test | valid)
+    vu, vt = u[valid], t[valid]
+    first = np.r_[True, vu[1:] != vu[:-1]]
     return Split(
         u[train],
         i[train],
         t[train],
-        np.c_[u[second], i[second]],
-        np.c_[u[last], i[last]],
-        np.c_[u[second], t[second]],
+        _targets(u[valid], i[valid]),
+        _targets(u[test], i[test]),
+        np.c_[vu[first], vt[first]],
+        np.c_[vu, i[valid], vt],
+    )
+
+
+def _targets(user: np.ndarray, item: np.ndarray) -> np.ndarray:
+    return np.unique(np.c_[user, item], axis=0)  # sorted by user, duplicates dropped
+
+
+def with_validation(split: Split) -> Split:
+    """Training data for the test protocol: train + the validation events.
+
+    Test targets are then one step ahead of the history, as in the original SASRec
+    evaluation. Events are appended unsorted; build_stream re-sorts by (user, time).
+    """
+    return Split(
+        np.r_[split.train_user, split.valid_events[:, 0]],
+        np.r_[split.train_item, split.valid_events[:, 1]],
+        np.r_[split.train_ts, split.valid_events[:, 2]],
+        split.valid,
+        split.test,
+        split.cutoff,
+        split.valid_events,
     )
 
 

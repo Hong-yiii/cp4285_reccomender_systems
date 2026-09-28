@@ -74,7 +74,8 @@ Use these on first appearance, or instead of the term. Check them against the so
 | Leave-last-out | For each shopper, hide their latest review for the final test and their second-latest for tuning; train on the rest. |
 | Validation vs test | Validation: hidden data used to choose settings. Test: hidden data used only to report the result, never to choose anything. |
 | NDCG@10 | Rank all products for each shopper and find the hidden one. Score 1 if it is first, 0.63 if second, less further down, 0 outside the top 10. Average over shoppers. Higher is better. |
-| Recall@10 | Share of shoppers whose hidden product appears in their top 10. |
+| Hit@10 | Share of shoppers whose hidden product appears in their top 10. Used when one product is hidden per shopper. |
+| Recall@10 | When several of a shopper's future products are hidden: how many appear in their top 10, divided by the number hidden (at most 10). Averaged over shoppers. |
 | MRR | Average of 1 ÷ the hidden product's rank: 1 if first, 0.5 if second, and so on. |
 | Full ranking | We rank every product, not the right one plus a small random sample, which would inflate scores [Krichene & Rendle 2020]. |
 | Checkpoint | A saved copy of the model at one point in training. |

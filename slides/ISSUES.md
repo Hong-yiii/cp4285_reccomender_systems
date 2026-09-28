@@ -13,7 +13,7 @@ Strike through or delete an item once it is fixed in the deck, and note who fixe
 | --- | --- | --- | --- |
 | D1 | Must | **Slide budget.** There are 22 slides, which is 20 once acknowledgements and references are excluded. That is the course maximum, and it includes the empty slide 7 and the version history (slide 22). | Fill slide 7 with the data introduction (D5). Replace slide 8 with neural slide N1. Hide the version history before exporting, which frees a place for N2. See [SLIDE-FLOW.md](../docs/SLIDE-FLOW.md#live-deck-review--28-september-2026). |
 | D2 | Must | **No neural slides.** Slides 5 and 8 still describe the neural model as undecided, but SASRec is selected and built. | Add N1 and N2 from [SLIDE-FLOW.md](../docs/SLIDE-FLOW.md#paste-ready-neural-slides). Fix slides 5 and 8 (below). |
-| D3 | Must | **Reviews are described as purchases.** Slides 10–11 say "bought", "purchases" and "last purchase". Each record is a star rating left on a date, not a purchase (P3). | Say "reviewed" and "latest review". Say once, on the data slide, that reviews stand in for what people bought or watched. |
+| D3 | Must | **Reviews are described as purchases.** Slides 10–11 say "bought", "purchases" and "last purchase". Each record is a star rating left on a date, not a purchase (P3). | ~~Say "reviewed" and "latest review".~~ Done on the pilot slides (randomwish, 28 Sep). Still open: say once, on the data slide, that reviews stand in for what people bought or watched. |
 | D4 | Should | **Six names for one idea:** off-sample data, contamination, perturbation, attack (vector), distribution shift and "mixed in" (P7). | Use "mix in Movies & TV" everywhere; the pilot slides already do. Define it once: "100% = as many Movies & TV reviews as Electronics training reviews." |
 | D5 | Should | **The dataset is never introduced.** Slide 9 gives sizes, but no slide says what Amazon Reviews 2023 is, what one record is, why only shoppers and products with five or more reviews are kept, or why these two categories (P3, P4). | Use slide 7 for this. Move slide 9's counts there, and add the 368K Electronics products and the five-review filter. |
 | D6 | Should | **Metrics are named before they are explained.** Slides 4–5 list NDCG@10, Recall@K and MRR. Slide 11 explains NDCG@10 clearly. Recall and MRR are never explained (P2). | Explain all three the first time they appear, or name only NDCG@10 until slide 11 and explain the other two on slide 14. |
@@ -31,7 +31,7 @@ Strike through or delete an item once it is fixed in the deck, and note who fixe
 | 2 Abstract | Should | Terms left unexplained: continual-learning recommender, off-sample data, collaborative filtering / matrix factorization, contamination. | Plain wording: "a recommender that keeps training as new reviews arrive"; "mixing in reviews from another category". |
 | 3 Motivation | Should | "Distribution shift" and "baseline domain" are unexplained. Also D9 and D10. | "The kind of reviews the model trains on changes, from Electronics only to a mix with Movies & TV." |
 | 4 Task | Must | Lists 10%, 50%, 100% and 200% mix levels, but slide 9 says 200% is impossible (140% is all the Movies & TV data). | Use 0%, 10%, 50%, 100% and 140%, as slide 17 does. |
-| 4 Task | Must | Says "Recall@K"; the results use Recall@10. | Say Recall@10. |
+| ~~4 Task~~ | ~~Must~~ | ~~Says "Recall@K"; the results use Recall@10.~~ | Fixed (randomwish, 28 Sep): slides 4, 5, 14, 16 and 18 say Hit@10, the name decided in [issue #8](https://github.com/Hong-yiii/cp4285_reccomender_systems/issues/8). |
 | 4 Task | Should | "Neural sequential / transformer recommender" and "schema compatibility" are unexplained. | Describe the neural model in one line (P1). Drop "schema compatibility"; the pilot settled it. |
 | 5 Method | Must | A bullet is cut off mid-sentence at "where feasible (w". | Finish or delete the sentence. |
 | 5 Method | Must | "SASRec-style where appropriate", but SASRec is selected and built. 200% appears again. | "Neural: SASRec, the original design, rebuilt in PyTorch." Use 140%. |
@@ -41,9 +41,9 @@ Strike through or delete an item once it is fixed in the deck, and note who fixe
 | 7 Data: exploration? | Must | Empty slide with a question-mark title. | Use it for the data introduction (D5). |
 | 8 Progress: technical plan | Must | Out of date. It weighs "SASRec / RNN / two-tower options" and a risk of "whether the attack vector is strong enough"; the pilot answered the second. | Replace with neural slide N1 and move the remaining risks to N2. |
 | 9 Pilot: how we tested it | Should | "All Movies & TV data joins as new shoppers" is a design choice, but the slide never says why, or what it means for the results. | Add a line: "so a model that keeps separate entries per product cannot be affected; only fixed-size models can be." |
-| 10 Pilot: three models | Must | "What people most often bought after your last item". See D3. | "Reviewed after your latest review." |
+| ~~10 Pilot: three models~~ | ~~Must~~ | ~~"What people most often bought after your last item". See D3.~~ | Fixed (randomwish, 28 Sep): "reviewed right after your latest product". |
 | 10 Pilot: three models | Should | "QR model" is a name with no meaning to the class. | "Compressed Markov chain (QR)". Explain k as the number of shared patterns it can keep. |
-| 11 How models work | Must | "Count purchases" and "last purchase". See D3. | "Count reviews" and "latest review". |
+| ~~11 How models work~~ | ~~Must~~ | ~~"Count purchases" and "last purchase". See D3.~~ | Fixed (randomwish, 28 Sep). The Markov card also says the reverse direction counts half, as in `transitions(back=0.5)`. |
 | 11–15 | Should | The QR size changes without warning: k = 256 on slide 11, rank 64 on slide 13, 256 on slides 12 and 15. | Put "pilot, 64 patterns" or "full study, 256 patterns" on every QR number. |
 | 12 Why only some get worse | Should | The 29% figure comes from the full study (256 patterns, 100% mix), but it sits in the pilot section next to the rank-64 pilot. | Label its source, or move it next to slide 15. |
 | 13 Pilot result | Should | Calls the popularity model "Benchmark"; slides 15–16 call it "Popularity". "(validation)" is unexplained. | Use "Popularity" throughout. Say "20K Electronics shoppers held out for tuning". |
@@ -56,6 +56,14 @@ Strike through or delete an item once it is fixed in the deck, and note who fixe
 | 18–19 Schedule | Must | Out of date. Week 7 still plans the pilot, which has run. Week 8 plans to implement SASRec, which is built and tested on made-up data. Week 10 assigns Hongyi "Tracking / Analysis". | Mark completed work. Week 8 becomes the first real Electronics run for SASRec. Align roles with slide 6. |
 | 21 References | Must | See D8. | — |
 | 22 Version history | Must | Only a V1.2 entry. | Add an entry, then hide the slide before export (D1). |
+
+## Fixed after this review
+
+Found and fixed on 28 September by randomwish, after the deck gained slides this review did not cover:
+
+- **How the matrix is modelled** showed a shoppers × products matrix, but the QR model factorises the product → next product table (`MarkovQRSVD`). It now shows that table; the zero corners are explained by no timeline linking the two domains.
+- **Results so far** read "with the formula ((rank × (1 + mix level))". Now "when QR's rank grows with the data: rank × (1 + mix level)".
+- **Evaluation protocol** defines Hit@10 where it is first listed (partly addresses D6).
 
 ## Open team decisions behind some issues
 

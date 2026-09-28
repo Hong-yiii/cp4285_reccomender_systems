@@ -120,7 +120,7 @@ Report both absolute domain scores and:
 - `RetentionLoss_A(alpha,t) = Q_A_initial - Q_A(alpha,t)`. Positive means worse than the initial checkpoint; negative means improvement.
 - `MixtureEffect_A(alpha,t) = Q_A(alpha,t) - Q_A(0,t)`. Negative means worse than A-only continued training at the same total update budget. This is distinct from losing initial capability.
 
-Use NDCG@10 as the proposed primary metric and Recall@10 as a secondary metric. For one relevant next-item target, Recall@10 equals Hit@10. Report B quality alongside A so that preserving A by failing to learn B is visible. Compare the initial frozen model with itself over the same test set as a basic evaluator check, then repeat trained comparisons across seeds.
+Use NDCG@10 as the proposed primary metric and Hit@10 as a secondary metric. For one relevant next-item target, Hit@10 equals Recall@10; they differ only when several future events count as targets (the classical `--targets` option). Report B quality alongside A so that preserving A by failing to learn B is visible. Compare the initial frozen model with itself over the same test set as a basic evaluator check, then repeat trained comparisons across seeds.
 
 These curves measure retention and adaptation under the stated protocol. They do not guarantee catastrophic forgetting, neural superiority, or malicious behavior in B.
 

@@ -73,7 +73,7 @@ def ranking_metrics(scores, targets, k):
     hit = rank <= k
     return {
         "ndcg": float((hit.float() / torch.log2(rank.float() + 1)).sum()),
-        "recall": float(hit.float().sum()),
+        "hit": float(hit.float().sum()),
         "count": len(targets),
     }
 
@@ -81,7 +81,7 @@ def ranking_metrics(scores, targets, k):
 @torch.no_grad()
 def evaluate(model, examples, batch_size, k, device):
     model.eval()
-    total = {"ndcg": 0.0, "recall": 0.0, "count": 0}
+    total = {"ndcg": 0.0, "hit": 0.0, "count": 0}
     for start in range(0, len(examples), batch_size):
         h, t = tensors(examples[start : start + batch_size], device, model.max_length)
         scores = model.scores(h)
@@ -95,7 +95,7 @@ def evaluate(model, examples, batch_size, k, device):
         raise ValueError("Evaluation needs at least one example")
     return {
         f"ndcg@{k}": total["ndcg"] / total["count"],
-        f"recall@{k}": total["recall"] / total["count"],
+        f"hit@{k}": total["hit"] / total["count"],
         "examples": total["count"],
     }
 

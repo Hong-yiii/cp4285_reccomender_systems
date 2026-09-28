@@ -199,3 +199,27 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** All 36 tests pass, including the reference link/self-containment check; Ruff passes. Slide numbers and content were checked against the export and screenshots of slides 1–5 and 7–13.
 
 **Limits:** No change to code, data, training or evaluation. The Google deck was not edited, and its slide numbers will drift as the team edits it. The neural slides describe built software and a planned experiment; there is still no neural Amazon result. The mixture denominator and classical/neural split alignment remain team decisions.
+
+## 28 September 2026 — Classical rigour study
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Remove SLIST from the study scope and make the classical analysis more rigorous, then follow the repository instructions after pulling main.
+
+**Assistance:** Added `cp4285 classical study` (`src/cp4285/classical/study.py`): validation-only tuning of the QR rank and popularity weight, test-split refits on train + validation events, a fixed 50K-user paired evaluation sample, three seeds, paired bootstrap confidence intervals and p-values (`evaluate.paired_change`), a rank-grows-with-data mechanism control, create-only outputs through `common/utils.save_json`, and resumable per-(seed, level) checkpoints. Added a bootstrap unit test. Updated `docs/CLASSICAL.md`, `CONTEXT.md` and appended dated section 18 to `reference.html`, keeping earlier sections unchanged.
+
+**Validation:** 37 tests plus Ruff lint and format passed. Smoke runs checked the study end to end and checkpoint resume. Tuning and seed 0 at 0/10/50% B ran on real data in this workspace.
+
+**Limits:** Seeds 1–2, the 100% and 140% levels and the intervals were still running, so the reported numbers are preliminary single-seed values. Tuning picked the largest grid rank. The protocol is still leave-last-out, not the neural cutoff protocol, so classical and neural scores remain incomparable.
+
+## 28 September 2026 — Hit@K and several targets per user
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Merge main into `classical-study`, evaluate issue #8 against the code, rename Recall@K to Hit@K, fix the classical `--split test` history, and support predicting more than one item per user so that Hit@K and Recall@K differ.
+
+**Assistance:** Resolved the merge by keeping both AI-log entries and renumbering the classical checkpoint to section 19 of `reference.html`. Renamed the metric key to `hit` in `neural/pilot.py` and to `hit@K` in the classical evaluator. Moved `with_validation` into `classical/data.py` and used it for `sweep`/`stream --split test`. Generalised `leave_last_out` to `n_targets`, `sample_pairs` to sample whole users, and `rank_targets` to score each user once. Added `per_user` (NDCG normalised by the ideal DCG of min(m, K) hits, Hit, Recall, reciprocal rank) and the `--targets` option. Updated CLASSICAL, IMPLEMENTATION, CONTINUED-TRAINING, EXPERIMENT, SLIDE-FLOW and the slide metric label. After issue #8's decision (Hit@10 for one hidden item, Recall@10 for several), Recall@K is divided by min(m, K). Edited the team Google deck through the Slides connector at the user's request: review wording on the pilot slides (issue D3), Hit@10 labels, the matrix slide redrawn as the product → next product table the QR model factorises, and a typo on the results slide; rendered pages were checked for overflow. Merged main after #7, accepting the removal of `slides/index.html`, and recorded the deck fixes in `slides/ISSUES.md`.
+
+**Validation:** 41 tests plus Ruff lint and format passed. On synthetic data, m = 1 metrics and per-user NDCG were bit-identical to the previous code for validation and test. A 50K-user real-data smoke run of `sweep --targets 2 --split test` completed; its numbers are a smoke check, not results.
+
+**Limits:** m > 1 was not run at full scale and is not comparable with m = 1. The neural pilot still has one target per user and no seen-item exclusion. Target event, m and exclusion remain team decisions.

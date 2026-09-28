@@ -160,4 +160,4 @@ def test_reference_walkthrough_tensors_and_ranking():
     scores = torch.full((1, 20), -1.0)
     scores[0, [1, 10, 2, 7]] = torch.tensor([0.9, 0.7, 0.4, 0.4])
     metrics = ranking_metrics(scores, target, 10)
-    assert metrics == pytest.approx({"ndcg": 1 / np.log2(5), "recall": 1, "count": 1})
+    assert metrics == pytest.approx({"ndcg": 1 / np.log2(5), "hit": 1, "count": 1})
