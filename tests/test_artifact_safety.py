@@ -10,8 +10,8 @@ from pathlib import Path
 import httpx
 import pytest
 
-from cp4285 import cli, data
-from cp4285.common import utils
+from cp4285 import cli
+from cp4285.common import data, utils
 
 
 def test_common_file_hash_and_utc_dates(tmp_path):

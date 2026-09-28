@@ -5,10 +5,11 @@ import pytest
 import torch
 
 from cp4285.cli import demo
+from cp4285.common.data import audit
 from cp4285.common.utils import millis
-from cp4285.data import audit, prepare
-from cp4285.model import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
-from cp4285.pilot import ranking_metrics, tensors
+from cp4285.neural.data import prepare
+from cp4285.neural.model import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
+from cp4285.neural.pilot import ranking_metrics, tensors
 
 
 def write_csv(path, rows):

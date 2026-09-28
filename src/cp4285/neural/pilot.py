@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from .common.utils import save_json, sha256
+from ..common.utils import save_json, sha256
 from .model import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
 
 

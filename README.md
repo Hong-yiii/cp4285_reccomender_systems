@@ -38,8 +38,9 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 
 | Path | Purpose |
 | --- | --- |
-| `src/cp4285/` | CLI, ingestion/audit, model and A-only training |
-| `src/cp4285/common/utils.py` | Shared create-only JSON writer, file hashing and UTC date conversion |
+| `src/cp4285/cli.py` | `cp4285` command |
+| `src/cp4285/common/` | Shared download, validated loading and audit (`data.py`); create-only JSON, hashing and UTC dates (`utils.py`) |
+| `src/cp4285/neural/` | Neural workstream: cutoff pilot split, SASRec model and A-only training |
 | `src/cp4285/classical/` | Classical comparator (`cp4285 classical ...`) |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
