@@ -7,7 +7,8 @@ import platform
 import tomllib
 from pathlib import Path
 
-from .data import DOMAINS, audit, download, millis, prepare, save_json
+from .common.utils import millis, save_json
+from .data import DOMAINS, audit, download, prepare
 
 ROOT = Path(__file__).resolve().parents[2]
 

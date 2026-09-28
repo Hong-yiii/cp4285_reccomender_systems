@@ -5,6 +5,7 @@ This checkout is the canonical **group-project** home, not the whole course work
 ## Navigation
 
 - `README.md`: setup, repository map and public/private boundary.
+- `reference.html`: reviewer walkthrough and diagrams; preserve its structure, append dated checkpoints and keep the top status notice current.
 - `docs/PROJECT.md`, `docs/UNDERSTANDING.md`: purpose, meeting synthesis and decision status.
 - `docs/EXPERIMENT.md`, `docs/MODERN-RECOMMENDER.md`, `docs/CONTINUED-TRAINING.md`: research protocol.
 - `docs/DATASET-ASSESSMENT.md`, `configs/pilot.toml`: provisional data choices and runnable defaults.
