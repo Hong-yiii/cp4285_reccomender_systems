@@ -7,8 +7,9 @@ import platform
 import tomllib
 from pathlib import Path
 
+from .common.data import DOMAINS, audit, download
 from .common.utils import millis, save_json
-from .data import DOMAINS, audit, download, prepare
+from .neural.data import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -23,7 +24,7 @@ def config(path):
 
 
 def demo(output):
-    from .pilot import run
+    from .neural.pilot import run
 
     base = Path(output)
     if base.exists():
@@ -113,7 +114,7 @@ def main():
             save_json(d["prepared"], result)
             print(json.dumps(result["metadata"], indent=2))
         elif args.command == "pilot":
-            from .pilot import run
+            from .neural.pilot import run
 
             output = args.output or cfg["training"]["output"]
             run(d["prepared"], cfg, output)

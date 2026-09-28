@@ -18,7 +18,7 @@ Upstream requires Python 2 / TensorFlow 1.12, incompatible with this project's P
 
 ## Model fidelity
 
-| Original behavior | Port in `src/cp4285/model.py` |
+| Original behavior | Port in `src/cp4285/neural/model.py` |
 | --- | --- |
 | Learned item embeddings scaled by sqrt(hidden), plus unscaled learned positions | Preserved; item 0 is zero padding |
 | Fixed-length, left-padded sequences; latest item at the last position | Preserved for every batch, including evaluation |
