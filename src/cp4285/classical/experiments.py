@@ -9,7 +9,7 @@ import numpy as np
 
 from ..common.utils import save_json
 from .contaminate import build_stream
-from .data import leave_last_out, load_domains, subsample_users, to_csr
+from .data import leave_last_out, load_domains, subsample_users, to_csr, with_validation
 from .evaluate import evaluate, sample_pairs
 from .models import (
     QRSVD,
@@ -23,6 +23,8 @@ from .models import (
     transitions,
 )
 
+TARGETS_HELP = "held-out events per user in each of validation and test (default 1)"
+
 
 def _load(args):
     return load_domains(args.a, args.b, args.cache)
@@ -33,12 +35,15 @@ def _setup(args):
     a, b, n_users = _load(args)
     if args.users:
         a = subsample_users(a, args.users, args.seed)
-    split = leave_last_out(a)
+    split = leave_last_out(a, args.targets)
     held = split.valid if args.split == "valid" else split.test
+    if args.split == "test":  # score test targets from a history that includes validation
+        split = with_validation(split)
     pairs = sample_pairs(held, args.eval_users, args.seed)
     print(
         f"loaded in {time.time() - t0:.0f}s: {len(split.train_user):,} A training events, "
-        f"{a.n_items:,} A items, {b.n_items:,} B items, {len(pairs):,} evaluation users",
+        f"{a.n_items:,} A items, {b.n_items:,} B items, "
+        f"{len(np.unique(pairs[:, 0])):,} evaluation users, {len(pairs):,} targets",
         flush=True,
     )
     return a, b, n_users, split, pairs
@@ -49,7 +54,7 @@ def _report(rows, tag, level, info, metrics, **extra):
     tail = "".join(f"  {k}={v:.2f}" for k, v in extra.items())
     print(
         f"{tag:<18} {level:>5.0%}  ndcg@10={metrics['ndcg@10']:.4f}  "
-        f"recall@10={metrics['recall@10']:.4f}  mrr={metrics['mrr']:.4f}{tail}",
+        f"hit@10={metrics['hit@10']:.4f}  recall@10={metrics['recall@10']:.4f}  mrr={metrics['mrr']:.4f}{tail}",
         flush=True,
     )
 
@@ -197,6 +202,7 @@ def add_arguments(parser, root: Path, data_cfg: dict):
         p.add_argument("--users", type=int, default=None, help="subsample A users")
         p.add_argument("--eval-users", type=int, default=20000)
         p.add_argument("--split", choices=["valid", "test"], default="valid")
+        p.add_argument("--targets", type=int, default=1, help=TARGETS_HELP)
         p.add_argument("--full-catalog", action="store_true", help="rank over A + B items")
         p.add_argument("--seed", type=int, default=4285)
         p.add_argument("--forget", type=float, default=1.0, help="stream: old-data decay")
@@ -214,6 +220,7 @@ def add_arguments(parser, root: Path, data_cfg: dict):
     st.add_argument("--k", type=int, default=None, help="skip tuning: use this rank")
     st.add_argument("--beta", type=float, default=None, help="skip tuning: use this beta")
     st.add_argument("--eval-users", type=int, default=50000)
+    st.add_argument("--targets", type=int, default=1, help=TARGETS_HELP)
     st.add_argument("--boot", type=int, default=1000, help="bootstrap resamples")
     st.add_argument("--no-scaled", dest="scaled", action="store_false",
                     help="skip the rank-grows-with-data control")  # fmt: skip

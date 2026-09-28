@@ -25,6 +25,8 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 
 **Shared utilities, 28 September:** `src/cp4285/common/utils.py` owns create-only JSON publication, file SHA-256 and UTC date conversion. Both workstreams import these helpers directly.
 
+**Metrics, 28 September (issue #8):** both evaluators report Hit@K (formerly labelled Recall@K; identical with one target). The classical split and evaluator accept `--targets m` future events per user, where Hit@K and Recall@K differ; m = 1 is unchanged and remains the default. `sweep --split test` now includes the validation event in the history. Choosing m, the target event and seen-item exclusion for both workstreams is still a team decision.
+
 **Package layout, 28 September:** the neural workstream lives in `src/cp4285/neural/` (`data.py` cutoff split, `model.py`, `pilot.py`). Protocol-independent download, validated loading and the A/B audit moved to `src/cp4285/common/data.py`. Each workstream keeps its own split and evaluation; the classical loader is unchanged. Import paths changed; CLI, config and behavior did not.
 
 The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.

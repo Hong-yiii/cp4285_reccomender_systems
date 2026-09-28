@@ -58,7 +58,7 @@ def test_batch_composition_does_not_change_fixed_position_scores():
 def test_ranking_metrics_known_ranks_and_ties():
     scores = torch.tensor([[3.0, 2.0, 1.0], [1.0, 1.0, 1.0]])
     metrics = ranking_metrics(scores, torch.tensor([1, 2]), 1)
-    assert metrics == {"ndcg": 1.0, "recall": 1.0, "count": 2}
+    assert metrics == {"ndcg": 1.0, "hit": 1.0, "count": 2}
 
 
 def test_end_to_end_checkpoint_and_holdout_contract(tmp_path):

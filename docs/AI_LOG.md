@@ -199,3 +199,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 37 tests plus Ruff lint and format passed. Smoke runs checked the study end to end and checkpoint resume. Tuning and seed 0 at 0/10/50% B ran on real data in this workspace.
 
 **Limits:** Seeds 1–2, the 100% and 140% levels and the intervals were still running, so the reported numbers are preliminary single-seed values. Tuning picked the largest grid rank. The protocol is still leave-last-out, not the neural cutoff protocol, so classical and neural scores remain incomparable.
+
+## 28 September 2026 — Hit@K and several targets per user
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Merge main into `classical-study`, evaluate issue #8 against the code, rename Recall@K to Hit@K, fix the classical `--split test` history, and support predicting more than one item per user so that Hit@K and Recall@K differ.
+
+**Assistance:** Resolved the merge by keeping both AI-log entries and renumbering the classical checkpoint to section 19 of `reference.html`. Renamed the metric key to `hit` in `neural/pilot.py` and to `hit@K` in the classical evaluator. Moved `with_validation` into `classical/data.py` and used it for `sweep`/`stream --split test`. Generalised `leave_last_out` to `n_targets`, `sample_pairs` to sample whole users, and `rank_targets` to score each user once. Added `per_user` (NDCG normalised by the ideal DCG of min(m, K) hits, Hit, Recall, reciprocal rank) and the `--targets` option. Updated CLASSICAL, IMPLEMENTATION, CONTINUED-TRAINING, EXPERIMENT, SLIDE-FLOW and the slide metric label.
+
+**Validation:** 41 tests plus Ruff lint and format passed. On synthetic data, m = 1 metrics and per-user NDCG were bit-identical to the previous code for validation and test. A 50K-user real-data smoke run of `sweep --targets 2 --split test` completed; its numbers are a smoke check, not results.
+
+**Limits:** m > 1 was not run at full scale and is not comparable with m = 1. The neural pilot still has one target per user and no seen-item exclusion. Target event, m and exclusion remain team decisions.

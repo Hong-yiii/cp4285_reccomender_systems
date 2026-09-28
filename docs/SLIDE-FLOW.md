@@ -93,7 +93,7 @@ flowchart TD
     A --> E
     M --> E
     B --> E
-    E --> Q["NDCG@10 and Recall@10"]
+    E --> Q["NDCG@10 and Hit@10"]
 ```
 
 On-slide captions:

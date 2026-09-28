@@ -18,21 +18,9 @@ import numpy as np
 
 from ..common.utils import save_json
 from .contaminate import build_stream
-from .data import Split, leave_last_out, load_domains, to_csr
-from .evaluate import ndcg_per_user, paired_change, rank_targets, sample_pairs
+from .data import leave_last_out, load_domains, to_csr, with_validation
+from .evaluate import paired_change, per_user, rank_targets, sample_pairs
 from .models import Markov, MarkovQRSVD, MostPop, last_items, transitions
-
-
-def _with_validation(split: Split) -> Split:
-    """Training data for the test protocol: train + the validation event."""
-    return Split(
-        np.r_[split.train_user, split.valid[:, 0]],
-        np.r_[split.train_item, split.valid[:, 1]],
-        np.r_[split.train_ts, split.cutoff[:, 1]],
-        split.valid,
-        split.test,
-        split.cutoff,
-    )
 
 
 def _inputs(s):
@@ -52,7 +40,8 @@ def tune(split, a, b, n_users, pairs, ks, betas, seed):
     for k in ks:
         for beta in betas:
             m = MarkovQRSVD(k=k, beta=beta, seed=seed).fit(t, pop)
-            score = float(ndcg_per_user(rank_targets(m, last, x, pairs, a.n_items)).mean())
+            ranks = rank_targets(m, last, x, pairs, a.n_items)
+            score = float(per_user(ranks, pairs[:, 0])["ndcg"].mean())
             grid.append({"k": k, "beta": beta, "ndcg@10": score})
             print(f"  tune k={k:<4} beta={beta:<5} valid ndcg@10={score:.4f}", flush=True)
     best = max(grid, key=lambda g: g["ndcg@10"])
@@ -82,7 +71,7 @@ def run_level(split, a, b, n_users, pairs, level, seed, k, beta, scaled):
 def study(args):
     t_start = time.time()
     a, b, n_users = load_domains(args.a, args.b, args.cache)
-    split = leave_last_out(a)
+    split = leave_last_out(a, args.targets)
     out_dir = Path(args.output)
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -98,9 +87,10 @@ def study(args):
         print(f"   chosen k={k} beta={beta}", flush=True)
 
     print("2. test split, seeds x levels", flush=True)
-    test_split = _with_validation(split)
+    test_split = with_validation(split)
     test_pairs = sample_pairs(split.test, args.eval_users, 4285)
-    ckpt = out_dir / f"study_ckpt_k{k}_b{beta}_n{len(test_pairs)}"
+    targets = f"_m{args.targets}" if args.targets > 1 else ""  # m = 1 keeps old checkpoint names
+    ckpt = out_dir / f"study_ckpt_k{k}_b{beta}_n{len(test_pairs)}{targets}"
     ckpt.mkdir(exist_ok=True)
     per_user, rows = {}, []
     for seed in args.seeds:
@@ -125,7 +115,8 @@ def study(args):
                 )
                 print(f"   seed={seed} level={level} done in {time.time() - t0:.0f}s", flush=True)
             for name, (ranks, share) in res.items():
-                nd = ndcg_per_user(ranks).astype(np.float32)
+                scores = per_user(ranks, test_pairs[:, 0])
+                nd = scores["ndcg"].astype(np.float32)
                 per_user[f"{name}|{seed}|{level}"] = nd
                 rows.append(
                     {
@@ -133,7 +124,8 @@ def study(args):
                         "seed": seed,
                         "level": level,
                         "ndcg@10": float(nd.mean()),
-                        "recall@10": float((ranks < 10).mean()),
+                        "hit@10": float(scores["hit"].mean()),
+                        "recall@10": float(scores["recall"].mean()),
                         "base_share": share,
                         "injected": info["injected"],
                         "frac_actual": info["frac_actual"],
@@ -168,7 +160,8 @@ def study(args):
     summary = {
         "scope": "amazon",
         "stamp": stamp,
-        "eval_users": len(test_pairs),
+        "eval_users": len(np.unique(test_pairs[:, 0])),
+        "targets_per_user": args.targets,
         "k": k,
         "beta": beta,
         "tuning": grid,

@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#update-classical-study"><strong>Latest · 19 · Classical rigour</strong></a>
+          <a href="#metrics-checkpoint"><strong>Latest · 20 · Hit@K and several targets</strong></a>
+          <a href="#update-classical-study">19 · Classical rigour</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
           <a href="#reviewer-checkpoint">16 · Shared utilities</a>
@@ -722,14 +723,15 @@
             the neural workstream into <code>src/cp4285/neural/</code> and shared
             dataset handling into <code>src/cp4285/common/</code>; it changes
             import paths, not training or evaluation behavior.
-            <a href="#update-classical-study">Section 19: classical rigour</a> is on branch
+            <a href="#update-classical-study">Section 19: classical rigour</a> and
+            <a href="#metrics-checkpoint">section 20: Hit@K and several targets</a> are on branch
             <code>classical-study</code>, merged with this layout but not yet on main.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
             >
             their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–19. Read the
+            unfixed-safety statements are superseded by sections 11–20. Read the
             <a href="#layout-checkpoint">section 18: package layout</a> for the
             current file map, then
             <a href="#sasrec-architecture">section 17: SASRec step by step</a>
@@ -3504,6 +3506,53 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
           <p class="small"><a href="#review-status">Current PR status</a></p>
         </section>
         <!-- APPENDED CLASSICAL RIGOUR CHECKPOINT 2026-09-28 END -->
+
+        <!-- APPENDED METRICS CHECKPOINT 2026-09-28 -->
+        <section id="metrics-checkpoint">
+          <span class="section-num">20 / METRICS CHECKPOINT · 28 SEPTEMBER 2026</span>
+          <h2>Hit@K replaces the Recall@K label, and the classical study can hold out several targets per user.</h2>
+          <p>
+            <span class="label fact">FACT</span> Both evaluators counted whether the one hidden item
+            reached the top K and called it Recall@K. With one target that is Hit@K, the name the
+            original SASRec paper uses. Both workstreams now report <code>hit@K</code>; no score changed.
+            This follows the discussion in
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/issues/8">issue #8</a>.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> <code>cp4285 classical sweep|stream|study --targets m</code>
+            holds out each user's last m events as test targets and the m before them as validation
+            targets (<a href="src/cp4285/classical/data.py">data.py</a>). Each user is scored once and every
+            target is ranked (<a href="src/cp4285/classical/evaluate.py">evaluate.py</a>, <code>per_user</code>):
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Metric</th><th scope="col">Per user, with m targets</th></tr></thead>
+              <tbody>
+                <tr><td>Hit@K</td><td>1 if any target is in the top K</td></tr>
+                <tr><td>Recall@K</td><td>Targets in the top K divided by m</td></tr>
+                <tr><td>NDCG@K</td><td>DCG of the targets in the top K over the ideal DCG of min(m, K) hits</td></tr>
+                <tr><td>MRR</td><td>1 / rank of the best-ranked target</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <span class="label fact">FACT</span> With m = 1 the split, sampled users, ranks and per-user
+            NDCG are bit-identical to the previous code (checked on synthetic data), so earlier study
+            checkpoints still resume. <code>sweep --split test</code> now adds the validation event to the
+            history, as <code>study</code> already did; before this it predicted two steps ahead.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> m &gt; 1 is a protocol change. Its scores are not
+            comparable with m = 1 scores, and the neural pilot still has one target per user. The team
+            should choose m for both workstreams before reporting it.
+          </p>
+          <p class="ref">
+            Evidence: <a href="tests/test_classical.py">tests</a> (hand-computed Hit, Recall, NDCG and MRR
+            for several targets). All 41 tests passed at this checkpoint.
+          </p>
+          <p class="small"><a href="#review-status">Current PR status</a></p>
+        </section>
+        <!-- APPENDED METRICS CHECKPOINT 2026-09-28 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

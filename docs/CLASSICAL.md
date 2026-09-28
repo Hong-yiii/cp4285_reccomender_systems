@@ -45,10 +45,12 @@ The `EXPERIMENT.md` note that isolated MF factors are an isolation control appli
 
 - Input: official Amazon'23 5-core ID files, the same files `cp4285 download` fetches. `--b data/raw/0core/Movies_and_TV.csv.gz` uses the unfiltered B file (17.3M events), because the 5-core B file only supplies 61% of A's training volume.
 - Every rating counts as an event. Leave-last-out per user (the official Amazon'23 rule): last event is test, second-to-last validation, the rest training. This is **not** the pilot's cutoff/cohort protocol.
+- `--targets m` (default 1) holds out each user's last m events as test targets and the m before them as validation targets; a repeated item counts once. m = 1 reproduces the rule above exactly.
+- Test scoring (`study`, and `sweep`/`stream --split test`) refits on train + validation events, so the first test target is one step ahead of the history, as in the original SASRec evaluation. Before 28 September 2026 `sweep --split test` skipped the validation event and so predicted two steps ahead; reported sweeps used the validation split and are unaffected.
 - Designs (`contaminate.py`):
   - `disjoint`: whole B timelines become new users.
   - `shared`: the 168,901 A users (10.3%) who also appear in B get their B events from before their validation event merged into their timeline. This is capped at about 15% of A volume.
-- Evaluation: full ranking over all 368,228 A items (or A + B with `--full-catalog`), excluding the user's training items. Metrics are NDCG@10/20, Recall@10/20 and MRR on 20K sampled validation users. `base_share` reports how much of each model's capacity sits on A.
+- Evaluation: full ranking over all 368,228 A items (or A + B with `--full-catalog`), excluding the user's training items. Metrics are NDCG@10/20, Hit@10/20, Recall@10/20 and MRR on 20K sampled validation users. Hit@K is 1 if any of a user's targets reaches the top K; Recall@K is the share of the user's targets that do; NDCG@K divides by the ideal DCG of min(m, K) hits; MRR uses the best-ranked target. With m = 1, Hit@K equals Recall@K (older reports label it Recall). `base_share` reports how much of each model's capacity sits on A.
 - The models are refitted at each level. `classical stream` streams users instead, but so far only for PureSVD.
 
 ## Results: disjoint B (0-core Movies & TV), k=64, SLIST N=20K

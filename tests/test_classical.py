@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 
 from cp4285.classical.contaminate import build_stream
-from cp4285.classical.data import Domain, leave_last_out, load_domains, to_csr
-from cp4285.classical.evaluate import evaluate
+from cp4285.classical.data import Domain, leave_last_out, load_domains, to_csr, with_validation
+from cp4285.classical.evaluate import evaluate, per_user, sample_pairs
 from cp4285.classical.models import (
     QRSVD,
     SLIST,
@@ -79,6 +79,29 @@ def test_leave_last_out_holds_out_the_two_latest_events(ab):
     assert all(t < cutoff[u] for u, t in zip(split.train_user, split.train_ts))
 
 
+def test_several_targets_per_user_and_test_history_includes_validation(ab):
+    a, _, _ = ab
+    split = leave_last_out(a, n_targets=2)
+    assert len(split.valid) == len(split.test) == 60 * 2
+    assert len(split.train_user) == 60 * 4
+    u = 7
+    timeline = a.item[a.user == u][np.argsort(a.ts[a.user == u])]
+    assert set(split.test[split.test[:, 0] == u, 1]) == set(timeline[-2:])
+    assert set(split.valid[split.valid[:, 0] == u, 1]) == set(timeline[-4:-2])
+    history = with_validation(split)
+    assert len(history.train_user) == 60 * 6  # test targets now follow the validation events
+    assert sorted(history.train_item[history.train_user == u]) == sorted(timeline[:-2])
+
+
+def test_sample_pairs_keeps_every_target_of_a_sampled_user():
+    pairs = np.array([[0, 5], [0, 6], [1, 7], [2, 8], [2, 9], [3, 1]])
+    sample = sample_pairs(pairs, 2, seed=0)
+    users = np.unique(sample[:, 0])
+    assert len(users) == 2
+    assert len(sample) == np.isin(pairs[:, 0], users).sum()
+    assert np.all(np.diff(np.flatnonzero(np.r_[True, sample[1:, 0] != sample[:-1, 0]])) > 0)
+
+
 def test_disjoint_injection_volume_and_fresh_identities(ab):
     a, b, n = ab
     split = leave_last_out(a)
@@ -144,9 +167,35 @@ def test_evaluate_uses_known_ranks_and_excludes_seen_items():
     seen = to_csr(np.array([0]), np.array([0]), (2, 4))
     pairs = np.array([[0, 1], [1, 3]])  # user 0: item 0 excluded, so item 1 ranks first
     result = evaluate(Fixed(), seen, seen, pairs, 4, ks=(1, 10))
-    assert result["recall@1"] == 0.5
-    assert result["recall@10"] == 1.0
+    assert result["hit@1"] == 0.5
+    assert result["hit@10"] == 1.0
     assert result["mrr"] == pytest.approx((1 + 1 / 4) / 2)
+
+
+def test_hit_and_recall_differ_with_several_targets():
+    # user 0: targets at ranks 0 and 15; user 1: one target at rank 2; user 2: ranks 30, 40
+    ranks = np.array([0, 15, 2, 30, 40])
+    user = np.array([0, 0, 1, 2, 2])
+    s = per_user(ranks, user, k=10)
+    assert s["hit"].tolist() == [1, 1, 0]
+    assert s["recall"].tolist() == [0.5, 1, 0]
+    ideal_two = 1 + 1 / np.log2(3)
+    assert s["ndcg"] == pytest.approx([1 / ideal_two, 1 / np.log2(4), 0])
+    assert s["rr"] == pytest.approx([1, 1 / 3, 1 / 31])
+    with pytest.raises(ValueError, match="adjacent"):
+        per_user(ranks, np.array([0, 1, 0, 2, 2]))
+
+
+def test_evaluate_ranks_each_of_a_users_targets():
+    class Fixed:
+        def score(self, rows):
+            return np.tile(np.arange(20, 0, -1, dtype=np.float32), (rows.shape[0], 1))
+
+    seen = to_csr(np.array([0]), np.array([0]), (1, 20))
+    pairs = np.array([[0, 1], [0, 12]])  # ranks 0 and 10 once item 0 is excluded
+    result = evaluate(Fixed(), seen, seen, pairs, 20, ks=(10,))
+    assert result["hit@10"] == 1.0
+    assert result["recall@10"] == 0.5
 
 
 def _csr(x):
