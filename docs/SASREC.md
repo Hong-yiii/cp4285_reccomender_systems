@@ -18,7 +18,7 @@ Upstream requires Python 2 / TensorFlow 1.12, incompatible with this project's P
 
 ## Model fidelity
 
-| Original behavior | Port in `src/cp4285/neural/model.py` |
+| Original behavior | Port in `src/cp4285/models/sasrec.py` |
 | --- | --- |
 | Learned item embeddings scaled by sqrt(hidden), plus unscaled learned positions | Preserved; item 0 is zero padding |
 | Fixed-length, left-padded sequences; latest item at the last position | Preserved for every batch, including evaluation |
@@ -53,6 +53,10 @@ Our study retains these deliberate differences from upstream's benchmark:
 - Continued negatives exclude the supplied history and fresh target, not future observations or held-out labels.
 
 Model fidelity does not justify comparing these scores directly with paper results. Dataset choice, training budget and two-domain design still need review.
+
+## Learner interface — 16 October 2026
+
+The network equations are unchanged. `models/sasrec_learner.py` now owns Adam, tensor/negative construction and owned Python/Torch RNG state through the shared `Recommender` ABC. `experiment/pilot.py` retains user sampling, validation selection and checkpoint/curve orchestration; `experiment/neural_evaluation.py` retains ranking policy. The `train` method on the raw network is still PyTorch's mode switch, not the ABC's learning operation. See [Packages and building](PACKAGES-AND-BUILDING.md) for executable examples and fork/RNG limits. Native training units and initial-versus-continuation loss masks are preserved; RNG isolation changes old continuation random trajectories, so use new run artifacts rather than claiming bitwise parity.
 
 ## Verification and compatibility
 

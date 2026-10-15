@@ -4,10 +4,10 @@ import gzip
 import numpy as np
 import pytest
 
-from cp4285.classical.contaminate import build_stream
-from cp4285.classical.data import Domain, leave_last_out, load_domains, to_csr
-from cp4285.classical.evaluate import evaluate
-from cp4285.classical.models import (
+from cp4285.experiment.classical_data import Domain, leave_last_out, load_domains, to_csr
+from cp4285.experiment.classical_evaluation import evaluate
+from cp4285.experiment.contaminate import build_stream
+from cp4285.models.classical import (
     QRSVD,
     SLIST,
     IncrementalQRSVD,
@@ -147,6 +147,38 @@ def test_evaluate_uses_known_ranks_and_excludes_seen_items():
     assert result["recall@1"] == 0.5
     assert result["recall@10"] == 1.0
     assert result["mrr"] == pytest.approx((1 + 1 / 4) / 2)
+
+
+def test_stream_calls_shared_lifecycle_without_refitting(monkeypatch, ab):
+    from types import SimpleNamespace
+
+    from cp4285.experiment import classical
+
+    args = SimpleNamespace(
+        users=None,
+        seed=1,
+        split="valid",
+        eval_users=20,
+        levels=[0, 0.5],
+        full_catalog=False,
+        k=3,
+        forget=1.0,
+        chunks=4,
+    )
+    phases, saved = [], []
+    original = IncrementalQRSVD.train
+
+    def tracked_train(self, batch):
+        phases.append(self.continuing)
+        return original(self, batch)
+
+    monkeypatch.setattr(classical, "_load", lambda _: ab)
+    monkeypatch.setattr(classical, "_save", lambda rows, *_: saved.extend(rows))
+    monkeypatch.setattr(IncrementalQRSVD, "train", tracked_train)
+    classical.stream(args)
+    assert phases[:4] == [False] * 4 and all(phases[4:])
+    assert len(phases) > 4 and len(saved) == 2
+    assert [row["level"] for row in saved] == [0, 0.5]
 
 
 def _csr(x):

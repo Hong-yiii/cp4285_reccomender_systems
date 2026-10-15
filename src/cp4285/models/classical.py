@@ -14,8 +14,12 @@ need their own stored factors.
 
 from __future__ import annotations
 
+from typing import Self, cast
+
 import numpy as np
 import scipy.sparse as sp
+
+from ..experiment.model import Recommender, candidate_indices
 
 
 def orth(a: np.ndarray) -> np.ndarray:
@@ -30,18 +34,21 @@ class MostPop:
         return self
 
     def score(self, rows: sp.csr_matrix) -> np.ndarray:
-        return np.tile(self.pop, (rows.shape[0], 1))
+        return np.tile(self.pop, (cast(tuple[int, int], rows.shape)[0], 1))
 
 
 class QRSVD:
     def __init__(self, k: int = 64, oversample: int = 16, n_iter: int = 3, seed: int = 0):
         self.k, self.oversample, self.n_iter, self.seed = k, oversample, n_iter, seed
 
-    def fit(self, x: sp.csr_matrix) -> QRSVD:
+    def fit(self, x: sp.csr_matrix) -> Self:
         rng = np.random.default_rng(self.seed)
         x = x.astype(np.float32)
         l = self.k + self.oversample
-        q = orth(x.T @ (x @ rng.standard_normal((x.shape[1], l), dtype=np.float32)))
+        q = orth(
+            x.T
+            @ (x @ rng.standard_normal((cast(tuple[int, int], x.shape)[1], l), dtype=np.float32))
+        )
         for _ in range(self.n_iter):  # power iterations sharpen the spectrum
             q = orth(x.T @ (x @ q))
         b = (x @ q).astype(np.float64)
@@ -60,21 +67,62 @@ class QRSVD:
         return v2[:n_base_items].sum(0) / v2.sum(0)
 
 
-class IncrementalQRSVD(QRSVD):
+class IncrementalQRSVD(QRSVD, Recommender[sp.csr_matrix, sp.csr_matrix, np.ndarray]):
     def __init__(self, k: int = 64, residual_rank: int | None = None, forget: float = 1.0, **kw):
         super().__init__(k=k, **kw)
         self.r = residual_rank or k
         self.forget = forget  # < 1 shrinks old singular values: more plastic, less memory
         self._rng = np.random.default_rng(self.seed)
+        self.continuing = False
+
+    def train(self, batch: sp.csr_matrix) -> None:
+        """Consume one fresh row chunk, never a cumulative matrix or an implicit refit."""
+        if not sp.isspmatrix_csr(batch) or batch.shape is None or min(batch.shape) < 1:
+            raise ValueError("Training needs a nonempty CSR row chunk")
+        if not np.isfinite(batch.data).all() or (batch.data < 0).any():
+            raise ValueError("Row chunks must contain finite nonnegative interactions")
+        if hasattr(self, "V") and batch.shape[1] != self.V.shape[0]:
+            raise ValueError("Row chunks must use the same fixed item catalogue")
+        self.partial_fit(batch)
+
+    def begin_continuation(self) -> None:
+        if not hasattr(self, "V"):
+            raise ValueError("Initial training is required before continuation")
+        if self.continuing:
+            raise ValueError("Continuation has already begun")
+        self.continuing = True  # Keep V, S and the randomized residual-projection RNG.
+
+    def score(self, rows: sp.csr_matrix, candidates=None) -> np.ndarray:
+        columns = candidate_indices(candidates, self.V.shape[0])
+        scores = super().score(rows)
+        if not np.isfinite(scores).all():
+            raise ValueError("Nonfinite evaluation scores")
+        return scores if columns is None else scores[:, columns]
+
+    def describe(self) -> dict:
+        return {
+            "model": "IncrementalQRSVD",
+            "rank": self.k,
+            "residual_rank": self.r,
+            "oversample": self.oversample,
+            "power_iterations": self.n_iter,
+            "forget": self.forget,
+            "seed": self.seed,
+            "update_unit": "fresh complete user rows, not single supervised targets",
+            "state_policy": "retain item basis, singular values and owned NumPy RNG",
+            "phase": "continuation" if self.continuing else "initial",
+            "candidate_indices": "zero-based fixed matrix columns",
+        }
 
     def partial_fit(self, c: sp.csr_matrix) -> IncrementalQRSVD:
         c = c.astype(np.float32)
         if not hasattr(self, "V"):
             return self.fit(c)
         v = self.V
-        r = min(self.r, c.shape[0])
+        n_rows = cast(tuple[int, int], c.shape)[0]
+        r = min(self.r, n_rows)
         p = np.asarray(c @ v)  # coordinates of the new rows in the current basis
-        omega = self._rng.standard_normal((c.shape[0], r), dtype=np.float32)
+        omega = self._rng.standard_normal((n_rows, r), dtype=np.float32)
         y = np.asarray(c.T @ omega) - v @ (p.T @ omega)  # range of the residual C - P V^T
         y -= v @ (v.T @ y)  # re-orthogonalise against V for stability
         j = orth(y)
@@ -127,7 +175,7 @@ class Markov:
         return self
 
     def score(self, rows: sp.csr_matrix) -> np.ndarray:
-        return (rows @ self.T).toarray()
+        return cast(sp.csr_matrix, rows @ self.T).toarray()
 
 
 class MarkovQRSVD:
@@ -145,11 +193,11 @@ class MarkovQRSVD:
     def fit(self, t: sp.csr_matrix, pop: np.ndarray) -> MarkovQRSVD:
         self.T = t
         self.D = sp.diags(((pop + 1.0) ** -self.beta).astype(np.float32))
-        self.svd.fit((t @ self.D).tocsr())
+        self.svd.fit(cast(sp.csr_matrix, t @ self.D).tocsr())
         return self
 
     def score(self, rows: sp.csr_matrix) -> np.ndarray:
-        return self.svd.score((rows @ self.T @ self.D).tocsr())
+        return self.svd.score(cast(sp.csr_matrix, rows @ self.T @ self.D).tocsr())
 
     def base_share(self, n_base_items: int) -> np.ndarray:
         return self.svd.base_share(n_base_items)
@@ -270,7 +318,7 @@ class SLIST:
         return self
 
     def score(self, rows: sp.csr_matrix) -> np.ndarray:
-        out = np.zeros((rows.shape[0], self.n_items), np.float32)
+        out = np.zeros((cast(tuple[int, int], rows.shape)[0], self.n_items), np.float32)
         out[:, self.items] = np.asarray(rows[:, self.items] @ self.B)
         return out
 

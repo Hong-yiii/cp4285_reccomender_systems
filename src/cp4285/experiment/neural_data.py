@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..common.data import connection, load
-from ..common.utils import millis, sha256
+from .data import connection, load
+from .utils import millis, sha256
 
 
 def prepare(path, cfg):

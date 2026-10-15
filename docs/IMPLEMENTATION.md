@@ -2,6 +2,8 @@
 
 Initialized 28 September 2026. Python 3.12, uv, DuckDB, NumPy and PyTorch. Exact dependency versions are in the repository's `uv.lock`. This is a runnable dataset audit and bounded **A-only** lifecycle pilot. The shared-domain design in the diagrams remains a proposal; B interfaces and mixed updates are not implemented yet.
 
+**Package integration, 16 October 2026:** the existing CLI and protocols are retained under `experiment/` and `models/`. SASRec and incremental PureSVD use the shared learner ABC; batch classical sweeps remain refits. Read [Packages and building](PACKAGES-AND-BUILDING.md) for extension recipes, native batch types and the separate `boilerplate-v1` reference tag.
+
 ## Setup
 
 From the repository root:
@@ -75,7 +77,7 @@ Paths within the config resolve from the repository root. CLI output paths resol
 
 ### Artifact safety checkpoint
 
-Audit reports, prepared snapshots, download manifests, neural metrics and classical JSON reports use the same **create-only** writer, `save_json` in `src/cp4285/common/utils.py`. It serializes finite JSON before publication, writes a same-directory temporary file, then links the completed file into place without replacing an existing file or symlink—even if another writer wins the destination race. Failed publication cleans its temporary file. The filesystem must support hardlinks; unsupported filesystems fail rather than fall back to overwriting. Atomic visibility is not a guarantee of power-loss durability or a multi-file transaction.
+Audit reports, prepared snapshots, download manifests, neural metrics and classical JSON reports use the same **create-only** writer, `save_json` in `src/cp4285/experiment/utils.py`. It serializes finite JSON before publication, writes a same-directory temporary file, then links the completed file into place without replacing an existing file or symlink—even if another writer wins the destination race. Failed publication cleans its temporary file. The filesystem must support hardlinks; unsupported filesystems fail rather than fall back to overwriting. Atomic visibility is not a guarantee of power-loss durability or a multi-file transaction.
 
 For repeat audits, choose a new `audit --output reports/audit-02.json`. For a new split, change `data.prepared` to a new snapshot path in the config; `prepare` has no `--output` or `--overwrite` flag. Pilot runs still require a new run directory. Existing research artifacts are never silently replaced by these JSON writers. Classical caches and model-checkpoint restart semantics are unchanged.
 
@@ -96,7 +98,7 @@ Offline regressions in `tests/test_artifact_safety.py` cover corrupt/truncated d
 
 ### Model scope
 
-`src/cp4285/neural/model.py` now ports the **original kang205/SASRec architecture** to PyTorch, replacing the generic encoder. The source commit, architecture checklist, license, tests and deliberate protocol differences are documented in [SASREC.md](SASREC.md). Upstream uses Python 2 / TensorFlow 1.12; we are not running that legacy runtime or claiming its benchmark scores. The demo uses the full configured architecture, with only its data/update budget reduced.
+`src/cp4285/models/sasrec.py` ports the **original kang205/SASRec architecture** to PyTorch, replacing the generic encoder. The source commit, architecture checklist, license, tests and deliberate protocol differences are documented in [SASREC.md](SASREC.md). Upstream uses Python 2 / TensorFlow 1.12; we are not running that legacy runtime or claiming its benchmark scores. The demo uses the full configured architecture, with only its data/update budget reduced.
 
 Initial training uses upstream-style sequence-wise loss and user sampling. Our fixed-A evaluator and fresh-event continuation are separate experimental choices. Checkpoints/metrics record implementation identity and upstream commit; old generic-model checkpoints are incompatible and must not be resumed as SASRec.
 
@@ -107,18 +109,21 @@ The frozen control and A-only continued training are implemented. Before adding 
 | Path | Purpose |
 | --- | --- |
 | `pyproject.toml`, `uv.lock`, `.python-version` | Managed environment and console command |
-| `src/cp4285/common/utils.py` | Standard-library helpers: `save_json`, file `sha256`, UTC `millis` |
-| `src/cp4285/common/data.py` | Official download, validated ID-file loading and A/B audit |
-| `src/cp4285/neural/data.py` | Neural cutoff pilot partitions (`prepare`) |
-| `src/cp4285/neural/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
+| `src/cp4285/experiment/utils.py`, `data.py` | Create-only JSON, hashing, dates, official download, validated loading and audit |
+| `src/cp4285/experiment/model.py` | Shared generic `Recommender` lifecycle ABC |
+| `src/cp4285/experiment/neural_data.py`, `pilot.py`, `neural_evaluation.py` | Neural cutoff split, sampling/selection/checkpoints and fixed evaluation |
+| `src/cp4285/models/sasrec.py`, `sasrec_learner.py` | Unchanged network architecture; stateful optimizer/update/scoring adapter |
 | `src/cp4285/cli.py` | `cp4285` command |
-| `src/cp4285/classical/` | Classical comparator; see [CLASSICAL.md](CLASSICAL.md) |
+| `src/cp4285/models/classical.py` | Classical kernels; incremental QR-SVD implements the lifecycle ABC |
+| `src/cp4285/experiment/classical*.py`, `contaminate.py` | Classical data, leave-last-out split, sweeps/stream and evaluation |
 | `tests/test_pipeline.py` | Meaningful data/evaluator/lifecycle checks |
 | `tests/test_classical.py` | Classical loader, split, contamination, isolation and evaluator checks |
 | `configs/pilot.toml` | Reviewable experiment defaults |
 | `slides/README.md` | Link to the team Google Slides deck and slide principles (no code) |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |
 
-Import shared helpers from `cp4285.common.utils` and protocol-independent dataset handling (download, validated loading, audit) from `cp4285.common.data`. Keep each workstream's split construction and evaluation in its own package (`neural/`, `classical/`): their research protocols differ. `common.utils` imports only the standard library; `common.data` uses DuckDB and HTTPX but no model libraries.
+Import shared helpers from `cp4285.experiment.utils` and dataset acquisition/audit from `cp4285.experiment.data`. Both workstreams' splits and evaluators belong to `experiment/`, but remain separate modules because their protocols differ. `experiment.utils` and the learner ABC import only the standard library; numerical libraries are loaded only by the modules that need them. Old `common`, `neural` and `classical` package imports are removed; there are no compatibility aliases.
+
+SASRec's adapter isolates Python and CPU/device Torch RNG across sequential in-memory forks and preserves module modes during scoring. The optimizer resets once at continuation and is retained afterward. Checkpoints save the learner-owned RNG rather than unrelated process-global state; durable resume remains unimplemented. CPU lifecycle checks pass; CUDA/MPS need backend validation before use. Since reload no longer consumes random draws initializing a discarded network, exact continuation numbers can differ from historical runs even though the objective/sampling policies are preserved.
 
 The project now lives in its own repository, separate from the course archive. See [MIGRATION.md](MIGRATION.md) for the layout change. No deployment or course submission is configured.

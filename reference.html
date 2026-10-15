@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#slides-checkpoint"><strong>Latest · 19 · Team deck</strong></a>
+          <a href="#abc-integration"><strong>Latest · 20 · Shared learner ABC</strong></a>
+          <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
           <a href="#reviewer-checkpoint">16 · Shared utilities</a>
@@ -717,28 +718,20 @@
             tabindex="-1"
             role="note"
           >
-            <strong>Current review checkpoint — 28 September 2026.</strong> PRs
-            #1–#4 and #6 are merged into main, including the package layout
-            (<code>src/cp4285/neural/</code>, <code>src/cp4285/common/</code>).
-            The current change retires the HTML slides: the team deck is in
-            Google Slides, linked from
-            <a href="slides/README.md"><code>slides/README.md</code></a>
-            with slide principles. See
-            <a href="#slides-checkpoint">section 19: team deck</a>. No code,
-            training or evaluation behavior changes.
-            <strong
-              >Sections 01–10 are an earlier historical snapshot, not current
-              instructions:</strong
-            >
-            their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–19. Read
-            <a href="#layout-checkpoint">section 18: package layout</a> for the
-            current file map, then
-            <a href="#sasrec-architecture">section 17: SASRec step by step</a>
-            for architecture, worked examples and corrected event/item terminology.
-            Status and line references in earlier sections are dated observations,
-            including pre-move file paths; code and the
-            <a href="docs/IMPLEMENTATION.md">runbook</a> remain authoritative.
+            <strong>Current review checkpoint — 16 October 2026.</strong>
+            This integration preserves main's real models and CLI under two
+            responsibility packages: <code>experiment/</code> and <code>models/</code>.
+            SASRec and incremental PureSVD use a shared learner ABC; classical
+            refit sweeps remain explicitly distinct. Read
+            <a href="#abc-integration">section 20</a> and the
+            <a href="docs/PACKAGES-AND-BUILDING.md">runnable development guide</a>.
+            The lightweight reference is tagged <code>boilerplate-v1</code>.
+            <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
+            Their old import paths, Git status, test counts and deadlines are historical;
+            old source links below are pinned to pre-integration main. The network
+            walkthrough remains useful, but common method names do not establish a
+            common research protocol. Source, <a href="CONTEXT.md">current context</a>
+            and the <a href="docs/IMPLEMENTATION.md">runbook</a> are authoritative.
           </div>
           <div class="legend" aria-label="Evidence labels">
             <span
@@ -2714,7 +2707,7 @@ uv run cp4285 --config configs/pilot.toml pilot --output runs/electronics-pilot-
                     and racing destinations.
                   </td>
                   <td rowspan="3">
-                    <a href="src/cp4285/common/utils.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/common/utils.py"
                       ><code>src/cp4285/common/utils.py</code></a
                     ><br />Standard library only. All three function bodies are
                     unchanged from the safety checkpoint.
@@ -2896,8 +2889,8 @@ Question: which item comes next? Not: how many stars will item 4 receive?</code>
             guarantee a useful learned representation or even initial gradient exposure.
           </p>
           <p class="ref">
-            Sources: <a href="src/cp4285/neural/data.py"><code>data.prepare</code></a>,
-            <a href="src/cp4285/neural/model.py"><code>SASRec.__init__</code></a>,
+            Sources: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/data.py"><code>data.prepare</code></a>,
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py"><code>SASRec.__init__</code></a>,
             <a href="configs/pilot.toml">pilot defaults</a>.
           </p>
 
@@ -2961,7 +2954,7 @@ r = retention event's item ID, 8</code></pre>
             remain research-design questions.
           </p>
           <p class="ref">
-            Source: <a href="src/cp4285/neural/data.py"><code>prepare</code>, including
+            Source: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/data.py"><code>prepare</code>, including
             <code>example</code>, <code>item_map</code> and <code>skipped</code></a>.
           </p>
 
@@ -3023,8 +3016,8 @@ scores = H[:, -1, :] @ E[1:].T</code></pre>
             applies no catalogue-wide softmax.
           </p>
           <p class="ref">
-            Sources: <a href="src/cp4285/neural/pilot.py"><code>tensors</code></a>;
-            <a href="src/cp4285/neural/model.py"><code>SASRec.forward</code> and <code>scores</code></a>.
+            Sources: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/pilot.py"><code>tensors</code></a>;
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py"><code>SASRec.forward</code> and <code>scores</code></a>.
           </p>
 
           <h3 id="sasrec-block">4. Inside a block: attention mixes the prefix; feedforward transforms each position.</h3>
@@ -3108,7 +3101,7 @@ X_next = (Z + F) * history_nonpadding_mask</code></pre>
             </p>
           </details>
           <p class="ref">
-            Sources: <a href="src/cp4285/neural/model.py"><code>SASRecBlock.forward</code></a>,
+            Sources: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py"><code>SASRecBlock.forward</code></a>,
             <a href="tests/test_sasrec.py"><code>reference_states</code> and equation tests</a>,
             <a href="docs/SASREC.md">pinned upstream fidelity checklist</a>.
             NumPy equation checks are not execution of the original TensorFlow runtime or reproduction of its benchmarks.
@@ -3196,9 +3189,9 @@ negative  [0, 0, 0, 0, n]</code></pre>
             is the intended guarantee. A real repeated review can also be a fresh event.
           </div>
           <p class="ref">
-            Sources: <a href="src/cp4285/neural/pilot.py"><code>initial_sequences</code>,
+            Sources: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/pilot.py"><code>initial_sequences</code>,
             <code>training_tensors</code> and <code>update</code></a>;
-            <a href="src/cp4285/neural/model.py"><code>sampled_loss</code></a>.
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py"><code>sampled_loss</code></a>.
           </p>
 
           <h3 id="sasrec-retention">6. Retention is a ranking metric, not the training loss.</h3>
@@ -3247,7 +3240,7 @@ negative  [0, 0, 0, 0, n]</code></pre>
             obtains rank by comparisons, without needing to sort the full list.
           </p>
           <p class="ref">
-            Source: <a href="src/cp4285/neural/pilot.py"><code>ranking_metrics</code>,
+            Source: <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/pilot.py"><code>ranking_metrics</code>,
             <code>evaluate</code> and validation selection in <code>run</code></a>.
           </p>
 
@@ -3322,9 +3315,9 @@ uv run pytest -q</code></pre>
               causal B interference or improvement.</p>
           </details>
           <p class="ref">
-            Evidence: inspected <a href="src/cp4285/neural/data.py">preparation</a>,
-            <a href="src/cp4285/neural/model.py">model</a>,
-            <a href="src/cp4285/neural/pilot.py">pilot</a>,
+            Evidence: inspected <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/data.py">preparation</a>,
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py">model</a>,
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/pilot.py">pilot</a>,
             <a href="configs/pilot.toml">configuration</a> and
             <a href="tests/test_sasrec.py">equation/example tests</a>.
             See <a href="docs/SASREC.md">SASRec source provenance and explicit differences</a>
@@ -3356,7 +3349,7 @@ uv run pytest -q</code></pre>
               <tbody>
                 <tr>
                   <td>
-                    <a href="src/cp4285/common/data.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/common/data.py"
                       ><code>common/data.py</code></a
                     >
                   </td>
@@ -3371,7 +3364,7 @@ uv run pytest -q</code></pre>
                 </tr>
                 <tr>
                   <td>
-                    <a href="src/cp4285/common/utils.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/common/utils.py"
                       ><code>common/utils.py</code></a
                     >
                   </td>
@@ -3380,7 +3373,7 @@ uv run pytest -q</code></pre>
                 </tr>
                 <tr>
                   <td>
-                    <a href="src/cp4285/neural/data.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/data.py"
                       ><code>neural/data.py</code></a
                     >
                   </td>
@@ -3392,10 +3385,10 @@ uv run pytest -q</code></pre>
                 </tr>
                 <tr>
                   <td>
-                    <a href="src/cp4285/neural/model.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/model.py"
                       ><code>neural/model.py</code></a
                     >,
-                    <a href="src/cp4285/neural/pilot.py"
+                    <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/blob/8b9edd3/src/cp4285/neural/pilot.py"
                       ><code>neural/pilot.py</code></a
                     >
                   </td>
@@ -3509,6 +3502,37 @@ uv run pytest -q</code></pre>
           </p>
         </section>
         <!-- APPENDED SLIDES CHECKPOINT 2026-09-28 END -->
+        <section id="abc-integration">
+          <span class="section-num">20 / SHARED LEARNER ABC · 16 OCTOBER 2026</span>
+          <h2>Keep the real models. Share lifecycle methods, not incompatible assumptions.</h2>
+          <p>The lightweight reset is retained at
+            <a href="https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/boilerplate-v1">tag boilerplate-v1</a>.
+            This integration instead starts from main's research implementations.
+            <code>experiment/</code> owns data, splits, schedules, evaluation and artifacts;
+            <code>models/</code> owns algorithms, updates, optimizer and RNG state.</p>
+          <pre>learner.train(initial_batch)
+branch = learner.fork()
+branch.begin_continuation()
+branch.train(fresh_batch)
+scores = branch.score(fixed_queries)</pre>
+          <p>The <a href="src/cp4285/experiment/model.py">Recommender ABC</a> is implemented by
+            <a href="src/cp4285/models/sasrec_learner.py">SASRecLearner</a> and
+            <a href="src/cp4285/models/classical.py">IncrementalQRSVD</a>, and used by their real runners.
+            SASRec keeps its initial all-position loss, fresh-target continuation and one Adam reset.
+            PureSVD keeps row-chunk updates. Forks own independent learning state; scoring does not learn.</p>
+          <div class="callout warn"><strong>Same lifecycle, different protocols.</strong>
+            The cutoff and leave-last-out evaluators remain separate modules under experiment.
+            Native update units, candidates, masking and ties still differ.
+            Classical sweep models remain batch refits, not continual learners;
+            MarkovQRSVD has no new incremental algorithm. No comparable research scores or
+            new real-data results follow from this reorganization.</div>
+          <p>Start with the <a href="docs/PACKAGES-AND-BUILDING.md">complete runnable development guide</a>
+            and <a href="notebooks/01_shared_lifecycle.ipynb">thin notebook</a>.
+            CPU lifecycle tests cover candidate alignment, optimizer persistence, scoring purity and
+            parent/sibling RNG isolation. In-memory RNG scopes support sequential branches, not
+            concurrent threads; accelerator validation and interrupted-run resume remain future work.</p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

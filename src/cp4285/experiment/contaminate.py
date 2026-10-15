@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .data import Domain, Split
+from .classical_data import Domain, Split
 
 
 @dataclass

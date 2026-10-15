@@ -4,7 +4,9 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 **Research question:** How does continued training on a changing domain mixture affect a recommender's performance on its original task?
 
-**Status — 28 September 2026:** working research proposal plus a runnable **original-architecture SASRec A-only pilot (PyTorch port)**. Hongyi selected the authors' SASRec model; see [source fidelity and protocol differences](docs/SASREC.md). Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. A **classical comparator** is also implemented, with contributor-reported real Amazon exploratory single-seed results under leave-last-out splitting ([CLASSICAL.md](docs/CLASSICAL.md)). Its protocol differs from the neural cutoff pilot, so their scores are not yet comparable. Amazon Electronics / Movies & TV and the shared two-domain neural model remain provisional. Neural B interfaces, mixed neural updates and multi-seed experiments are not implemented. Neural checks remain synthetic and are **not** real-data results.
+**Status — 16 October 2026:** `main`'s implementations are organized into **`cp4285.experiment`** and **`cp4285.models`**, with a shared learner ABC used by SASRec and incremental QR-SVD. See the [runnable development guide](docs/PACKAGES-AND-BUILDING.md) and [notebook](notebooks/01_shared_lifecycle.ipynb). The minimal reset remains separately available at [tag `boilerplate-v1`](https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/boilerplate-v1). Common methods do **not** make the existing research protocols comparable; classical batch refits remain distinct from continuation.
+
+**Research baseline inherited from 28 September 2026:** working research proposal plus a runnable **original-architecture SASRec A-only pilot (PyTorch port)**. Hongyi selected the authors' SASRec model; see [source fidelity and protocol differences](docs/SASREC.md). Dataset auditing, checkpoint reload, frozen evaluation and A-only continuation are implemented. A **classical comparator** is also implemented, with contributor-reported real Amazon exploratory single-seed results under leave-last-out splitting ([CLASSICAL.md](docs/CLASSICAL.md)). Its protocol differs from the neural cutoff pilot, so their scores are not yet comparable. Amazon Electronics / Movies & TV and the shared two-domain neural model remain provisional. Neural B interfaces, mixed neural updates and multi-seed experiments are not implemented. Neural checks remain synthetic and are **not** real-data results.
 
 ## Start here
 
@@ -18,7 +20,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 
-The next recorded milestone is the **29 September 2026 design critique**. The official template's weekday/date conflict remains unresolved; verify Canvas rather than assuming a submission deadline.
+The September notes recorded the **29 September 2026 design critique** as their next milestone; this is historical, not a current deadline. The official template's weekday/date conflict remains unresolved; verify Canvas rather than assuming a submission deadline.
 
 ## Run locally
 
@@ -39,9 +41,9 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | Path | Purpose |
 | --- | --- |
 | `src/cp4285/cli.py` | `cp4285` command |
-| `src/cp4285/common/` | Shared download, validated loading and audit (`data.py`); create-only JSON, hashing and UTC dates (`utils.py`) |
-| `src/cp4285/neural/` | Neural workstream: cutoff pilot split, SASRec model and A-only training |
-| `src/cp4285/classical/` | Classical comparator (`cp4285 classical ...`) |
+| `src/cp4285/experiment/` | Data, splits, shared `Recommender` ABC, protocol-specific runners/evaluators and artifacts |
+| `src/cp4285/models/` | SASRec network/learner and existing classical kernels; incremental QR-SVD implements the ABC |
+| `notebooks/01_shared_lifecycle.ipynb` | Thin synthetic lifecycle walkthrough; no notebook-local algorithm |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
 | `docs/` | Research context, requirements, protocol, provenance and AI log |

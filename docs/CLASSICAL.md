@@ -6,7 +6,9 @@ Status: implemented, with **contributor-reported real Amazon runs from the origi
 
 When interactions from B (Movies & TV) are added to training at increasing volume, how much does next-event ranking on A (Electronics) degrade for classical recommenders? Which model property decides that?
 
-## Models (`src/cp4285/classical/models.py`)
+**Package integration, 16 October 2026:** kernels now live in `models/classical.py`; data, contamination, runner and evaluation live in `experiment/`. Only `IncrementalQRSVD` implements the shared continual learner ABC. The `stream` command uses `train()` and one `begin_continuation()` transition; `sweep` still performs explicitly independent fits. This does not introduce incremental `MarkovQRSVD` or change the existing split/masking/tie policies. See [the development guide](PACKAGES-AND-BUILDING.md). The separate open classical-study PR #9 is not incorporated here.
+
+## Models (`src/cp4285/models/classical.py`)
 
 | Model | What it does | Path by which B can affect A |
 | --- | --- | --- |
