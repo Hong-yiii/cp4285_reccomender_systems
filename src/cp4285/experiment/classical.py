@@ -7,11 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..common.utils import save_json
-from .contaminate import build_stream
-from .data import leave_last_out, load_domains, subsample_users, to_csr
-from .evaluate import evaluate, sample_pairs
-from .models import (
+from ..models.classical import (
     QRSVD,
     SLIST,
     IncrementalQRSVD,
@@ -22,6 +18,10 @@ from .models import (
     recency_query,
     transitions,
 )
+from .classical_data import leave_last_out, load_domains, subsample_users, to_csr
+from .classical_evaluation import evaluate, sample_pairs
+from .contaminate import build_stream
+from .utils import save_json
 
 
 def _load(args):
@@ -61,7 +61,18 @@ def _save(rows, name, args):
     if path.exists():
         raise FileExistsError(f"Refusing to overwrite {path}")
     settings = {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()}
-    save_json(path, {"scope": "amazon", "args": settings, "rows": rows})
+    save_json(
+        path,
+        {
+            "scope": "amazon",
+            "args": settings,
+            "rows": rows,
+            "protocol": "classical-leave-last-out",
+            "learning": "fresh user-row updates"
+            if name.startswith("stream_")
+            else "independent refits",
+        },
+    )
     print(f"saved {path}")
 
 
@@ -139,12 +150,14 @@ def stream(args):
     np.minimum.at(first, split.train_user, split.train_ts)
     order = np.argsort(first)[: len(np.unique(split.train_user))]
     for chunk in np.array_split(order, args.chunks):
-        model.partial_fit(x_a[np.sort(chunk)])
+        if len(chunk):
+            model.train(x_a[np.sort(chunk)])
     _report(
         rows, "stream-svd", 0.0, {}, evaluate(model, x_a, x_a, pairs, n_cand),
         base_share=float(model.base_share(a.n_items).mean()),
     )  # fmt: skip
 
+    model.begin_continuation()
     extra = x_all[n_users:]
     cum = np.cumsum(np.diff(extra.indptr))
     done = 0
@@ -152,7 +165,7 @@ def stream(args):
         upto = min(int(np.searchsorted(cum, level * len(split.train_user)) + 1), extra.shape[0])
         for chunk in np.array_split(np.arange(done, upto), args.chunks):
             if len(chunk):
-                model.partial_fit(extra[chunk])
+                model.train(extra[chunk])
         done = upto
         _report(
             rows, "stream-svd", level, {"injected": int(cum[upto - 1])},

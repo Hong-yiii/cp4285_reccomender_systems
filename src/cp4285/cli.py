@@ -7,9 +7,9 @@ import platform
 import tomllib
 from pathlib import Path
 
-from .common.data import DOMAINS, audit, download
-from .common.utils import millis, save_json
-from .neural.data import prepare
+from .experiment.data import DOMAINS, audit, download
+from .experiment.neural_data import prepare
+from .experiment.utils import millis, save_json
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -24,7 +24,7 @@ def config(path):
 
 
 def demo(output):
-    from .neural.pilot import run
+    from .experiment.pilot import run
 
     base = Path(output)
     if base.exists():
@@ -77,7 +77,7 @@ def main():
     de = commands.add_parser("demo", help="Synthetic end-to-end software check, not Amazon results")
     de.add_argument("--output", default=str(ROOT / "runs/synthetic-smoke"))
     cl = commands.add_parser("classical", help="Classical comparator under B contamination")
-    from .classical.experiments import add_arguments
+    from .experiment.classical import add_arguments
 
     pre = argparse.ArgumentParser(add_help=False)  # config supplies the classical data defaults
     pre.add_argument("--config", default=str(ROOT / "configs/pilot.toml"))
@@ -114,13 +114,13 @@ def main():
             save_json(d["prepared"], result)
             print(json.dumps(result["metadata"], indent=2))
         elif args.command == "pilot":
-            from .neural.pilot import run
+            from .experiment.pilot import run
 
             output = args.output or cfg["training"]["output"]
             run(d["prepared"], cfg, output)
             print(f"Pilot saved: {output}")
         elif args.command == "classical":
-            from .classical.experiments import run as classical
+            from .experiment.classical import run as classical
 
             classical(args)
         elif args.command == "demo":
