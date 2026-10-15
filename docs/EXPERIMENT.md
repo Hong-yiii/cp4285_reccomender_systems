@@ -1,5 +1,7 @@
 # Proposed experiment definition
 
+> **Historical September proposal.** The [October meeting](MEETING-2026-10-15.md) broadens capacity/schedule exploration without finalizing the protocol. The trial runtime was removed. Use [package/building rules](PACKAGES-AND-BUILDING.md) for current implementation guidance; the safeguards below remain useful reasoning, not approved defaults.
+
 Status: agent proposal for verification, not a protocol already agreed by the team. Update, 28 September 2026: the original SASRec PyTorch A-only pilot has synthetic checks; the [classical comparator](CLASSICAL.md) reports exploratory real-data validation sweeps under a different leave-last-out protocol. No common-protocol classical/neural comparison has run.
 
 For Hongyi's confirmed neural-model contribution, see [MODERN-RECOMMENDER.md](MODERN-RECOMMENDER.md), which formalizes a proposed shared Transformer, the update lifecycle, and the distinction between retention loss and performance relative to A-only continued training.

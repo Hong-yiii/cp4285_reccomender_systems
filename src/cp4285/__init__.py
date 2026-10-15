@@ -1,1 +1,1 @@
-"""CP4285 dataset auditing and continued-training pilot."""
+"""Shared experiment contracts and extensible recommender research models."""

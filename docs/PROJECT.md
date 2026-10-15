@@ -1,5 +1,7 @@
 # CP4285 group project
 
+> **Historical September note.** The October reset removed the trial runtime and reopened model/protocol choices. Read [current context](../CONTEXT.md), the [October meeting](MEETING-2026-10-15.md) and [package/building rules](PACKAGES-AND-BUILDING.md) first. Status, roles, commands and deadlines below belong to their original dates.
+
 Initialized 25 September 2026. Status: understanding and proposed scope awaiting Hongyi's verification. These are AI-assisted working notes, not a team-approved proposal or submission.
 
 Latest clarification, 28 September: Hongyi owns the **modern deep-learning recommender** contribution and has selected the original **kang205/SASRec** model. [SASREC.md](SASREC.md) records its PyTorch port and source fidelity. Start with [MODERN-RECOMMENDER.md](MODERN-RECOMMENDER.md) for the research framing; dataset and two-domain design remain provisional.

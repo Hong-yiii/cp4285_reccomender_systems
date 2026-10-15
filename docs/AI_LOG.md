@@ -211,3 +211,29 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Findings raised with the user:** on `main`, classical `sweep --split test` scores from the latest training review, so it predicts two steps ahead (fixed on the `classical-study` branch); SASRec's output is a score per product, not a probability, and its training loss is a yes/no loss on two products per position; for mixing, Electronics predictions can change only through the shared weights (about 28,500 numbers) as long as random products for Movies & TV examples come from Movies & TV, which today's sampler does not guarantee.
 
 **Limits:** Figures only; no code, data, training or evaluation changed. Example products, ranks and bar heights are illustrative. The mixing figure describes a planned design. Figures that cite the QR test refit, Hit@10 checkpoint selection or the next-items split depend on PR #9 as it stood on 28 September.
+
+## 16 October 2026 — Research reset and two-package boilerplate
+
+**Tool:** OpenAI assistant in Pi, with a fresh-context read-only researcher for meeting distillation and an independent read-only reviewer.
+
+**User request and decisions:** Treat existing code as disposable trial work; preserve experimental understanding and build two extensible packages with shared interfaces and a notebook. Synthesize the supplied reference research-system writeup into a package/building north star for human review. The user subsequently explicitly authorized deleting old code, prioritizing package and testing principles over retaining trials.
+
+**Inputs and assistance:** Read the supplied October 15 transcript/sketch and historical context, including an uncommitted real-neural report. Created `docs/MEETING-2026-10-15.md` and the review draft `docs/PACKAGES-AND-BUILDING.md`, separating meeting support, proposals, actual implementation and unresolved methods choices. Implemented `cp4285.experiment` and `cp4285.models`: data/model ABCs, event identities and holdout checks, fresh update schedules, shared single-target metrics, validation-selected independent branches/frozen control, create-only artifacts and saved-result SVG plots. Added a clearly synthetic counting isolation control and an executable notebook. No research model was selected or ported.
+
+**Retirement and preservation:** Removed the old neural/classical/common pipelines, CLI, pilot config and trial-only tests, and removed unused runtime dependencies. Retained the proven JSON-publication behavior inside the experiment package. Preserved four pre-existing uncommitted config/code/test/report files byte-for-byte under ignored `local/trials-before-reset-2026-10-16/`, with a checksum manifest. Existing ignored datasets/runs/reports were not changed. Historical committed code remains recoverable from pre-reset commit `8b9edd3`; research notes remain with historical labels. Refreshed the root guidance/runbook and appended a reference-HTML checkpoint without replacing its old narrative.
+
+**Validation:** Locked environment sync, all 9 new offline tests, Ruff lint/format, primary Python diagnostics and source/wheel builds passed. The tests exercise the notebook cells in a fresh process, branch independence, deterministic fixed evaluation, score/ranking behavior, mixture accounting/exhaustion, leakage/identity/order rejection and artifact overwrite/race protection. Independent review identified test-target leakage into validation prefixes and an unchosen global chronological constraint; both were corrected with regression checks. This is software/contract validation, not real-data reproduction or scientific validation.
+
+**Limits:** The north star and single-target interface await human review. Real-data loaders/models, durable model checkpoints/resume, large-data execution and multi-seed analysis are not implemented. The full prepared input and learner forks are in memory. No acquisition, real training, new empirical claim, submission, slide edit or publication occurred. The uncommitted historical neural report was read but its datasets/checkpoints were not revalidated. Raw private transcript content and participant details were not published.
+
+## 16 October 2026 — Executable development samples
+
+**Tool:** OpenAI assistant in Pi, with read-only scouting and independent review.
+
+**Request:** Provide simple model and evaluation sample code in documentation, showing how teammates develop with the packages; aggressively remove unnecessary material.
+
+**Assistance:** Replaced the long conceptual building guide with code-first recipes: the complete existing counting model, complete shared evaluator, a small contract check and notebook usage. Reused the model rather than adding another toy implementation or framework. Moved the evaluator unchanged into `experiment/evaluation.py` and retained the public import. Reduced duplicated runbook material and refreshed contributor/context pointers. Added a test that checks the documented model/evaluator syntax trees against maintained source and executes every Python block in a fresh process. The sample check covers nonempty history input, distinct scores under candidate reordering, ranking arithmetic and model-state/branch preservation; the counting model still deliberately ignores history.
+
+**Validation:** All 10 tests, Ruff lint/format, primary changed-Python diagnostics, locked environment sync and source/wheel builds passed. Documentation examples are executable software checks, not scientific reproduction.
+
+**Limits:** No research model, data, metric or selection policy was added or changed. MRR is described only as a possible extension recipe, not an implemented result. The existing backend-specific state/exposure and real-data protocol decisions remain open. Historical/private evidence and pre-existing working-tree changes were preserved.

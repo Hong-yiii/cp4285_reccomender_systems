@@ -1,9 +1,7 @@
-"""Shared file and timestamp helpers, using only the standard library."""
+"""Create-only publication; retained safety behavior, independent of the retired trials."""
 
-import hashlib
 import json
 import os
-from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -20,15 +18,3 @@ def save_json(path, value):
         f.flush()
         # Same-filesystem link publishes atomically and refuses a racing destination.
         os.link(f.name, path)
-
-
-def sha256(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(1024 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def millis(date):
-    return int(datetime.fromisoformat(date).replace(tzinfo=UTC).timestamp() * 1000)

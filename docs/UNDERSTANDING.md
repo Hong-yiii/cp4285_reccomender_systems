@@ -1,5 +1,7 @@
 # Project understanding
 
+> **Historical September reconstruction.** See the [October meeting synthesis](MEETING-2026-10-15.md) and [current context](../CONTEXT.md) for the reset. Keep the reasoning below as evidence, not a current assignment or frozen protocol.
+
 Status: reconstructed from the 23 September meeting and supplied diagram, pending team verification. Transcript timestamps refer to blocks, not exact utterance times. The transcript is machine-generated and contains errors.
 
 ## How the idea developed

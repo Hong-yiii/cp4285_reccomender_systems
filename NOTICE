@@ -3,9 +3,11 @@ Wang-Cheng Kang and Julian McAuley (2018)
 https://github.com/kang205/SASRec
 Upstream commit: e3738967fddab206d6eeb4fda433e7a7034dd8b1
 
-src/cp4285/neural/model.py is a modified PyTorch translation of upstream model.py
-and modules.py. The training sequence construction in src/cp4285/neural/pilot.py
-follows upstream sampler.py. Modifications are documented in docs/SASREC.md.
+Historical attribution: the September trial contained a modified PyTorch
+translation in src/cp4285/neural/model.py and training sequence construction in
+src/cp4285/neural/pilot.py. That trial code was removed in the October reset;
+it remains in Git history. The current boilerplate contains no SASRec port.
+Historical modifications are documented in docs/SASREC.md.
 
 The original modules.py attributes its attention utilities to:
 June 2017 by Kyubyong Park — kbpark.linguist@gmail.com

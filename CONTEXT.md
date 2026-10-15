@@ -1,66 +1,61 @@
 # Project context
 
-Snapshot: **28 September 2026**. Start here when continuing work in Pi; then read only the task-relevant documents linked below. Historical notes retain their original dates.
+Snapshot: **16 October 2026**. Read this first, then [Packages and building rules](docs/PACKAGES-AND-BUILDING.md) and the [October meeting synthesis](docs/MEETING-2026-10-15.md).
 
-## Question and ownership
+## Current direction and ownership
 
-Study original-task retention during continued training: train a recommender on A, continue with A-only or A/B mixtures, and repeatedly measure a fixed A task. Compare a classical baseline with a neural/advanced model under a common protocol. Hongyi's confirmed contribution is the **neural recommender**. Other allocations and final experimental choices need team confirmation.
+Study old-task recommendation quality during continued learning, potentially varying model capacity and incoming domain composition. The team wants to explore independently and converge on a common, inspectable benchmark. A decline, no change or improvement is a valid outcome; do not promise catastrophic forgetting or neural superiority.
 
-This is an offline study, not a deployed service. Improvement or no measurable decline is a valid result. The [project reconstruction](docs/UNDERSTANDING.md) separates meeting evidence from interpretation; the [project overview](docs/PROJECT.md) explains scope.
+**User-confirmed reset:** treat previous implementation as disposable trial work. Preserve scientific understanding and the principles of testing and writing two extensible packages. The user explicitly permits deleting old code. The package/building document is a **draft for human review**, not an approved final protocol.
 
-## Implemented versus proposed
+The two responsibility packages are:
 
-| Implemented | Still proposed / not measured |
-| --- | --- |
-| uv-managed Python 3.12 package and CLI | Final dataset and classical-model selection |
-| Explicit official Amazon ID-file downloads with full gzip validation | Real Amazon audit/training results for the neural cutoff pilot |
-| Original-ID overlap, duplicate and timestamp audits | Neural B embeddings/scoring and mixed-domain updates |
-| Bounded familiar-item A preparation with isolated holdouts | Classical/neural comparison under one protocol |
-| Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
-| Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
-| Synthetic lifecycle tests | Final team deck / submission |
-| Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; multi-seed classical results |
+- `cp4285.experiment`: source preparation/contracts, schedules, model ABC, shared evaluation/selection, artifacts and graphs.
+- `cp4285.models`: concrete neural/non-neural implementations and model-side ablations.
 
-**Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
+The notebook imports both and explains the experiment. The package implements computation and safeguards; the notebook exposes assumptions and evidence; the eventual report owns the argument. Scientifically different tasks must not be forced through a universal runner.
 
-**Shared utilities, 28 September:** `src/cp4285/common/utils.py` owns create-only JSON publication, file SHA-256 and UTC date conversion. Both workstreams import these helpers directly.
+## Implemented now
 
-**Package layout, 28 September:** the neural workstream lives in `src/cp4285/neural/` (`data.py` cutoff split, `model.py`, `pilot.py`). Protocol-independent download, validated loading and the A/B audit moved to `src/cp4285/common/data.py`. Each workstream keeps its own split and evaluation; the classical loader is unchanged. Import paths changed; CLI, config and behavior did not.
+- Standard-library-only Python 3.12 boilerplate, in the existing uv-managed distribution.
+- `DataSource` and `Recommender` ABCs; typed event/query/example/prepared-experiment records.
+- Fresh-target update blocks, constant/changing A/B schedules, no silent stream recycling.
+- One concrete **single-target** runner: initial selection on validation NDCG, independent continuation branches, frozen control, fixed old/new task evaluation.
+- A standalone shared evaluator in `experiment/evaluation.py`: NDCG/Hit/Recall with explicit cutoff, stable original-item-ID ties and fixed candidates.
+- Create-only prepared snapshot, manifest and raw result JSON; SVG plots read saved results.
+- `CountingRecommender` and `SyntheticSource` as a plumbing/isolation fixture, **not research models/data**.
+- `notebooks/01_shared_experiment.ipynb`; offline contract checks include executing its cells in a fresh Python process.
+- A sample-first development guide with complete maintained model/evaluator definitions, a nonempty-history/candidate-alignment/state check and notebook usage. `tests/test_documentation.py` verifies source/example agreement and executes all guide Python blocks. No new model or metric framework was added.
 
-**Slides, 28 September:** the team's Google Slides deck is canonical; [slides/README.md](slides/README.md) links it and sets slide principles for a class audience with no assumed knowledge of SASRec, the dataset or the papers. The HTML narrative was retired. The live deck is at the 20-slide limit and has no neural slides yet. [slides/ISSUES.md](slides/ISSUES.md) lists its problems slide by slide; [SLIDE-FLOW.md](docs/SLIDE-FLOW.md#live-deck-review--28-september-2026) places two neural slides.
+The old `common/`, `neural/`, `classical/`, CLI, pilot config and trial-only tests have been removed. The create-only JSON writer's behavior was retained inside `experiment/artifacts.py`. No old model adapter or compatibility layer is maintained. Historical source is recoverable at [pre-reset commit 8b9edd3](https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/8b9edd3).
 
-**Classical scope, 29 September (stated by Hongyi; confirm with the classical owner):** the full study keeps only the QR model (`MarkovQRSVD`) as the classical model; Popularity and the unfactorised Markov chain are dropped, citing the size of a full Markov table on the whole dataset. Note that the current `MarkovQRSVD` still builds and stores that full sparse transition table (`fit` keeps `T`; `score` computes `rows @ T @ D` before projecting), so dropping `Markov` does not by itself remove that cost. [slides/figures/](slides/figures/README.md) holds the slide diagrams: `method-pipeline` follows this scope, `classical-models` still shows all three models, and all figures use the issue #8 metrics (Hit@10, Recall@10, mix levels up to 100%).
+**Not implemented:** a real-data loader, real neural/classical model under the new interface, durable model checkpoint/reload/resume, large-data streaming/batched evaluation, multi-positive tasks, multi-seed aggregation or formal transfer metrics. In-memory full-state forks and one-query scoring are deliberate small-pilot limits. A passing synthetic check is not a real-data result or scientific validation.
 
-The [runbook](docs/IMPLEMENTATION.md) describes actual code. The [continued-training specification](docs/CONTINUED-TRAINING.md) describes the broader proposed experiment. Do not confuse the two. The classical workstream reports exploratory real-data results under leave-last-out splitting; the neural cutoff pilot still has only synthetic checks. Those scores are not yet comparable.
+## Scientific invariants
 
-## Provisional defaults and invariants
+- Preserve real source identities and domain namespaces; never equate unrelated integer IDs or splice users' histories.
+- Split before learning preprocessing. Holdouts enter neither training targets nor prefixes. Test events must not leak into validation-based selection.
+- Freeze each task's queries, labels, candidates and ranking policy across checkpoints.
+- Select/tune on development data, not retention curves. Keep independent state and declared optimizer/RNG policies across branches.
+- Count supervised targets, not padded positions, users or files. Larger B share at fixed total targets means less A exposure; this alone does not isolate harmful B gradients.
+- Aggregate score changes are outcomes under a protocol, not proof that a particular weight or memory was erased.
+- Source events determine terminology: Amazon reviews are not purchase timestamps or ideal-recommendation ground truth.
+- Artifacts are create-only and private by default. Acquisition/expensive computation needs an explicit decision.
 
-- Amazon Reviews 2023 Electronics (A), Movies & TV (B); official deduplicated 5-core ID files.
-- Target is the **next reviewed item**, all ratings by default; review times are not purchase/viewing times and low ratings are not endorsements.
-- Config: 2021-01-01 initial cutoff, 2022-01-01 stream end, at most 500 reviewers, history 50, hidden size 50, two blocks, one head, dropout 0.5. These are exploratory, not tuned settings.
-- Omit ambiguous timestamp ties. Build vocabulary from initial training only; count omitted unknown items. Exclude validation and retention events from all training targets **and prefixes**.
-- Freeze A histories, targets and full initial catalogue across evaluation checkpoints. Rank with stable ties; tune on validation, never retention curves.
-- Left-pad to fixed width, keeping the latest item at position 49 by default. Initial training supervises all nonpadding positions in each sampled user's final training window; continuation supervises only the fresh final target to avoid implicit replay.
-- Preserve weights across continuation; reset Adam (betas 0.9/0.98) once at the phase boundary, then preserve its state. Existing run directories must not be overwritten. Audit/prepared/manifest/metric/classical-report JSON is create-only; use new output paths for repeat runs.
-- Planned mixtures use B's share of supervised examples. The draft group deck instead uses B/A volume: resolve the denominator. Fixed total updates also reduce A exposure as B increases.
-- Separate catalogues require shared parameters before B can affect A. Do not equate unrelated integer IDs or fabricate cross-user histories. Disjoint matrix-factorisation factors can be an isolation control.
+## Decisions before a real experiment
 
-## Next actions
+1. Review the runnable package/building recipes and single-target baseline interface.
+2. Choose model family, meaningful capacity variation, training/state policy and parameter accounting. October did not reaffirm SASRec or QR-Markov as mandatory models.
+3. Choose dataset/category pair, observed feedback/filter, split/cohort, history horizon and cold-start/candidate policy.
+4. Specify original-task versus past-task matrix, metric/cutoff, constant/changing/sequential schedules, mixture denominator, budget and seeds.
+5. Implement one real loader and one defensible model, verify its lifecycle, then compare additional implementations on the same prepared contract.
 
-**Checkpoint reached:** original SASRec is merged in [PR #2](https://github.com/Hong-yiii/cp4285_reccomender_systems/pull/2), preserving the teammate's classical comparator. The subsequent artifact-safety checkpoint adds full gzip verification and non-overwriting JSON publication. It does not approve acquisition or change the experiment split. See the [runbook](docs/IMPLEMENTATION.md#artifact-safety-checkpoint) for retry/recovery limits.
+No paper/model names or appointment deadlines should be inferred from the machine-generated meeting transcript. External scientific claims still require primary-source checks.
 
-1. Confirm the **29 September design critique** submission time in Canvas; the template's weekday/date conflict is unresolved. Review [requirements](docs/REQUIREMENTS.md) and [deck preparation](docs/DEFENSE.md).
-2. Agree task, category pair, feedback filter, mixture denominator and classical-model sharing with the team. Explicitly resolve the neural validation/retention shared-prefix interpretation and align classical/neural protocols before comparing scores.
-3. Review storage/compute before explicitly downloading full categories; run the audit and inspect feasibility/coverage before changing config defaults.
-4. Run a real A-only pilot and validate its split, reload and frozen-control behavior.
-5. Only then implement B interfaces, independent mixture branches and B evaluation; leave adapters/replay until a defensible baseline exists.
+## Historical evidence and privacy
 
-## Context and slides
+September design notes, source discussions, figures and `reference.html` preserve reasoning and dated findings. They do not describe the current runtime; [IMPLEMENTATION.md](docs/IMPLEMENTATION.md) does. The Google Slides deck remains canonical and was not edited.
 
-- [Reviewer reference](reference.html): persistent, self-contained project walkthrough at the repository root. Original narrative and diagrams are preserved as dated evidence; read its latest checkpoint first. Append updates rather than silently rewriting historical results. Source and runbook remain authoritative.
-- [Neural model rationale](docs/MODERN-RECOMMENDER.md), [experiment controls](docs/EXPERIMENT.md), [dataset assessment](docs/DATASET-ASSESSMENT.md).
-- [Classical comparator](docs/CLASSICAL.md): the contributor reports single-seed validation sweeps showing disjoint-B effects under shared rank/item budgets and 10.3% reviewer overlap. These originating-workspace results were not rerun during the SASRec merge and are not a common-protocol neural comparison.
-- [Team Google Slides deck and slide principles](slides/README.md); [deck issues](slides/ISSUES.md); [neural slides and Mermaid diagrams](docs/SLIDE-FLOW.md).
-- [Primary references, course slides and local-only source index](docs/SOURCES.md).
-- `local/course/` holds copied Week 01–02 PDFs, learning notes and references on the migrated machine. `local/sources/` holds supplied project evidence and the draft team PDF. Neither is published.
-- [AI log](docs/AI_LOG.md) records prior Codex assistance and the move to Pi. Add subsequent substantive assistance for the team's disclosure.
+Before the reset, four pre-existing uncommitted files were copied byte-for-byte to ignored `local/trials-before-reset-2026-10-16/`, with checksums: the real-neural config, baseline code/test and result report. That report describes real A-only runs, but this session did not revalidate their datasets/checkpoints. Preserve this distinction from earlier notes claiming only synthetic evidence. Existing ignored datasets/runs/reports were not modified.
+
+Private transcripts, chats, team/course PDFs, personal IDs and datasets never belong in public commits. [AI_LOG.md](docs/AI_LOG.md) records substantive assistance. The repo must run without `local/` or historical artifacts.

@@ -1,5 +1,7 @@
 # Hongyi's neural recommender workstream
 
+> **Historical September proposal.** The October reset reopens models and protocol; the trial implementation was removed. Preserve the safeguards and reasoning, not the selected architecture or defaults. See [current context](../CONTEXT.md) and the [October synthesis](MEETING-2026-10-15.md).
+
 Updated 28 September 2026. **Confirmed by Hongyi:** his contribution concerns the modern deep-learning recommender, and the base model is now the original **kang205/SASRec** architecture. Its implemented PyTorch port is documented in [SASREC.md](SASREC.md). The two-domain adaptation and experimental protocol below remain proposals, not completed work or blanket team approval.
 
 ## Validation of the three assumptions

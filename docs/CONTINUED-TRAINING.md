@@ -1,5 +1,7 @@
 # Continued training for SASRec: proposed protocol
 
+> **Historical September proposal.** The trial SASRec implementation was removed in the October reset. This specification is research context, not a requirement that the new shared interface or model use these defaults. See [current context](../CONTEXT.md), the [October meeting](MEETING-2026-10-15.md) and [package/building rules](PACKAGES-AND-BUILDING.md).
+
 Draft v0.1, 27 September 2026. Scope: Hongyi's neural-model contribution. Update, 28 September: the original SASRec base architecture is now selected and ported to PyTorch; see [SASREC.md](SASREC.md). The A-only implementation uses sequence-wise initial training and fresh-target-only continuation. This document's broader two-domain protocol, dataset choices and final training budgets remain proposals; no real-data result is claimed.
 
 ## Research statement

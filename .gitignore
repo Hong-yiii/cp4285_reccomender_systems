@@ -15,6 +15,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.ipynb_checkpoints/
 *.egg-info/
 build/
 dist/

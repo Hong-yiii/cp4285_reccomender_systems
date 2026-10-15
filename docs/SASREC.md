@@ -1,5 +1,7 @@
 # Original SASRec architecture
 
+> **Historical implementation note.** The trial port and commands below were removed in the October reset; [pre-reset source](https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/8b9edd3) remains in Git. This reasoning does not require the rebuilt models to use SASRec. See [current context](../CONTEXT.md) and [package/building rules](PACKAGES-AND-BUILDING.md).
+
 **Decision, 28 September 2026:** Hongyi selected [kang205/SASRec](https://github.com/kang205/SASRec) rather than the earlier generic Transformer approximation. The implemented model is a **PyTorch port of that original architecture**, not the original TensorFlow executable and not a reproduction of the paper's benchmark numbers.
 
 For the step-by-step explanation with a reviewer timeline, tensor shapes, attention equations, loss and retention arithmetic, open the [SASRec walkthrough in the reviewer reference](../reference.html#sasrec-architecture). Its worked example has an offline regression in `tests/test_sasrec.py`.

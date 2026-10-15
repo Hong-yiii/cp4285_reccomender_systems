@@ -1,5 +1,7 @@
 # Classical comparator
 
+> **Historical trial evidence.** The old classical implementation and commands below were removed in the October reset; [pre-reset source](https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/8b9edd3) remains in Git. Reported numbers were not rerun during the reset and are not results from the new shared protocol. See [current context](../CONTEXT.md).
+
 Status: implemented, with **contributor-reported real Amazon runs from the originating workspace** (28 September 2026). Those runs were not rerun during the SASRec integration; raw logs are not included here. The results are **single-seed, validation-split exploratory results**, not tuned final numbers. The protocol differs from the SASRec pilot (see [Protocol](#protocol)), so the two sets of numbers are not directly comparable yet.
 
 ## Question
