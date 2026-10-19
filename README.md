@@ -2,21 +2,21 @@
 
 **Research question:** How does recommendation quality on previously learned tasks change during continued updates, and how does this depend on model capacity and the incoming data distribution?
 
-**16 October 2026 — reset:** the September pipelines were exploratory trials and have been removed from the active implementation. The current project is a small, tested **two-package foundation**, not a completed research experiment. Real models and data preparation will be rebuilt intentionally. Scientific safeguards carry forward; old architecture and experimental defaults do not.
+**16 October 2026 — reset:** the September pipelines were exploratory trials and have been removed from the active implementation. The current project is a small, tested **two-package foundation**, not a completed research experiment. A bounded local Amazon loader and optional CPU SASRec-style learner are now available in a proposed pilot notebook; no local Amazon files were available to validate real learning. Scientific safeguards carry forward; old architecture and experimental defaults do not.
 
 ## Start here
 
 1. **[Develop with the two packages](docs/PACKAGES-AND-BUILDING.md)** — copyable model and evaluator code, an executable contract check, and the notebook recipe.
 2. [October meeting synthesis](docs/MEETING-2026-10-15.md) — supported direction versus unresolved choices.
 3. [Current context](CONTEXT.md) and [running the boilerplate](docs/IMPLEMENTATION.md).
-4. [Executable notebook](notebooks/01_shared_experiment.ipynb).
+4. [Dependency-free shared notebook](notebooks/01_shared_experiment.ipynb) and [observable neural pilot](notebooks/02_neural_continual_learning.ipynb) ([CPU-extra instructions](docs/IMPLEMENTATION.md#neural-pilot-optional-cpu-extra)).
 
 ## The two packages
 
 | Path | Owns |
 | --- | --- |
 | `src/cp4285/experiment/` | Data/protocol ABC, immutable inputs, model ABC, scheduling, shared selection/evaluation, safe artifacts and plots |
-| `src/cp4285/models/` | Model implementations and model-side ablations; currently only a counting isolation control |
+| `src/cp4285/models/` | Model implementations and model-side ablations; counting isolation control and optional CPU SASRec-style learner |
 | `notebooks/` | Reader-facing executable explanation, importing both packages |
 | `tests/` | Contract/lifecycle checks; executable documentation and notebook examples |
 | `docs/` | Methods, decisions, historical research reasoning and AI-use log |

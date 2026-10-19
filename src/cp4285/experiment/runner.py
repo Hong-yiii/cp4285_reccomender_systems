@@ -4,6 +4,7 @@ import json
 import math
 import platform
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import asdict
 from hashlib import sha256
 from importlib.metadata import version
@@ -22,12 +23,16 @@ def run(
     output: str | Path,
     initial_epochs: int,
     k: int,
+    observe: Callable[[dict, Recommender], None] | None = None,
 ) -> dict:
     """Run an explicit small protocol; never mutate the caller's model or overwrite output.
 
     One initial epoch is one train(initial) call. One continuation block is one
     train(block) call. Selection uses validation NDCG only, retaining the first
     best epoch. Steps/examples are recorded, not claimed to be matched FLOPs.
+    Optional observe(event, learner) reports completed epochs/evaluations and selected
+    state for logging/create-only checkpoints. It must not mutate the learner or tune
+    on test records. Observer errors fail the run, leaving partial artifacts intact.
     """
     data.validate()
     if type(initial_epochs) is not int or initial_epochs <= 0 or type(k) is not int or k <= 0:
@@ -69,9 +74,13 @@ def run(
         working.train(data.initial)
         metrics = evaluate(working, data.validation, k=k)
         validation.append({"epoch": epoch, **metrics})
+        if observe is not None:
+            observe({"phase": "initial", "epoch": epoch, **metrics}, working)
         if metrics["ndcg"] > best_score:
             best, best_score, selected_epoch = working.fork(), metrics["ndcg"], epoch
     assert best is not None
+    if observe is not None:
+        observe({"phase": "selected", "epoch": selected_epoch}, best)
 
     baseline = {task.name: evaluate(best, task, k=k) for task in data.tests}
     records = []
@@ -96,6 +105,8 @@ def run(
                     "ndcg_change_from_initial": metrics["ndcg"] - baseline[task.name]["ndcg"],
                 }
             )
+            if observe is not None:
+                observe({"phase": "evaluation", **records[-1]}, learner)
 
     frozen = best.fork()
     record(frozen, "frozen", 0, Counter())

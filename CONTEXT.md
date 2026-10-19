@@ -1,6 +1,6 @@
 # Project context
 
-Snapshot: **16 October 2026**. Read this first, then [Packages and building rules](docs/PACKAGES-AND-BUILDING.md) and the [October meeting synthesis](docs/MEETING-2026-10-15.md).
+Snapshot: **18 October 2026**. Read this first, then [Packages and building rules](docs/PACKAGES-AND-BUILDING.md) and the [October meeting synthesis](docs/MEETING-2026-10-15.md).
 
 ## Current direction and ownership
 
@@ -17,7 +17,7 @@ The notebook imports both and explains the experiment. The package implements co
 
 ## Implemented now
 
-- Standard-library-only Python 3.12 boilerplate, in the existing uv-managed distribution.
+- Python 3.12 foundation with standard-library-only core; optional CPU Torch `neural` extra.
 - `DataSource` and `Recommender` ABCs; typed event/query/example/prepared-experiment records.
 - Fresh-target update blocks, constant/changing A/B schedules, no silent stream recycling.
 - One concrete **single-target** runner: initial selection on validation NDCG, independent continuation branches, frozen control, fixed old/new task evaluation.
@@ -27,9 +27,13 @@ The notebook imports both and explains the experiment. The package implements co
 - `notebooks/01_shared_experiment.ipynb`; offline contract checks include executing its cells in a fresh Python process.
 - A sample-first development guide with complete maintained model/evaluator definitions, a nonempty-history/candidate-alignment/state check and notebook usage. `tests/test_documentation.py` verifies source/example agreement and executes all guide Python blocks. No new model or metric framework was added.
 
+- `experiment/amazon.py`: bounded local official ID CSV/review JSONL loader (gzip supported), original IDs, training-only frozen catalogues, explicit ordinal/cohort/timestamp-tie rules and exclusion audit. No acquisition.
+- `models/sasrec.py`: CPU SASRec-style shared causal encoder/positions with separate domain item tables, full-softmax final-target CE (not original SASRec reproduction), one Adam step per target, independent owned dropout RNG, reset-once continuation and create-only full-state checkpoint/reload.
+- `notebooks/02_neural_continual_learning.ipynb`: proposed real-data protocol, offline labelled schema fixture, optional bounded local audit/training, progress/loss/timing, fixed retention/adaptation and separate B development diagnostics. A runner observer enables create-only checkpoints/progress without moving training/evaluation into the notebook.
+
 The old `common/`, `neural/`, `classical/`, CLI, pilot config and trial-only tests have been removed. The create-only JSON writer's behavior was retained inside `experiment/artifacts.py`. No old model adapter or compatibility layer is maintained. Historical source is recoverable at [pre-reset commit 8b9edd3](https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/8b9edd3).
 
-**Not implemented:** a real-data loader, real neural/classical model under the new interface, durable model checkpoint/reload/resume, large-data streaming/batched evaluation, multi-positive tasks, multi-seed aggregation or formal transfer metrics. In-memory full-state forks and one-query scoring are deliberate small-pilot limits. A passing synthetic check is not a real-data result or scientific validation.
+**Not implemented:** a classical research model, automatic interrupted-run resume, large-data streaming/batched evaluation, multi-positive tasks, multi-seed aggregation or formal transfer metrics. In-memory full-state forks and one-query/target processing are deliberate small-pilot limits. The proposed loader's bounded file prefix, activity-filtered cohort and known incoming training inventory are not representative Amazon sampling or strict calendar-time deployment. No local data files were present in this checkout during implementation; actual Amazon audit/training remains unvalidated. Passing schema-fixture/neural checks is not a real-data result or scientific validation.
 
 ## Scientific invariants
 
@@ -48,7 +52,7 @@ The old `common/`, `neural/`, `classical/`, CLI, pilot config and trial-only tes
 2. Choose model family, meaningful capacity variation, training/state policy and parameter accounting. October did not reaffirm SASRec or QR-Markov as mandatory models.
 3. Choose dataset/category pair, observed feedback/filter, split/cohort, history horizon and cold-start/candidate policy.
 4. Specify original-task versus past-task matrix, metric/cutoff, constant/changing/sequential schedules, mixture denominator, budget and seeds.
-5. Implement one real loader and one defensible model, verify its lifecycle, then compare additional implementations on the same prepared contract.
+5. Review the proposed neural notebook/loader protocol, supply authorized local category files, and validate actual A/B development learning before comparing models. The user authorized a tiny local CPU pilot, not downloads or expensive runs; no available files meant no actual Amazon run in this implementation.
 
 No paper/model names or appointment deadlines should be inferred from the machine-generated meeting transcript. External scientific claims still require primary-source checks.
 

@@ -75,7 +75,7 @@ The inherited `fork()` deep-copies this small model. For another backend, includ
 | `describe()` | Record real configuration, randomness, update policy and parameter counts; use explicit non-applicability rather than invented values. |
 | `fork()` | Produce an independent complete learner; default `deepcopy` suffices for this sample. |
 
-For a neural implementation, wrap the network and optimizer inside this class. Do not confuse this `train(examples)` with PyTorch's `network.train()`, which only switches mode. Restore training mode for updates, use deterministic evaluation/no gradients for scoring, and allocate vocabulary from permitted training data. We deliberately do not ship a pretend neural stub or add Torch before choosing a real model.
+For a neural implementation, wrap the network and optimizer inside this class. Do not confuse this `train(examples)` with PyTorch's `network.train()`, which only switches mode. Restore training mode for updates, use deterministic evaluation/no gradients for scoring, and allocate vocabulary from permitted training data. The optional [SASRec-style implementation](../src/cp4285/models/sasrec.py) now provides a small CPU example with full-state lifecycle tests; it is not an original-SASRec reproduction. Install the `neural` extra and see the [observable neural notebook](../notebooks/02_neural_continual_learning.ipynb) and [runbook](IMPLEMENTATION.md#neural-pilot-optional-cpu-extra). The sample counting code above remains the minimal dependency-free contract example.
 
 ## 3. Sample evaluation: one common policy
 
@@ -202,7 +202,7 @@ For data work, implement `DataSource.load_data()` returning `PreparedExperiment(
 - Keep source/configuration/seed and artifact provenance explicit. No overwrites, hidden downloads or expensive runs without approval. Private sources/data/results stay ignored.
 - Do not force a different scientific task through this schema. Document the decision before changing the common contract. Improvement, stability and decline are all valid outcomes.
 
-**Current ceiling:** one target per example; in-memory data/copies; one-query scoring; self-reported metadata; no real-data/model adapter, durable checkpoint/resume or multi-seed analysis. Before expensive experiments, verify backend state reload and capture its environment. These examples are software checks, not Amazon results or proof of forgetting.
+**Current ceiling:** one target per example; in-memory data/copies; one-query scoring; self-reported metadata; no automatic interrupted-run resume or multi-seed analysis. A bounded local Amazon adapter and optional CPU neural learner with durable create-only checkpoints now exist; their proposed offline ordinal protocol is not a final benchmark. No real files were available during this implementation, so only schema fixtures have been executed. Before expensive experiments, verify real development learning and capture the environment. These examples are software checks, not Amazon results or proof of forgetting.
 
 ## 7. Run and contribute
 
