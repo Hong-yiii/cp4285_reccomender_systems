@@ -4,7 +4,23 @@ import ast
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
+
+
+def test_neural_dependency_is_cuda_only():
+    root = Path(__file__).resolve().parents[1]
+    config = tomllib.loads((root / "pyproject.toml").read_text())
+    assert config["project"]["dependencies"] == []  # Core stays standard-library-only.
+    assert config["project"]["optional-dependencies"]["neural"] == [
+        "torch==2.14.1+cu126; sys_platform == 'linux' or sys_platform == 'win32'"
+    ]
+    assert config["tool"]["uv"]["sources"]["torch"] == [
+        {"index": "pytorch-cu126", "extra": "neural"}
+    ]
+    assert config["tool"]["uv"]["index"] == [
+        {"name": "pytorch-cu126", "url": "https://download.pytorch.org/whl/cu126", "explicit": True}
+    ]
 
 
 def test_documentation_examples(tmp_path):

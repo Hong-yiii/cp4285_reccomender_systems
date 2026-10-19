@@ -75,7 +75,7 @@ The inherited `fork()` deep-copies this small model. For another backend, includ
 | `describe()` | Record real configuration, randomness, update policy and parameter counts; use explicit non-applicability rather than invented values. |
 | `fork()` | Produce an independent complete learner; default `deepcopy` suffices for this sample. |
 
-For a neural implementation, wrap the network and optimizer inside this class. Do not confuse this `train(examples)` with PyTorch's `network.train()`, which only switches mode. Restore training mode for updates, use deterministic evaluation/no gradients for scoring, and allocate vocabulary from permitted training data. The optional [SASRec-style implementation](../src/cp4285/models/sasrec.py) now provides a small CPU example with full-state lifecycle tests; it is not an original-SASRec reproduction. Install the `neural` extra and see the [observable neural notebook](../notebooks/02_neural_continual_learning.ipynb) and [runbook](IMPLEMENTATION.md#neural-pilot-optional-cpu-extra). The sample counting code above remains the minimal dependency-free contract example.
+For a neural implementation, wrap the network and optimizer inside this class. Do not confuse this `train(examples)` with PyTorch's `network.train()`, which only switches mode. Restore training mode for updates, use deterministic evaluation/no gradients for scoring, and allocate vocabulary from permitted training data. The optional [SASRec-style implementation](../src/cp4285/models/sasrec.py) now provides a small **CUDA-required** example with full-state lifecycle tests (skipped explicitly without CUDA); it is not an original-SASRec reproduction. Install the `neural` extra and see the [observable neural notebook](../notebooks/02_neural_continual_learning.ipynb) and [runbook](IMPLEMENTATION.md#neural-pilot-cuda-required) and [RTX 2070 compatibility/acceptance handoff](RTX2070-HANDOFF.md). Torch is pinned to official `2.14.1+cu126` for Python 3.12 Linux/Windows; no CPU execution/fallback or batching is provided. GPU parameters/tensors/Adam/owned RNG and portable trusted weights-only checkpoint loading must be validated on real CUDA hardware; earlier CPU evidence does not establish CUDA correctness. CPU Torch can test explicit rejection only. The sample counting code above remains the minimal dependency-free contract example.
 
 ## 3. Sample evaluation: one common policy
 
@@ -202,7 +202,7 @@ For data work, implement `DataSource.load_data()` returning `PreparedExperiment(
 - Keep source/configuration/seed and artifact provenance explicit. No overwrites, hidden downloads or expensive runs without approval. Private sources/data/results stay ignored.
 - Do not force a different scientific task through this schema. Document the decision before changing the common contract. Improvement, stability and decline are all valid outcomes.
 
-**Current ceiling:** one target per example; in-memory data/copies; one-query scoring; self-reported metadata; no automatic interrupted-run resume or multi-seed analysis. A bounded local Amazon adapter and optional CPU neural learner with durable create-only checkpoints now exist; their proposed offline ordinal protocol is not a final benchmark. No real files were available during this implementation, so only schema fixtures have been executed. Before expensive experiments, verify real development learning and capture the environment. These examples are software checks, not Amazon results or proof of forgetting.
+**Current ceiling:** one target per example; in-memory data/copies; one-query scoring; self-reported metadata; no automatic interrupted-run resume or multi-seed analysis. A bounded local Amazon adapter and optional-install, CUDA-required neural learner with durable create-only checkpoints now exist; their proposed offline ordinal protocol is not a final benchmark. No real files or CUDA GPU were available during this change; historical CPU schema-fixture execution does not validate the CUDA implementation. Current GPU tests and the neural notebook remain unexecuted on CUDA. Before expensive experiments, verify real development learning and capture the environment. These examples are software checks, not Amazon results or proof of forgetting.
 
 ## 7. Run and contribute
 
@@ -213,6 +213,15 @@ uv run ruff check src tests
 uv run --with jupyterlab jupyter lab notebooks/01_shared_experiment.ipynb
 ```
 
-Jupyter is optional; uv may install the launcher. The normal tests need no dataset or GPU. `tests/test_documentation.py` executes every Python block above in order and checks that the model/evaluator definitions match their maintained source. Keep examples executable, not aspirational.
+Jupyter is optional; uv may install the launcher. The core tests need no dataset or GPU. To install/test/launch the neural notebook on a CUDA machine, use:
+
+```sh
+uv sync --locked --extra neural
+uv run --locked --extra neural python -c "from cp4285.models.sasrec import cuda_preflight; print(cuda_preflight())"
+uv run --locked --extra neural pytest -q -rs
+CP4285_NEURAL_MODE=fixture uv run --locked --extra neural --with jupyterlab jupyter lab notebooks/02_neural_continual_learning.ipynb
+```
+
+Without CUDA, its four lifecycle/notebook tests skip rather than executing on CPU; standalone loader/contracts remain tested. On an existing CPU-Torch development environment only, `uv run --no-sync pytest -q -rs` checks rejection/configuration without downloading CUDA wheels. This is not CUDA validation. `tests/test_documentation.py` executes every Python block above in order and checks that the model/evaluator definitions match their maintained source. Keep examples executable, not aspirational.
 
 **Copyable team brief:** Read this guide, CONTEXT and the October meeting synthesis. Choose one question. Change its owning package, add a small executable check and a short Markdown findings note, then import it in the shared notebook. Propose contract changes rather than hiding incompatible behavior. Before comparing runs, agree the data/filter, target horizon, fixed candidates, metrics, selection, exposure budget, model capacity and seeds. Report evidence and limits; do not promise a forgetting curve.

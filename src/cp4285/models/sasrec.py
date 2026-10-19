@@ -1,4 +1,4 @@
-"""Small CPU-only SASRec-style learner; not a reproduction of sampled-BCE SASRec."""
+"""Small CUDA-required SASRec-style learner; not a sampled-BCE SASRec reproduction."""
 
 import os
 from pathlib import Path
@@ -11,12 +11,64 @@ from torch.nn import functional as F
 
 from cp4285.experiment import Example, Query, Recommender
 
+_CUDA_HELP = (
+    "NVIDIA CUDA GPU required; CPU execution/fallback is not supported. "
+    "Check nvidia-smi and GPU visibility (CUDA_VISIBLE_DEVICES), install a compatible NVIDIA "
+    "driver, then run `uv sync --locked --extra neural` with Python 3.12 and restart the kernel. "
+    "See docs/RTX2070-HANDOFF.md."
+)
+
+
+def require_cuda() -> torch.device:
+    """Resolve the current visible CUDA GPU, never a CPU/MPS fallback."""
+    if torch.version.cuda is None or not torch.cuda.is_available():
+        raise RuntimeError(_CUDA_HELP)
+    return torch.device("cuda", torch.cuda.current_device())
+
+
+def cuda_preflight() -> dict[str, object]:
+    """Exercise CUDA allocation, matrix multiply and backward before any data/artifacts."""
+    device = require_cuda()
+    try:
+        x = torch.ones((2, 2), device=device, requires_grad=True)
+        (x @ x).sum().backward()
+        if x.grad is None or not bool(torch.isfinite(x.grad).all()):
+            raise RuntimeError("Nonfinite CUDA preflight gradient")
+        torch.cuda.synchronize(device)
+    except (RuntimeError, AssertionError) as error:
+        raise RuntimeError(f"CUDA tensor/backward preflight failed. {_CUDA_HELP}") from error
+    properties = torch.cuda.get_device_properties(device)
+    return {
+        "device": str(device),
+        "gpu": properties.name,
+        "compute_capability": list(torch.cuda.get_device_capability(device)),
+        "total_memory_bytes": properties.total_memory,
+        "torch": str(torch.__version__),
+        "cuda_runtime": torch.version.cuda,
+        "compiled_architectures": torch.cuda.get_arch_list(),
+        "cudnn": torch.backends.cudnn.version(),
+        "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+        "cublas_workspace_config": os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
+        "matmul_allow_tf32": torch.backends.cuda.matmul.allow_tf32,
+        "reproducibility": "owned CUDA RNG; same-runtime checks; no cross-device bitwise guarantee",
+    }
+
 
 class _Encoder(nn.Module):
-    def __init__(self, sizes: dict[str, int], width: int, heads: int, layers: int, horizon: int):
+    def __init__(
+        self,
+        sizes: dict[str, int],
+        width: int,
+        heads: int,
+        layers: int,
+        horizon: int,
+        device: torch.device,
+    ):
         super().__init__()
-        self.items = nn.ModuleDict({d: nn.Embedding(n + 1, width) for d, n in sizes.items()})
-        self.positions = nn.Embedding(horizon, width)
+        self.items = nn.ModuleDict(
+            {d: nn.Embedding(n + 1, width, device=device) for d, n in sizes.items()}
+        )
+        self.positions = nn.Embedding(horizon, width, device=device)
         layer = nn.TransformerEncoderLayer(
             width,
             heads,
@@ -25,18 +77,21 @@ class _Encoder(nn.Module):
             batch_first=True,
             norm_first=True,
             activation="gelu",
+            device=device,
         )
         self.encoder = nn.TransformerEncoder(layer, layers, enable_nested_tensor=False)
-        self.norm = nn.LayerNorm(width)
+        self.norm = nn.LayerNorm(width, device=device)
 
     def item_table(self, domain: str) -> nn.Embedding:
         return cast(nn.Embedding, self.items[domain])
 
     def encode(self, domain: str, ids: torch.Tensor, noise: torch.Tensor | None = None):
-        x = self.item_table(domain)(ids) + self.positions(torch.arange(ids.shape[1]))
+        x = self.item_table(domain)(ids) + self.positions(
+            torch.arange(ids.shape[1], device=ids.device)
+        )
         if noise is not None:
             x = x * noise
-        mask = torch.ones((ids.shape[1], ids.shape[1]), dtype=torch.bool).triu(1)
+        mask = torch.ones((ids.shape[1], ids.shape[1]), dtype=torch.bool, device=ids.device).triu(1)
         return self.norm(self.encoder(x, mask=mask))
 
 
@@ -45,7 +100,7 @@ class SASRecRecommender(Recommender):
 
     One Adam update per supplied target, in order; full domain softmax CE at the
     last history position. No padding targets, negative sampling, replay or hidden
-    epochs. Input dropout uses an owned CPU generator; attention/FFN dropout is zero.
+    epochs. Input dropout uses an owned CUDA generator; attention/FFN dropout is zero.
     This small-pilot policy trades throughput for transparent exposure accounting.
     """
 
@@ -61,6 +116,7 @@ class SASRecRecommender(Recommender):
         dropout: float = 0.1,
         seed: int = 7,
     ) -> None:
+        self.device = require_cuda()
         if any(type(n) is not int or n <= 0 for n in (width, heads, layers, max_history)):
             raise ValueError("Positive integer architecture dimensions required")
         if width % heads or not 0 <= dropout < 1 or not 0 < learning_rate < 1:
@@ -90,14 +146,21 @@ class SASRecRecommender(Recommender):
             "dropout": dropout,
             "seed": seed,
         }
-        # Scoped initialization restores the caller's CPU RNG; updates use only self.generator.
-        with torch.random.fork_rng(devices=[]):
-            torch.manual_seed(seed)
+        # Seed only this GPU, restoring both process CPU and selected CUDA RNG states.
+        with torch.random.fork_rng(devices=[self.device.index]), torch.cuda.device(self.device):
+            torch.cuda.manual_seed(seed)
             self.network = _Encoder(
-                {d: len(v) for d, v in self.vocabularies.items()}, width, heads, layers, max_history
+                {d: len(v) for d, v in self.vocabularies.items()},
+                width,
+                heads,
+                layers,
+                max_history,
+                self.device,
             )
-        self.generator = torch.Generator(device="cpu").manual_seed(seed + 1)
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=learning_rate)
+        self.generator = torch.Generator(device=self.device).manual_seed(seed + 1)
+        self.optimizer = torch.optim.Adam(
+            self.network.parameters(), lr=learning_rate, capturable=True
+        )
         self.continuation_started = False
         self.targets_seen = 0
         self.last_loss: float | None = None
@@ -109,7 +172,7 @@ class SASRecRecommender(Recommender):
             ids = [self.indices[query.domain][item] for item in query.history[-self.max_history :]]
         except KeyError as error:
             raise ValueError("Unknown history item; vocabulary must come from training") from error
-        return torch.tensor([ids], dtype=torch.long)
+        return torch.tensor([ids], dtype=torch.long, device=self.device)
 
     def train(self, examples: tuple[Example, ...]) -> None:
         # Validate the complete call before any gradient updates.
@@ -128,10 +191,12 @@ class SASRecRecommender(Recommender):
             noise = None
             if p:
                 shape = (1, ids.shape[1], self.width)
-                noise = (torch.rand(shape, generator=self.generator) >= p).float() / (1 - p)
+                noise = (
+                    torch.rand(shape, generator=self.generator, device=self.device) >= p
+                ).float() / (1 - p)
             hidden = self.network.encode(domain, ids, noise)[:, -1]
             logits = hidden @ self.network.item_table(domain).weight[1:].T
-            loss = F.cross_entropy(logits, torch.tensor([target]))
+            loss = F.cross_entropy(logits, torch.tensor([target], device=self.device))
             if not torch.isfinite(loss):
                 raise ValueError("Nonfinite training loss")
             loss.backward()
@@ -149,13 +214,16 @@ class SASRecRecommender(Recommender):
             raise ValueError("Unknown candidate") from error
         with torch.no_grad():
             hidden = self.network.encode(query.domain, ids)[:, -1]
-            scores = hidden @ self.network.item_table(query.domain).weight[candidate_ids].T
+            indices = torch.tensor(candidate_ids, dtype=torch.long, device=self.device)
+            scores = hidden @ self.network.item_table(query.domain).weight[indices].T
         return tuple(scores.flatten().tolist())
 
     def begin_continuation(self) -> None:
         if self.continuation_started:
             raise ValueError("Continuation optimizer may only be reset once")
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.learning_rate)
+        self.optimizer = torch.optim.Adam(
+            self.network.parameters(), lr=self.learning_rate, capturable=True
+        )
         self.continuation_started = True
 
     def describe(self) -> dict[str, object]:
@@ -164,14 +232,24 @@ class SASRecRecommender(Recommender):
             "family": "SASRec-style shared causal Transformer (not a reproduction)",
             "config": dict(self.config),
             "seed": self.config["seed"],
-            "randomness": "owned CPU generator for input dropout; scoped seeded initialization",
+            "randomness": "owned CUDA generator for input dropout; scoped CUDA initialization",
             "update_policy": "one Adam step/target; full domain CE; reset Adam once at continuation",
             "parameter_count": count,
             "trainable_parameter_count": count,
             "catalogue_sizes": {d: len(v) for d, v in self.vocabularies.items()},
             "capacity_note": "includes both domain tables, shared positions, encoder and layer norm",
-            "torch": torch.__version__,
-            "device": "cpu",
+            "torch": str(torch.__version__),
+            "device": str(self.device),
+            "runtime": {
+                "gpu": torch.cuda.get_device_name(self.device),
+                "compute_capability": list(torch.cuda.get_device_capability(self.device)),
+                "cuda_runtime": torch.version.cuda,
+                "compiled_architectures": torch.cuda.get_arch_list(),
+                "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+                "matmul_allow_tf32": torch.backends.cuda.matmul.allow_tf32,
+                "cublas_workspace_config": os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
+                "reproducibility": "not enforced; no cross-device bitwise guarantee",
+            },
         }
 
     def save(self, path: str | Path) -> None:
@@ -181,7 +259,8 @@ class SASRecRecommender(Recommender):
             raise FileExistsError(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "format": 1,
+            "format": 2,
+            "runtime": self.describe(),
             "vocabularies": self.vocabularies,
             "config": self.config,
             "network": self.network.state_dict(),
@@ -198,13 +277,15 @@ class SASRecRecommender(Recommender):
 
     @classmethod
     def load(cls, path: str | Path) -> "SASRecRecommender":
-        payload = torch.load(path, map_location="cpu", weights_only=True)
-        if payload["format"] != 1:
+        device = require_cuda()
+        payload = torch.load(path, map_location=device, weights_only=True)
+        if payload["format"] != 2:
             raise ValueError("Unknown neural checkpoint format")
         model = cls(payload["vocabularies"], **payload["config"])
         model.network.load_state_dict(payload["network"])
         model.optimizer.load_state_dict(payload["optimizer"])
-        model.generator.set_state(payload["rng"])
+        # Generator state API requires a CPU ByteTensor; this is metadata, not CPU learning.
+        model.generator.set_state(payload["rng"].cpu())
         model.targets_seen = payload["targets_seen"]
         model.last_loss = payload["last_loss"]
         model.continuation_started = payload["continuation_started"]
