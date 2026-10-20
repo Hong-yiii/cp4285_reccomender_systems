@@ -225,3 +225,46 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Locked sync, Ruff lint/format, all **42 tests**, CLI doctor/classical help and source/wheel builds passed. The suite executes both guide examples and notebook cells in fresh Python processes and includes synthetic checkpoint/frozen-control checks. CPU tests verify unchanged native updates, candidate order, scoring purity, copied optimizer bindings, persistent optimizer steps, reset-once guards and parent/sibling RNG isolation. Fresh LSP checks found no code errors; stale pre-sync dependency-import diagnostics and test-path false positives were dispositioned separately. Independent read-only review reported no blocking findings; it inspected tests but did not independently execute them.
 
 **Limits:** This is a common lifecycle and responsibility layout, **not** a common scientific benchmark. Native update/exposure units, splits, candidate catalogues, seen masking and tie policies remain distinct. Initial weights are selected on validation; continuation resets Adam and uses end-of-initial sampler state, not a resumed best-epoch optimizer. Owned Torch RNG and avoiding a discarded network initialization on reload change historical continuation trajectories, so new runs need code-revision provenance. Sequential in-memory forks do not provide thread-safe global RNG scopes or durable resume; accelerator lifecycle checks remain unverified. No datasets were downloaded, no real-data experiment or course submission was performed, the Google deck was untouched, and PR #9's separate classical study was not incorporated. PR publication is for review, not authorization to merge main.
+
+## 19 October 2026 — LLM continual-recommendation direction and PESO replication
+
+**Tool:** Claude Code (Claude Opus 5.5), with web search and fetch for papers, the GitHub CLI for reading the upstream repository, and Modal for GPU runs billed to the user's account.
+
+**Request:** Find a way to bring LLMs into the study of scalability and continual learning / catastrophic forgetting, changing one variable at a time and with an interpretable readout such as a counter of predictions that got better or worse. After discussing LLM-analysis methods, GenRec (arXiv 2608.10257) and PESO (arXiv 2510.25093), the user chose to replicate PESO first, list its future directions, and run it on Modal with A100s and Python 3.10.
+
+**Assistance:**
+- Read the project docs and code. Summarized how outside researchers analyse LLMs: scaling sweeps, learning-vs-forgetting trade-offs, before/after flip counts, representation analysis, causal rollback and data attribution.
+- Read PESO's paper and its unlicensed code at a pinned commit, in ignored `local/peso/` only.
+- Verified from code and data:
+  - the PESO penalty covers only the LoRA matrices;
+  - there is no target leakage across blocks;
+  - the item tokenizer covers items that arrive later;
+  - the released datasets differ from the paper's;
+  - only one seed is used.
+- Wrote our Modal launcher, a retention-matrix evaluator that reuses upstream functions, a user-group labeller and a summariser. Added `cp4285 flips` (retention matrix, backward transfer, kept/lost/gained counts, McNemar tests, forgetting events, group slices) with tests. Documented everything in `docs/PESO-REPLICATION.md`.
+- Diagnosed environment failures:
+  - Hugging Face gated access, granted by the user;
+  - an `hf_xet` log file left open on the Modal volume;
+  - an upstream block-0 copy race;
+  - a transformers 4.52.4 best-checkpoint race between ranks.
+  
+  The last two led to one GPU with gradient accumulation 4, keeping the effective batch at 32.
+- Diagnosed lost Modal runs: a local network disconnect cancelled detached runs, and GPU preemption restarted two seeds. Moved launches server-side, cancelled seed 42 at the user's request, and migrated it to a non-preemptible Runpod on-demand pod with a network volume. The user approved the move; `pod_run.py` runs it.
+- At the user's request, audited the workstream against `AGENTS.md`:
+  - checked the Table 2 targets, averaging, λ, Table 3 groups and future directions against the arXiv PDF (pp. 8–10, 27);
+  - moved account-specific IDs into ignored `local/WORKSPACE.md`;
+  - added the dated `reference.html` checkpoint;
+  - reran the required checks.
+
+**Validation:** `uv sync --locked`, `cp4285 doctor`, 47 tests, Ruff lint/format and a fresh synthetic demo pass. A debug smoke run on Modal completed every stage. On block 1, our evaluator matched upstream `continual_test.py` exactly, but only on an all-zero result from a 100-example model; the non-zero comparison is pending the full run.
+
+**Result (20 October):** three seeds completed (43 and 44 on Modal, 42 on Runpod). Pretrain and single evolving LoRA reproduce Table 2 within about 5%. PESO ties single evolving LoRA: paired NDCG@10 difference −0.0001 ± 0.0002, against the paper's +0.0012. A Runpod host-maintenance restart cost one PESO rerun and about 1 h 45 min of idle GPU time.
+
+**Deliverables (20 October):**
+- At the user's request, a progress-update format (`docs/updates/`) modelled on the 15 October meeting notes, with a first entry for the replication.
+- `notebooks/02_peso_replication.ipynb` with metric files committed under `replication/peso/results/`, plus an execution test.
+- `summarize.py` refactored to expose paired differences.
+- The Gemini meeting notes were treated as unconfirmed: their "recall@20" conflicts with the repo's meeting synthesis.
+- A Jacobian-lens probe (Gurnee et al. 2026) is proposed but not run.
+
+**Limits:** No per-user significance test or retention matrix yet. The candidate causes of the PESO gap (environment deviations, unreleased data processing) are untested; see `docs/PESO-REPLICATION.md`. Results are on PESO's released Instruments blocks, not our Electronics/Movies & TV data, and are not comparable with SASRec or classical numbers. None of the extension directions has been run. The two environment deviations are documented. Nothing was committed, pushed or submitted, and the authors were not contacted.

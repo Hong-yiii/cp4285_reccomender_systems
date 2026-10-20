@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#abc-integration"><strong>Latest · 20 · Shared learner ABC</strong></a>
+          <a href="#peso-replication"><strong>Latest · 21 · PESO replication</strong></a>
+          <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
@@ -718,8 +719,15 @@
             tabindex="-1"
             role="note"
           >
-            <strong>Current review checkpoint — 16 October 2026.</strong>
-            This integration preserves main's real models and CLI under two
+            <strong>Current review checkpoint — 19 October 2026.</strong>
+            A user-requested, exploratory LLM workstream is replicating PESO
+            (ICLR 2026) on its own released Instruments data before choosing an
+            extension. Read <a href="#peso-replication">section 21</a> and the
+            <a href="docs/PESO-REPLICATION.md">replication record</a>. It is not a
+            team-confirmed protocol change and its numbers are not comparable with
+            ours. Three-seed result (20 October): Pretrain and single LoRA reproduce;
+            PESO's reported gain does not. The 16 October integration remains
+            the code baseline: it preserves main's real models and CLI under two
             responsibility packages: <code>experiment/</code> and <code>models/</code>.
             SASRec and incremental PureSVD use a shared learner ABC; classical
             refit sweeps remain explicitly distinct. Read
@@ -3531,6 +3539,50 @@ scores = branch.score(fixed_queries)</pre>
             CPU lifecycle tests cover candidate alignment, optimizer persistence, scoring purity and
             parent/sibling RNG isolation. In-memory RNG scopes support sequential branches, not
             concurrent threads; accelerator validation and interrupted-run resume remain future work.</p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <section id="peso-replication">
+          <span class="section-num">21 / PESO REPLICATION · 19 OCTOBER 2026</span>
+          <h2>Replicate an LLM continual recommender before extending it.</h2>
+          <p>The user asked how LLMs could inform the scalability and forgetting
+            question, changing one variable at a time with an interpretable readout.
+            They chose to replicate PESO first: a Llama-3.2-1B generative recommender
+            updated block by block with one LoRA adapter and a KL penalty, weighted by λ,
+            towards the previous block's adapter
+            (<a href="https://arxiv.org/abs/2510.25093">arXiv 2510.25093</a>).
+            The target is Table 2, Instruments, checked against the PDF (p. 8).</p>
+          <div class="callout warn"><strong>Different data, different protocol.</strong>
+            Runs use PESO's released, preprocessed Instruments blocks and its own
+            beam-search evaluation. They are not Electronics/Movies &amp; TV results and
+            are not comparable with the SASRec or classical numbers in sections 01–20.</div>
+          <p><span class="label fact">FACT</span> From upstream code and data: the PESO
+            penalty covers only the LoRA matrices, while the item-token embeddings and
+            output layer (about 265M parameters each, against 5.6M LoRA parameters)
+            train unpenalized. No block's test item becomes a later training target.
+            The item tokenizer covers items that arrive later. The released datasets
+            differ from the paper's, and only seed 42 is used upstream.</p>
+          <p><span class="label fact">FACT</span> Runs use Python 3.10 and one GPU per
+            stage with gradient accumulation 4 (same effective batch 32). Two-GPU runs
+            hit a block-0 copy race in upstream code and a best-checkpoint race in
+            transformers 4.52.4. Modal GPU containers are preemptible, so seed 42 moved to
+            a non-preemptible Runpod pod, while seeds 43 and 44 continue on Modal.</p>
+          <p><span class="label fact">FACT</span> Three seeds (20 October), NDCG@10 on
+            D2–D4: Pretrain 0.0137 ± 0.0010 (paper 0.0131), single evolving LoRA
+            0.0147 ± 0.0008 (0.0150), PESO 0.0146 ± 0.0007 (0.0162). Paired by seed,
+            PESO minus single LoRA is −0.0001 ± 0.0002, against the paper's +0.0012.
+            Seed-to-seed variation is as large as the claimed gain. See the
+            <a href="docs/PESO-REPLICATION.md">replication record</a> for what this can and
+            cannot support.</p>
+          <p><span class="label fact">FACT</span> Deliverables (20 October): dated
+            <a href="docs/updates/README.md">progress updates</a> in the meeting-notes format, and
+            <a href="notebooks/02_peso_replication.ipynb">notebook 02</a>, which rebuilds these tables from
+            metric files committed under <code>replication/peso/results/</code>.</p>
+          <p><span class="label recommend">RECOMMENDATION</span> After replication, push one
+            variable at a time: first whether the penalty also covers the item-token
+            layers, checked by rolling back each component. The evaluator
+            <a href="replication/peso/peso_eval.py">peso_eval.py</a> and
+            <a href="src/cp4285/experiment/flips.py">cp4285 flips</a> report the retention
+            matrix and per-user kept/lost/gained counts.</p>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <footer>

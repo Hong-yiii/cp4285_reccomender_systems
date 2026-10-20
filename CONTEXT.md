@@ -1,6 +1,6 @@
 # Project context
 
-Snapshot: **16 October 2026**. Read [Packages and building](docs/PACKAGES-AND-BUILDING.md), the [October meeting synthesis](docs/MEETING-2026-10-15.md) and the [runbook](docs/IMPLEMENTATION.md) before extending the code.
+Snapshot: **16 October 2026**, with the 19 October LLM workstream below. Read [Packages and building](docs/PACKAGES-AND-BUILDING.md), the [October meeting synthesis](docs/MEETING-2026-10-15.md) and the [runbook](docs/IMPLEMENTATION.md) before extending the code.
 
 ## Current direction and ownership
 
@@ -30,6 +30,16 @@ The CLI remains `cp4285`; a thin notebook imports the packages. Old `common/`, `
 The tagged boilerplate's single-target `Example` contract and generic runner are **not** copied into this integration: enforcing them unchanged would silently alter main's all-position SASRec training and classical row-chunk semantics. Neither is presented as the final common benchmark.
 
 **Not implemented:** neural B interfaces/mixed updates, common classical/neural evaluation, multi-seed aggregation, interrupted-run resume or a finalized experiment matrix. Checkpoints save weights/optimizer/cursor and owned RNG, but the CLI cannot resume them. Sequential in-memory forks are not thread-safe global-RNG isolation. Owned RNG and avoiding a throwaway network initialization during reload change historical continuation random trajectories; use new run artifacts and record the code revision.
+
+## LLM continual-recommendation workstream — 19 October 2026
+
+User-requested and exploratory; **not** a team-confirmed protocol change. The user chose to replicate PESO (Yoo et al., ICLR 2026, arXiv 2510.25093) before choosing an LLM extension. See [PESO-REPLICATION.md](docs/PESO-REPLICATION.md).
+
+- Implemented: a Modal launcher and a Runpod pod runner. Both use Python 3.10 instead of upstream's 3.9 and one GPU per stage with gradient accumulation 4 (same effective batch 32), and keep all other upstream pins; our evaluator, which pairs any saved block state with any block's test users and dumps per-user top-10s; `cp4285 flips`, which reports the retention matrix, backward transfer, kept/lost/gained counts, McNemar tests, forgetting events and user-group slices; and a new/dormant/continuing labeller.
+- Checked in upstream code and data: the PESO penalty covers only the LoRA matrices, while the item-token embeddings and output layer train unpenalized; there is no target leakage across blocks; the semantic-ID index covers items that arrive later; the released datasets differ from the paper's; only seed 42 is used.
+- Result, 20 October (three seeds): Pretrain and single evolving LoRA reproduce Table 2 within about 5% (NDCG@10 0.0137 and 0.0147 against 0.0131 and 0.0150). PESO does not beat single evolving LoRA: NDCG@10 0.0146 ± 0.0007 against the paper's 0.0162, with a paired PESO − LoRA difference of −0.0001 ± 0.0002 against the claimed +0.0012. Seed variation is as large as the claimed gain. Infrastructure issues (two-GPU races, Modal preemption, a Runpod host outage) are documented in the replication record.
+- Deliverables: progress update `docs/updates/2026-10-20-peso-replication.md` (meeting-notes format); `notebooks/02_peso_replication.ipynb` with metric files committed under `replication/peso/results/` (metrics only).
+- Not done: the retention matrix and per-user flip test (O3), every extension direction, and the proposed Jacobian-lens probe (O7). Figures wait on a plotting-dependency decision. Upstream code has no licence: it lives only in ignored `local/peso/` and the run image. Results are on PESO's released Instruments blocks and are not our Electronics/Movies & TV results.
 
 ## Scientific invariants and unresolved decisions
 

@@ -15,6 +15,8 @@ This checkout is the canonical **group-project** home, not the whole course work
 - `docs/SASREC.md`: selected original architecture, pinned upstream code, license and explicit training/evaluation differences.
 - `docs/PACKAGES-AND-BUILDING.md`, `notebooks/01_shared_lifecycle.ipynb`: ABC development guide and runnable walkthrough; `boilerplate-v1` is the separate lightweight reference tag.
 - `src/cp4285/experiment/`, `src/cp4285/models/`, `tests/`: protocol ownership, concrete learners and lifecycle tests. Keep native learning units and distinct classical/neural evaluations explicit; batch refits are not continuation.
+- `docs/updates/`: dated progress shares in the meeting-notes format (`[Owner] Task: description` next steps). `notebooks/02_peso_replication.ipynb` reads only committed results.
+- `docs/PESO-REPLICATION.md`, `replication/peso/`, `src/cp4285/experiment/flips.py`: LLM continual-recommendation replication on Modal and the flip/retention analysis. Upstream PESO has no licence: clone it into ignored `local/peso/` or the run image, never into the repo. GPU runs bill the user's Modal account.
 - `docs/AI_LOG.md`: collective AI-use documentation.
 
 ## Working rules
