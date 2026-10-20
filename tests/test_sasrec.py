@@ -1,4 +1,4 @@
-"""CUDA lifecycle checks skip without a GPU; CPU rejection is not CUDA evidence."""
+"""CPU lifecycle executes offline; CUDA cases skip explicitly without a GPU."""
 
 import copy
 import json
@@ -15,11 +15,26 @@ from test_amazon import files
 
 from cp4285.experiment import Event, Example, Query, run
 from cp4285.experiment.amazon import AmazonSource
-from cp4285.models.sasrec import SASRecRecommender, cuda_preflight
+from cp4285.models.sasrec import SASRecRecommender, cuda_preflight, device_preflight, resolve_device
 
-cuda_required = pytest.mark.skipif(
-    not torch.cuda.is_available(), reason="NVIDIA CUDA GPU required; no CPU neural fallback"
-)
+devices = [
+    "cpu",
+    pytest.param(
+        "cuda",
+        marks=pytest.mark.skipif(
+            not torch.cuda.is_available(),
+            reason="CUDA hardware unavailable; CPU tests are not CUDA evidence",
+        ),
+    ),
+]
+
+
+@pytest.fixture(scope="module", autouse=True)
+def small_cpu_workload():
+    previous = torch.get_num_threads()
+    torch.set_num_threads(1)
+    yield
+    torch.set_num_threads(previous)
 
 
 def test_cuda_required_rejection(tmp_path, monkeypatch):
@@ -27,23 +42,33 @@ def test_cuda_required_rejection(tmp_path, monkeypatch):
     rng = torch.get_rng_state().clone()
     for action in (
         cuda_preflight,
-        lambda: SASRecRecommender({"A": ("x", "y")}),
-        lambda: SASRecRecommender.load(tmp_path / "must-not-be-read.pt"),
+        lambda: SASRecRecommender({"A": ("x", "y")}, device="cuda"),
+        lambda: SASRecRecommender.load(tmp_path / "must-not-be-read.pt", device="cuda"),
     ):
         with pytest.raises(RuntimeError, match="NVIDIA CUDA GPU required.*uv sync --locked"):
             action()
+    assert resolve_device("auto") == torch.device("cpu")
+    assert resolve_device("cpu") == torch.device("cpu")
+    default = SASRecRecommender({"A": ("x", "y")})
+    automatic = SASRecRecommender({"A": ("x", "y")}, device="auto")
+    assert default.device == automatic.device == torch.device("cpu")
+    equal(state(default), state(automatic))
+    assert device_preflight("cpu")["device"] == "cpu"
+    with pytest.raises(ValueError, match="device must"):
+        SASRecRecommender({"A": ("x", "y")}, device="mps")
     assert torch.equal(torch.get_rng_state(), rng)
     assert not list(tmp_path.iterdir())
 
 
 @pytest.mark.parametrize("mode", ["fixture", "audit", "real"])
-def test_notebook_rejects_cpu_before_data_or_artifacts(tmp_path, mode):
+def test_notebook_explicit_cuda_fails_before_data_or_artifacts(tmp_path, mode):
     root = Path(__file__).resolve().parents[1]
     notebook = json.loads((root / "notebooks/02_neural_continual_learning.ipynb").read_text())
     code = "\n\n".join("".join(c["source"]) for c in notebook["cells"] if c["cell_type"] == "code")
     env = dict(
         os.environ,
         CUDA_VISIBLE_DEVICES="",
+        CP4285_DEVICE="cuda",
         CP4285_NEURAL_MODE=mode,
         CP4285_AMAZON_A="/must-not-open-A.csv",
         CP4285_AMAZON_B="/must-not-open-B.csv",
@@ -60,7 +85,7 @@ def test_notebook_rejects_cpu_before_data_or_artifacts(tmp_path, mode):
     )
     assert result.returncode != 0
     assert "NVIDIA CUDA GPU required" in result.stderr
-    assert "uv sync --locked --extra neural" in result.stderr
+    assert "uv sync --locked --extra neural-cuda" in result.stderr
     assert not list(tmp_path.iterdir())
 
 
@@ -102,13 +127,15 @@ def example(domain="A", target="y"):
     )
 
 
-@cuda_required
-def test_score_purity_rng_forks_checkpoint_next_update(tmp_path):
-    runtime = cuda_preflight()  # A boolean availability check alone is not GPU validation.
-    assert str(runtime["device"]).startswith("cuda:")
+@pytest.mark.parametrize("device", devices)
+def test_score_purity_rng_forks_checkpoint_next_update(tmp_path, device):
+    runtime = device_preflight(device)
+    assert str(runtime["device"]).startswith(device)
     global_rng = torch.get_rng_state().clone()
-    global_cuda_rng = torch.cuda.get_rng_state_all()
-    model = SASRecRecommender({"A": ("x", "y"), "B": ("x", "y")}, dropout=0.3)
+    global_cuda_rng = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []
+    model = SASRecRecommender({"A": ("x", "y"), "B": ("x", "y")}, dropout=0.3, device=device)
+    if device == "cuda":
+        assert resolve_device("auto") == model.device
     model.train((example(), example("B")))
     assert all(p.device == model.device for p in model.network.parameters())
     assert model.generator.device == model.device
@@ -121,7 +148,7 @@ def test_score_purity_rng_forks_checkpoint_next_update(tmp_path):
     )
     assert all(int(values["step"]) <= 2 for values in model.optimizer.state.values())
     equal(torch.get_rng_state(), global_rng)
-    equal(torch.cuda.get_rng_state_all(), global_cuda_rng)
+    equal(torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [], global_cuda_rng)
     before = state(model)
     query = example().query
     scores = model.score(query, ("x", "y"))
@@ -138,7 +165,7 @@ def test_score_purity_rng_forks_checkpoint_next_update(tmp_path):
     left.begin_continuation()
     left.train((example(),))
     left.save(path)
-    restored = SASRecRecommender.load(path)
+    restored = SASRecRecommender.load(path, device=device)
     equal(state(left), state(restored))
     assert all(
         value.device == restored.device
@@ -146,11 +173,21 @@ def test_score_purity_rng_forks_checkpoint_next_update(tmp_path):
         for value in values.values()
         if isinstance(value, torch.Tensor)
     )
-    # Simulate a portable checkpoint staged on another device, without CPU model execution.
+    # Staging storage on CPU must preserve the recorded generator backend.
     portable = tmp_path / "portable.pt"
     torch.save(torch.load(path, map_location="cpu", weights_only=True), portable)
-    remapped = SASRecRecommender.load(portable)
+    remapped = SASRecRecommender.load(portable, device=device)
     equal(state(left), state(remapped))
+    incompatible = tmp_path / "incompatible.pt"
+    payload = torch.load(path, map_location="cpu", weights_only=True)
+    payload["device_type"] = "cuda" if device == "cpu" else "cpu"
+    torch.save(payload, incompatible)
+    with pytest.raises(ValueError, match="RNG backend differs"):
+        SASRecRecommender.load(incompatible, device=device)
+    payload["format"] = 2
+    torch.save(payload, tmp_path / "old-format.pt")
+    with pytest.raises(ValueError, match="checkpoint format"):
+        SASRecRecommender.load(tmp_path / "old-format.pt", device=device)
     left.train((example("B"),))
     restored.train((example("B"),))
     remapped.train((example("B"),))
@@ -163,12 +200,12 @@ def test_score_purity_rng_forks_checkpoint_next_update(tmp_path):
     with pytest.raises(ValueError, match="Unknown"):
         model.score(Query("A", "u", ("unknown",)), ("x",))
     equal(torch.get_rng_state(), global_rng)
-    equal(torch.cuda.get_rng_state_all(), global_cuda_rng)
+    equal(torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [], global_cuda_rng)
 
 
-@cuda_required
-def test_causal_history_actual_learning_and_shared_encoder():
-    model = SASRecRecommender({"A": ("x", "y"), "B": ("x", "y")}, dropout=0.0)
+@pytest.mark.parametrize("device", devices)
+def test_causal_history_actual_learning_and_shared_encoder(device):
+    model = SASRecRecommender({"A": ("x", "y"), "B": ("x", "y")}, dropout=0.0, device=device)
     with torch.no_grad():
         long = model.network.encode("A", torch.tensor([[1, 2]], device=model.device))
         short = model.network.encode("A", torch.tensor([[1]], device=model.device))
@@ -189,11 +226,11 @@ def test_causal_history_actual_learning_and_shared_encoder():
     assert before != model.score(example().query, ("x", "y"))
 
 
-@cuda_required
-def test_neural_shared_runner_and_observation(tmp_path):
+@pytest.mark.parametrize("device", devices)
+def test_neural_shared_runner_and_observation(tmp_path, device):
     source = AmazonSource(files(tmp_path))
     data = source.load_data()
-    model = SASRecRecommender(source.vocabularies, width=8)
+    model = SASRecRecommender(source.vocabularies, width=8, device=device)
     events = []
 
     def observe(event, learner):
@@ -213,8 +250,8 @@ def test_neural_shared_runner_and_observation(tmp_path):
     assert (tmp_path / "selected.pt").is_file()
 
 
-@cuda_required
-def test_neural_notebook_offline(tmp_path, monkeypatch):
+@pytest.mark.parametrize("device", devices)
+def test_neural_notebook_offline(tmp_path, monkeypatch, device):
     root = Path(__file__).resolve().parents[1]
     notebook = json.loads((root / "notebooks/02_neural_continual_learning.ipynb").read_text())
     code = "\n\n".join("".join(c["source"]) for c in notebook["cells"] if c["cell_type"] == "code")
@@ -228,6 +265,11 @@ def test_neural_notebook_offline(tmp_path, monkeypatch):
         if key not in {"CP4285_AMAZON_A", "CP4285_AMAZON_B"}
     }
     env["CP4285_NEURAL_MODE"] = "fixture"
+    env["CP4285_TORCH_THREADS"] = "1"
+    if device == "cpu":
+        env.pop("CP4285_DEVICE", None)  # Exercise the notebook's real CPU default.
+    else:
+        env["CP4285_DEVICE"] = device
     subprocess.run(
         [sys.executable, "-"], input=code, text=True, cwd=tmp_path, check=True, timeout=180, env=env
     )
@@ -235,5 +277,12 @@ def test_neural_notebook_offline(tmp_path, monkeypatch):
     assert list((tmp_path / "runs").glob("*/checkpoints/selected.pt"))
     runtime_path = next((tmp_path / "runs").glob("*/runtime.json"))
     runtime = json.loads(runtime_path.read_text())
-    assert runtime["device"].startswith("cuda:")
-    assert runtime["peak_allocated_bytes"] > 0
+    assert runtime["device"].startswith(device)
+    if sys.platform != "win32":
+        assert runtime["peak_process_rss_bytes"] > 0
+    else:
+        assert runtime["peak_process_rss_bytes"] is None
+    if device == "cuda":
+        assert runtime["peak_allocated_bytes"] > 0
+    else:
+        assert runtime["peak_allocated_bytes"] is None

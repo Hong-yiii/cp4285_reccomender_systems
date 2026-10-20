@@ -670,9 +670,10 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#reset-checkpoint"
-            ><strong>Latest · 20 · Research reset</strong></a
+          <a href="#cpu-pilot-checkpoint"
+            ><strong>Latest · 21 · Real CPU pilot</strong></a
           >
+          <a href="#reset-checkpoint">20 · Research reset</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
@@ -720,27 +721,27 @@
             tabindex="-1"
             role="note"
           >
-            <strong>Current review checkpoint — 16 October 2026.</strong>
-            The trial implementation has been retired with the user's
-            authorization. The active code is now two packages:
-            <code>cp4285.experiment</code> and <code>cp4285.models</code>, with
-            ABC contracts, a synthetic verification notebook and shared
-            evaluation. Real models/data will be rebuilt intentionally. Read
+            <strong>Current review checkpoint — 19 October 2026.</strong>
+            The active two-package foundation now includes a bounded Amazon
+            loader and CPU/CUDA SASRec-style model. The user supersedes the
+            GPU-only requirement: CPU is the notebook default, while explicit
+            CUDA remains fatal if unavailable. An authorized bounded real CPU
+            pilot completed, but all heldout @1 scores stayed zero: development
+            learning, meaningful retention and forgetting are not established.
+            Read <a href="#cpu-pilot-checkpoint">section 21: real CPU pilot</a>,
+            the
+            <a href="docs/RESEARCH-SCRATCHPAD.md">research scratchpad</a> and
             <a href="docs/PACKAGES-AND-BUILDING.md"
               >Packages and building rules</a
-            >
-            (draft for team review), the
-            <a href="docs/MEETING-2026-10-15.md">meeting synthesis</a> and
-            <a href="#reset-checkpoint">section 20: research reset</a>.
+            >.
             <strong
-              >Sections 01–19 preserve historical reasoning, not current
+              >Sections 01–20 preserve historical reasoning, not current
               execution instructions.</strong
             >
-            Their source links point to the pre-reset Git snapshot; earlier line
-            numbers, test counts, model choices and results belong to their
-            dated checkpoints. The current
-            <a href="docs/IMPLEMENTATION.md">runbook</a> is authoritative. No
-            new real-data experiment or team slide edit was performed.
+            Earlier source links, test counts, model choices and results belong
+            to their dated checkpoints. The current
+            <a href="docs/IMPLEMENTATION.md">runbook</a> is authoritative. CUDA
+            hardware remains unvalidated; no canonical team slide edits.
           </div>
           <div class="legend" aria-label="Evidence labels">
             <span
@@ -3936,6 +3937,62 @@ uv run pytest -q</code></pre>
               href="https://github.com/Hong-yiii/cp4285_reccomender_systems/tree/8b9edd3"
               >Pre-reset source snapshot</a
             >
+          </p>
+        </section>
+        <section id="cpu-pilot-checkpoint">
+          <span class="section-num"
+            >21 / 19 OCTOBER 2026 — BOUNDED REAL CPU PILOT</span
+          >
+          <h2>A real pipeline run, not evidence of learned retention.</h2>
+          <p>
+            User-authorized CPU/CUDA selection supersedes the historical
+            GPU-only requirement. The neural notebook defaults to CPU; explicit
+            CUDA fails without a working GPU. Optional uv CPU/CUDA extras are
+            mutually exclusive. Device-owned RNG, independent full-state forks,
+            backend-appropriate Adam and create-only format-3 checkpoints are
+            implemented; full-state restoration requires the same RNG backend.
+          </p>
+          <p>
+            The parent acquired 16 MiB total from official pinned Electronics
+            and Movies &amp; TV CSV prefixes, not complete datasets. At the
+            unchanged 50,000-row bound, 32 users yielded zero test targets. A
+            single pre-metric coverage adjustment to 256 lexical users was
+            explicitly approved; splits, frozen training-only catalogues, two
+            initial epochs and eight continuation targets per branch stayed
+            fixed.
+          </p>
+          <ul>
+            <li>
+              Catalogues A/B: 1,216/1,230; development A/B: 15/2; tests A/B:
+              8/4.
+            </li>
+            <li>42,640 parameters, 512 initial A targets, one CPU thread.</li>
+            <li>
+              Initial training CE fell 9.5242 to 6.9119, but A development and
+              all 36 A/B NDCG/Hit/Recall@1 records remained zero; frozen
+              unchanged.
+            </li>
+            <li>
+              Runner time 1.528 s; audit/setup/run 2.498 s; peak process RSS
+              about 342 MiB. These are tiny-run measurements, not scale
+              guarantees.
+            </li>
+            <li>
+              Private executed notebook and checkpoints passed reload/fork
+              next-update checks. Headless Python execution is not Jupyter
+              browser/kernel certification; CUDA hardware was not exercised.
+            </li>
+          </ul>
+          <p>
+            No test-curve tuning followed. Floor scores cannot establish useful
+            retention or forgetting. Severe known-item exclusions, tiny
+            holdouts, prefix/activity bias, future-context fixed anchors,
+            A-before-B block order and one seed limit the inference. Agree a
+            development-learning criterion and budget before extending this
+            pilot. Exact source provenance, private evidence paths, checks and
+            independent audit status are in the
+            <a href="docs/RESEARCH-SCRATCHPAD.md">scratchpad</a> and
+            <a href="docs/IMPLEMENTATION.md">runbook</a>.
           </p>
         </section>
         <footer>

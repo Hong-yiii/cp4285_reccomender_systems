@@ -1,4 +1,4 @@
-"""Small CUDA-required SASRec-style learner; not a sampled-BCE SASRec reproduction."""
+"""Small CPU/CUDA SASRec-style learner; not a sampled-BCE SASRec reproduction."""
 
 import os
 from pathlib import Path
@@ -12,9 +12,9 @@ from torch.nn import functional as F
 from cp4285.experiment import Example, Query, Recommender
 
 _CUDA_HELP = (
-    "NVIDIA CUDA GPU required; CPU execution/fallback is not supported. "
+    "NVIDIA CUDA GPU required when device='cuda'; no fallback for explicit CUDA. "
     "Check nvidia-smi and GPU visibility (CUDA_VISIBLE_DEVICES), install a compatible NVIDIA "
-    "driver, then run `uv sync --locked --extra neural` with Python 3.12 and restart the kernel. "
+    "driver, then run `uv sync --locked --extra neural-cuda` with Python 3.12 and restart the kernel. "
     "See docs/RTX2070-HANDOFF.md."
 )
 
@@ -24,6 +24,36 @@ def require_cuda() -> torch.device:
     if torch.version.cuda is None or not torch.cuda.is_available():
         raise RuntimeError(_CUDA_HELP)
     return torch.device("cuda", torch.cuda.current_device())
+
+
+def resolve_device(device: str = "cpu") -> torch.device:
+    """Choose only a declared backend; auto uses CPU if CUDA is unavailable."""
+    if device not in {"cpu", "cuda", "auto"}:
+        raise ValueError("device must be 'cpu', 'cuda' or 'auto'")
+    if device == "cuda" or (device == "auto" and torch.cuda.is_available()):
+        return require_cuda()
+    return torch.device("cpu")
+
+
+def device_preflight(device: str = "cpu") -> dict[str, object]:
+    """Run a real tensor/backward check on the selected backend, without RNG use."""
+    selected = resolve_device(device)
+    if selected.type == "cuda":
+        return cuda_preflight()
+    x = torch.ones((2, 2), device=selected, requires_grad=True)
+    (x @ x).sum().backward()
+    if x.grad is None or not bool(torch.isfinite(x.grad).all()):
+        raise RuntimeError("Nonfinite CPU preflight gradient")
+    return {
+        "device": str(selected),
+        "torch": str(torch.__version__),
+        "cuda_runtime": torch.version.cuda,
+        "torch_threads": torch.get_num_threads(),
+        "torch_interop_threads": torch.get_num_interop_threads(),
+        "logical_cpus": os.cpu_count(),
+        "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+        "reproducibility": "owned CPU RNG; same-runtime checks; no cross-device bitwise guarantee",
+    }
 
 
 def cuda_preflight() -> dict[str, object]:
@@ -100,7 +130,7 @@ class SASRecRecommender(Recommender):
 
     One Adam update per supplied target, in order; full domain softmax CE at the
     last history position. No padding targets, negative sampling, replay or hidden
-    epochs. Input dropout uses an owned CUDA generator; attention/FFN dropout is zero.
+    epochs. Input dropout uses an owned device generator; attention/FFN dropout is zero.
     This small-pilot policy trades throughput for transparent exposure accounting.
     """
 
@@ -115,8 +145,9 @@ class SASRecRecommender(Recommender):
         learning_rate: float = 0.003,
         dropout: float = 0.1,
         seed: int = 7,
+        device: str = "cpu",
     ) -> None:
-        self.device = require_cuda()
+        self.device = resolve_device(device)
         if any(type(n) is not int or n <= 0 for n in (width, heads, layers, max_history)):
             raise ValueError("Positive integer architecture dimensions required")
         if width % heads or not 0 <= dropout < 1 or not 0 < learning_rate < 1:
@@ -146,9 +177,14 @@ class SASRecRecommender(Recommender):
             "dropout": dropout,
             "seed": seed,
         }
-        # Seed only this GPU, restoring both process CPU and selected CUDA RNG states.
-        with torch.random.fork_rng(devices=[self.device.index]), torch.cuda.device(self.device):
-            torch.cuda.manual_seed(seed)
+        # Seed only the selected backend; fork_rng restores process RNG after construction.
+        devices = [self.device.index] if self.device.type == "cuda" else []
+        with torch.random.fork_rng(devices=devices):
+            if self.device.type == "cuda":
+                with torch.cuda.device(self.device):
+                    torch.cuda.manual_seed(seed)
+            else:
+                torch.default_generator.manual_seed(seed)
             self.network = _Encoder(
                 {d: len(v) for d, v in self.vocabularies.items()},
                 width,
@@ -159,7 +195,7 @@ class SASRecRecommender(Recommender):
             )
         self.generator = torch.Generator(device=self.device).manual_seed(seed + 1)
         self.optimizer = torch.optim.Adam(
-            self.network.parameters(), lr=learning_rate, capturable=True
+            self.network.parameters(), lr=learning_rate, capturable=self.device.type == "cuda"
         )
         self.continuation_started = False
         self.targets_seen = 0
@@ -222,7 +258,7 @@ class SASRecRecommender(Recommender):
         if self.continuation_started:
             raise ValueError("Continuation optimizer may only be reset once")
         self.optimizer = torch.optim.Adam(
-            self.network.parameters(), lr=self.learning_rate, capturable=True
+            self.network.parameters(), lr=self.learning_rate, capturable=self.device.type == "cuda"
         )
         self.continuation_started = True
 
@@ -232,7 +268,7 @@ class SASRecRecommender(Recommender):
             "family": "SASRec-style shared causal Transformer (not a reproduction)",
             "config": dict(self.config),
             "seed": self.config["seed"],
-            "randomness": "owned CUDA generator for input dropout; scoped CUDA initialization",
+            "randomness": "owned device generator for input dropout; scoped backend initialization",
             "update_policy": "one Adam step/target; full domain CE; reset Adam once at continuation",
             "parameter_count": count,
             "trainable_parameter_count": count,
@@ -241,10 +277,17 @@ class SASRecRecommender(Recommender):
             "torch": str(torch.__version__),
             "device": str(self.device),
             "runtime": {
-                "gpu": torch.cuda.get_device_name(self.device),
-                "compute_capability": list(torch.cuda.get_device_capability(self.device)),
+                "gpu": torch.cuda.get_device_name(self.device)
+                if self.device.type == "cuda"
+                else None,
+                "compute_capability": list(torch.cuda.get_device_capability(self.device))
+                if self.device.type == "cuda"
+                else None,
                 "cuda_runtime": torch.version.cuda,
-                "compiled_architectures": torch.cuda.get_arch_list(),
+                "compiled_architectures": torch.cuda.get_arch_list()
+                if self.device.type == "cuda"
+                else [],
+                "torch_threads": torch.get_num_threads(),
                 "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
                 "matmul_allow_tf32": torch.backends.cuda.matmul.allow_tf32,
                 "cublas_workspace_config": os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
@@ -259,7 +302,8 @@ class SASRecRecommender(Recommender):
             raise FileExistsError(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "format": 2,
+            "format": 3,
+            "device_type": self.device.type,
             "runtime": self.describe(),
             "vocabularies": self.vocabularies,
             "config": self.config,
@@ -276,12 +320,16 @@ class SASRecRecommender(Recommender):
             os.link(stream.name, path)
 
     @classmethod
-    def load(cls, path: str | Path) -> "SASRecRecommender":
-        device = require_cuda()
-        payload = torch.load(path, map_location=device, weights_only=True)
-        if payload["format"] != 2:
+    def load(cls, path: str | Path, *, device: str = "cpu") -> "SASRecRecommender":
+        selected = resolve_device(device)
+        payload = torch.load(path, map_location=selected, weights_only=True)
+        if payload["format"] != 3:
             raise ValueError("Unknown neural checkpoint format")
-        model = cls(payload["vocabularies"], **payload["config"])
+        if payload["device_type"] != selected.type:
+            raise ValueError(
+                "Checkpoint RNG backend differs; full-state loading requires same backend"
+            )
+        model = cls(payload["vocabularies"], device=selected.type, **payload["config"])
         model.network.load_state_dict(payload["network"])
         model.optimizer.load_state_dict(payload["optimizer"])
         # Generator state API requires a CPU ByteTensor; this is metadata, not CPU learning.

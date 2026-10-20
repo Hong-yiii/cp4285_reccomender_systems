@@ -2,21 +2,21 @@
 
 **Research question:** How does recommendation quality on previously learned tasks change during continued updates, and how does this depend on model capacity and the incoming data distribution?
 
-**16 October 2026 — reset:** the September pipelines were exploratory trials and have been removed from the active implementation. The current project is a small, tested **two-package foundation**, not a completed research experiment. A bounded local Amazon loader and optional-install, CUDA-required SASRec-style learner are now available in a proposed pilot notebook; no local Amazon files were available to validate real learning. Scientific safeguards carry forward; old architecture and experimental defaults do not.
+**16 October 2026 — reset:** the September pipelines were exploratory trials and have been removed from the active implementation. The current project is a small, tested **two-package foundation**, not a completed research experiment. A bounded local Amazon loader and optional-install CPU/CUDA SASRec-style learner are available in a proposed pilot notebook. A bounded real CPU run completed on 19 October: all heldout @1 scores remained zero, so development learning and meaningful retention/forgetting are **not established**. See the [research scratchpad](docs/RESEARCH-SCRATCHPAD.md) for measured evidence and review status. Scientific safeguards carry forward; old architecture and experimental defaults do not.
 
 ## Start here
 
 1. **[Develop with the two packages](docs/PACKAGES-AND-BUILDING.md)** — copyable model and evaluator code, an executable contract check, and the notebook recipe.
 2. [October meeting synthesis](docs/MEETING-2026-10-15.md) — supported direction versus unresolved choices.
 3. [Current context](CONTEXT.md) and [running the boilerplate](docs/IMPLEMENTATION.md).
-4. [Dependency-free shared notebook](notebooks/01_shared_experiment.ipynb) and [observable neural pilot](notebooks/02_neural_continual_learning.ipynb) ([CUDA-required instructions](docs/IMPLEMENTATION.md#neural-pilot-cuda-required), [RTX 2070 handoff](docs/RTX2070-HANDOFF.md)).
+4. [Dependency-free shared notebook](notebooks/01_shared_experiment.ipynb) and [observable neural pilot](notebooks/02_neural_continual_learning.ipynb) ([CPU/CUDA instructions](docs/IMPLEMENTATION.md#neural-pilot-cpu-or-cuda), [RTX 2070 handoff](docs/RTX2070-HANDOFF.md)).
 
 ## The two packages
 
 | Path | Owns |
 | --- | --- |
 | `src/cp4285/experiment/` | Data/protocol ABC, immutable inputs, model ABC, scheduling, shared selection/evaluation, safe artifacts and plots |
-| `src/cp4285/models/` | Model implementations and model-side ablations; counting isolation control and optional-install, CUDA-required SASRec-style learner |
+| `src/cp4285/models/` | Model implementations and model-side ablations; counting isolation control and optional-install CPU/CUDA SASRec-style learner |
 | `notebooks/` | Reader-facing executable explanation, importing both packages |
 | `tests/` | Contract/lifecycle checks; executable documentation and notebook examples |
 | `docs/` | Methods, decisions, historical research reasoning and AI-use log |
@@ -24,7 +24,7 @@
 | `reference.html` | Preserved historical walkthrough with dated current-status checkpoints |
 | `local/`, `data/`, `runs/`, `reports/` | Ignored private sources, inputs and generated evidence |
 
-One Python distribution, two responsibility packages. No service, plugin framework or core numerical dependency. The core/counting samples need no GPU; **neural execution and the neural notebook require NVIDIA CUDA, with no CPU fallback**. Models implement the common interface; they do not redefine the benchmark.
+One Python distribution, two responsibility packages. No service, plugin framework or core numerical dependency. The core/counting samples need no GPU. **The user supersedes the GPU-only requirement: neural CPU and CUDA are supported; the notebook defaults to CPU.** Explicit `device='cuda'` remains fatal if CUDA is unavailable, never a silent fallback. Models implement the common interface; they do not redefine the benchmark.
 
 ## Run the small check
 
@@ -36,7 +36,7 @@ uv run pytest -q
 uv run ruff check src tests
 ```
 
-These checks execute the guide's Python examples and the dependency-free notebook cells in fresh processes. Neural lifecycle/notebook checks skip explicitly without Torch/CUDA; the loader and core contracts remain tested. They also verify that the documented model/evaluator definitions match maintained source. All data are invented; nothing is downloaded.
+These checks execute the guide's Python examples and the dependency-free notebook cells in fresh processes. With optional Torch installed, CPU neural lifecycle/notebook checks execute; CUDA cases explicitly skip without hardware. Without Torch, the neural test module skips; loader/core contracts remain tested. They also verify that the documented model/evaluator definitions match maintained source. All data are invented; nothing is downloaded.
 
 ```python
 from cp4285.experiment import SyntheticSource, run, plot_results
@@ -56,19 +56,20 @@ For the interactive walkthrough (optional launcher installation through uv):
 uv run --with jupyterlab jupyter lab notebooks/01_shared_experiment.ipynb
 ```
 
-## Neural pilot: NVIDIA CUDA required
+## Neural pilot: CPU or CUDA
 
-Python 3.12 on Linux/Windows, compatible NVIDIA driver and GPU (RTX 2070 / Turing SM75 is the intended target):
+Python 3.12 on Linux/Windows; CPU is the notebook/model default:
 
 ```sh
-nvidia-smi
 uv sync --locked --extra neural
-uv run --locked --extra neural python -c "from cp4285.models.sasrec import cuda_preflight; print(cuda_preflight())"
+uv run --locked --extra neural python -c "from cp4285.models.sasrec import device_preflight; print(device_preflight('cpu'))"
 uv run --locked --extra neural pytest -q -rs
-CP4285_NEURAL_MODE=fixture uv run --locked --extra neural --with jupyterlab jupyter lab notebooks/02_neural_continual_learning.ipynb
+CP4285_DEVICE=cpu CP4285_NEURAL_MODE=fixture uv run --locked --extra neural --with jupyterlab jupyter lab notebooks/02_neural_continual_learning.ipynb
 ```
 
-The extra pins `torch==2.14.1+cu126` from the explicit official cu126 index, not CPU Torch. [Official compatibility/driver sources and target acceptance checks](docs/RTX2070-HANDOFF.md) explain this choice. The notebook fails before opening data/creating artifacts if its real CUDA tensor/backward preflight fails, including in audit mode. It preserves one optimizer step per target, no batching. **CUDA training/tests/notebook execution have not run on the development VM; prior CPU fixture evidence does not validate CUDA.** No real Amazon result is established. Default Run All uses invented fixtures.
+`neural` pins official `torch==2.14.1+cpu`. For CUDA, select **instead** `--extra neural-cuda` (official `2.14.1+cu126`), and set `CP4285_DEVICE=cuda`. The extras are mutually exclusive; no global install. Model/API device choices are `cpu`, `cuda`, `auto`; auto selects CUDA if available, CPU otherwise. Explicit CUDA fails before notebook data/artifacts when its tensor/backward preflight fails. [RTX compatibility and acceptance](docs/RTX2070-HANDOFF.md) remain hardware gates, not CPU-tested claims. One optimizer step per target, no batching; full-state checkpoints require the same CPU/CUDA RNG backend.
+
+Default Run All uses **invented fixtures**. The authorized real run used bounded official Electronics/Movies & TV prefixes (16 MiB acquired total, 50k rows/category scanned), 256-user coverage-adjusted cohorts, two initial A epochs and eight continuation targets/branch. It completed in 1.528 s runner time with ~342 MiB peak process RSS. Training CE decreased but A development and every A/B @1 record stayed zero. This is real-data **pipeline feasibility**, not learned generalization or a forgetting result. Source provenance, failed original 32-user audit, approved adjustment, private executed artifact paths and limits are recorded in the [runbook](docs/IMPLEMENTATION.md#actual-evidence-19-october-2026) and scratchpad. CUDA execution remains unvalidated.
 
 ## Standing boundary
 

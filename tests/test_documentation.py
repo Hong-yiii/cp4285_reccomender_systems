@@ -8,18 +8,26 @@ import tomllib
 from pathlib import Path
 
 
-def test_neural_dependency_is_cuda_only():
+def test_neural_dependencies_are_explicit_and_mutually_exclusive():
     root = Path(__file__).resolve().parents[1]
     config = tomllib.loads((root / "pyproject.toml").read_text())
     assert config["project"]["dependencies"] == []  # Core stays standard-library-only.
-    assert config["project"]["optional-dependencies"]["neural"] == [
-        "torch==2.14.1+cu126; sys_platform == 'linux' or sys_platform == 'win32'"
-    ]
+    for extra, version in (("neural", "cpu"), ("neural-cuda", "cu126")):
+        assert config["project"]["optional-dependencies"][extra] == [
+            f"torch==2.14.1+{version}; sys_platform == 'linux' or sys_platform == 'win32'"
+        ]
+    assert config["tool"]["uv"]["conflicts"] == [[{"extra": "neural"}, {"extra": "neural-cuda"}]]
     assert config["tool"]["uv"]["sources"]["torch"] == [
-        {"index": "pytorch-cu126", "extra": "neural"}
+        {"index": "pytorch-cpu", "extra": "neural"},
+        {"index": "pytorch-cu126", "extra": "neural-cuda"},
     ]
     assert config["tool"]["uv"]["index"] == [
-        {"name": "pytorch-cu126", "url": "https://download.pytorch.org/whl/cu126", "explicit": True}
+        {
+            "name": f"pytorch-{version}",
+            "url": f"https://download.pytorch.org/whl/{version}",
+            "explicit": True,
+        }
+        for version in ("cpu", "cu126")
     ]
 
 
