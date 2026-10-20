@@ -2,8 +2,9 @@
 
 A clean container (Python 3.12, no project code, no caches) runs the notebook file
 itself with nbconvert, magics included. The only credential is a Hugging Face token
-(HF_TOKEN from the workspace secret), as in Colab's Secrets panel. Prints the final
-comparison cell and returns the executed notebook.
+(HF_TOKEN from the workspace secret), as in Colab's Secrets panel. The notebook clones
+its REPO at BRANCH from GitHub, so push the branch (and publish its release) first.
+Prints the final comparison cell and returns the executed notebook.
 
     modal run replication/peso/modal_colab_test.py --gpu A100-40GB
 """
