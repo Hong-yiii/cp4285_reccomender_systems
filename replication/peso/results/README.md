@@ -33,4 +33,20 @@ ad4c27dfbfc01e7d46fea7ef5e7d6373f4f5c000b4bbe934b67dee5136c34fb0  seed44/results
 50faf8c107b18c7b38bf27946e54fb6b0a77dd69fbb2e2129f4bc6cf3bf1e2cc  summary-3seeds.json
 ```
 
-Per-user prediction dumps and the user-group file are not committed. The groups can be regenerated from PESO's released blocks with [`user_groups.py`](../user_groups.py).
+## Seed-42 analysis reports (`seed42/reports/`)
+
+Aggregate counts and statistics only, with no user IDs, items or weights. Written on the RTX 4090 pod on 20 October 2026 from the seed-42 checkpoints:
+
+| File | Script | What it holds |
+| --- | --- | --- |
+| `transfer.json` | [`transfer_report.py`](../transfer_report.py) | State × block NDCG/Hit matrices (20 beams, at most 2,500 users per block), backward transfer, per-step kept/lost/gained counts by user group, and PESO-vs-single-LoRA McNemar tests |
+| `jlens.json` | [`jlens_report.py`](../jlens_report.py) | J-lens and logit-lens readout quality per state, internal vs output rank change, and the drift split |
+| `penalty.json` | [`penalty_size.py`](../penalty_size.py) | PESO's KL penalty and its gradient at the end of each block, in float32 and bfloat16 |
+
+```text
+d8c0277824fa6e9202403cd69e61c75c221dca71fff44973ada55142f8c0b19b  seed42/reports/transfer.json
+95fd838a6298ae2aa2fab7db4996d757fe40c3a8e503414a2c21cfbc984f0568  seed42/reports/jlens.json
+184866ac4ef08c8ee9ca28ecb7c3f62cde28b86c9ba0923fefd0fc4b41e661ae  seed42/reports/penalty.json
+```
+
+Per-user prediction dumps, J-lens tensors and the user-group file are not committed. The groups can be regenerated from PESO's released blocks with [`user_groups.py`](../user_groups.py).

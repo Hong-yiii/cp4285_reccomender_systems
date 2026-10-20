@@ -79,6 +79,11 @@ Modal GPU containers are preemptible, and Modal's preemption guide says `nonpree
 7. **"Final model" evaluation restores each block's state.** For test block j, upstream reloads block j's saved adapter and `embed_tokens`/`lm_head`. Table 2 therefore averages each block's own test after training on that block. It contains no old-block retention.
 8. **Averaging is ambiguous.** The paper reports metrics "averaged over D2, …, D4" (code blocks 1–3) but fine-tunes at stages t = 2, …, 5 (PDF p. 8). We report blocks 1–3 (the paper's statement) and 1–4.
 9. **Downloads were authorized.** The user approved downloading PESO's released data in the 19 October plan, and the Llama 3.2 licence was accepted on the user's Hugging Face account. Copies live only in ignored `local/` and `data/` folders and on the run volumes. No Amazon metadata was downloaded.
+10. **The released penalty is numerically negligible.** The softmax runs over every entry of a flattened LoRA matrix (4,096–65,536 entries), which makes both distributions nearly uniform. For small changes, KL ≈ ‖Δ − mean(Δ)‖²/(2n), so the matrix size divides the penalty. [`penalty_size.py`](../replication/peso/penalty_size.py) recomputes it from the seed-42 checkpoints at the end of each block, where it peaks:
+    - **Value:** 0.7–1.3 × 10⁻⁶ in float32, against a training loss of about 2–3. The approximation matches within 1–3%.
+    - **Gradient:** norm 1.4–1.9 × 10⁻⁶, against logged gradient norms of about 6–11.
+    - **In bfloat16,** the training dtype, the computed value (about 5 × 10⁻⁴) is mostly rounding error.
+    - **So:** with the same seed, PESO trains almost exactly like single LoRA, which explains the null result below. This is about the released code at `edbec5f`; the paper's own implementation may differ.
 
 ## Our additions
 
@@ -90,6 +95,9 @@ Modal GPU containers are preemptible, and Modal's preemption guide says `nonpree
   - per-user forgetting events.
   
   `--groups` slices every count by user group.
+- [`transfer_report.py`](../replication/peso/transfer_report.py) runs `cp4285 flips` on both methods' dumps and adds the head-to-head PESO-vs-single-LoRA flips on the same users.
+- [`jlens.py`](../replication/peso/jlens.py) and [`jlens_report.py`](../replication/peso/jlens_report.py) are our Jacobian-lens probe and its summary (direction O7).
+- [`penalty_size.py`](../replication/peso/penalty_size.py) measures the PESO penalty and its gradient from saved checkpoints (finding 10).
 - [`user_groups.py`](../replication/peso/user_groups.py) labels each block's test users as new, dormant or continuing, following the paper's Table 3 groups (PDF p. 9). For Instruments block 3 (the paper's D4) this gives 1,684 new, 329 dormant and 276 continuing users.
 
 ## Results
@@ -132,7 +140,8 @@ What these numbers can and cannot support:
 - **The environment is not the obvious cause.** Pretrain and single evolving LoRA match, which argues against a broken setup.
 - **The documented deviations remain candidate causes.** Python 3.10 and one GPU with gradient accumulation 4 change the sampling order, though not the effective batch.
 - **The paper's own data may differ.** Its exact data processing for Table 2 is not released (finding 1).
-- **No per-user test has been run yet.** A McNemar test on the kept/lost/gained counts needs the retention-matrix dumps (O3), which have not been run.
+- **Per-user tests agree (seed 42).** On the transfer matrix below, PESO and single LoRA differ on only a few dozen users per block, and no state–block pair is significant under McNemar's test.
+- **A mechanism is measured.** In the released code the penalty is about 10⁻⁶ (finding 10), so PESO ≈ single LoRA is expected. The paper's reported gain would need another explanation, such as seed variation or an implementation that differs from the release.
 
 This is a statement about this replication, not a claim that PESO cannot help elsewhere.
 
@@ -151,6 +160,46 @@ Run on an RTX 4090 pod (seed 42, block 1, 1,772 users, state 1), before the tran
 - **Changing GPU type moves a few users.** A100 to RTX 4090 changed block-1 hits by 1 (single LoRA) and 4 (PESO) of 1,772 users, about ±0.0002–0.0005 NDCG@10. That is the same size as the paired PESO − single LoRA differences in the table above. Effects this small are at the level of hardware numerics, so cross-GPU comparisons need that caveat.
 - **Batched generation is not valid here.** With left padding and batch 16, 0 of 1,772 (single LoRA) and 3 of 1,772 (PESO) top-10 lists matched batch 1, likely because upstream's constrained-decoding helper assumes unpadded input. All our evaluations therefore use batch 1, as upstream does.
 
+### Transfer matrix and per-user flips — 20 October 2026 (seed 42)
+
+Every saved state of single LoRA (states 0–4) and PESO (states 1–4; state 0 is the shared block-0 checkpoint) was evaluated on every block's test users with our evaluator.
+- **Settings:** RTX 4090, batch 1, 20 beams so that @20 metrics exist, and at most 2,500 seeded test users per block. Only block 0 (17,046 users) is subsampled; blocks 1–4 have 1,772–2,289 users each.
+- **Not Table 2's numbers:** with 20 beams and the subsample, absolute values differ from the 10-beam, all-user results above.
+- **Where:** `transfer_report.py` wrote [`replication/peso/results/seed42/reports/transfer.json`](../replication/peso/results/seed42/reports/transfer.json) (counts only; the per-user dumps stay on the run volume), and notebook 02 prints it.
+
+| | Backward transfer, NDCG@10 | Backward transfer, NDCG@20 | Last state on block 0, NDCG@10 |
+| --- | --- | --- | --- |
+| Single evolving LoRA | −0.0038 | −0.0053 | 0.0116 |
+| PESO | −0.0061 | −0.0065 | 0.0092 |
+
+Backward transfer is the mean over blocks 0–3 of (score after the last block − score right after training that block).
+
+- **Neither method avoids forgetting, and PESO does not forget less.** Both lose quality on earlier blocks as training continues. On this seed PESO's backward transfer is more negative; with one seed that is not evidence that PESO forgets more.
+- **The per-user counter shows heavy churn under flat averages.** At each update about 45% (single LoRA) and 47% (PESO) of earlier top-10 hits are lost, and nearly as many new hits are gained. Summed over 20 block-steps, single LoRA keeps 606, loses 496 and gains 467. Dormant and continuing users lose slightly larger shares (46–53%) than new users (45–47%), but those counts are small.
+- **Head to head, PESO and single LoRA rarely disagree.** On the same state, block and users, only 11–27 of 1,772–2,500 users per pair are hits for one method but not the other. None of the 20 pairs differs significantly: the smallest exact McNemar p is 0.06, before any correction for multiple comparisons.
+
+### Jacobian-lens probe — 20 October 2026 (seed 42, direction O7)
+
+Our implementation of the J-lens (Gurnee et al., 2026), [`jlens.py`](../replication/peso/jlens.py):
+- **The lens:** rows of W_U·J_ℓ, with J_ℓ = ∂h_L/∂h_ℓ taken at the decision point (the last prompt token) and averaged over 200 fixed test prompts. The logit lens (J = I) is the baseline.
+- **The readout:** the rank of the target item's first semantic-ID code among the 256 first codes, at layers 4, 8 and 12, for 500 test users per block, on every saved state.
+- **The drift split:** each state's lens rows minus block 0's are split exactly into an item-head part, (U_i − U_0)·J_i, and an inner-layer part, U_0·(J_i − J_0).
+- **Where:** [`jlens_report.py`](../replication/peso/jlens_report.py) wrote [`results/seed42/reports/jlens.json`](../replication/peso/results/seed42/reports/jlens.json).
+
+MRR after the last block, with the share of targets ranked in the top 10 of 256 in brackets (single LoRA; PESO differs by at most 0.001):
+
+| Readout | Layer 4 | Layer 8 | Layer 12 |
+| --- | --- | --- | --- |
+| J-lens | 0.097 (22%) | 0.095 (23%) | 0.107 (28%) |
+| Logit lens | 0.023 (4%) | 0.035 (10%) | 0.088 (20%) |
+| Final output | 0.213 (43%) | | |
+
+- **The J-lens reads the coming recommendation early.** At layer 4 it ranks the target's first code about 4× better than the logit lens, and at layer 8 nearly 3× better. That is roughly half as well as the final output.
+- **Internal and output changes mostly move together.** From each block's own state to the last state (blocks 1–3), changes in mid-layer and output ranks correlate at Spearman 0.59–0.65. For about 11% of users the output rank worsened while the J-lens rank did not. That is limited evidence of internal retention beneath output forgetting.
+- **The lens drifts steadily, through both parts.** By state 4 the layer-4 lens has moved 36% of its block-0 norm: an item-head part of 21% and an inner-layer part of 27% (vector parts, so the sizes do not add). At layer 12 the item head dominates (19% vs 14%).
+- **PESO's drift equals single LoRA's to three decimals at every state and layer,** as finding 10 predicts.
+- **Limits:** one seed and the first code token only (256 groups), which undercounts item-level forgetting. Workspace properties were shown on much larger models, so this is exploratory.
+
 ## Reproduce in Colab (trained weights)
 
 [`notebooks/03_peso_colab.ipynb`](../notebooks/03_peso_colab.ipynb) re-evaluates our trained **seed-43** weights with upstream's unchanged `continual_test.py` and prints recorded, reproduced and paper numbers side by side. It does not retrain.
@@ -159,7 +208,7 @@ Run on an RTX 4090 pod (seed 42, block 1, 1,772 users, state 1), before the tran
 - an A100 or L4 runtime;
 - a Hugging Face token stored as the Colab secret `HF_TOKEN`, from an account that has accepted Meta's Llama 3.2 licence. It is needed only for the gated base model.
 
-**What it does:** clones this repository first (settings `REPO` and `BRANCH`; the recorded numbers it compares against are read from `replication/peso/results/`), then clones PESO at `edbec5f`, installs the pinned torch 2.5.1 and transformers 4.52.4, downloads the pinned base model, and downloads our weights from the GitHub release of `REPO`. Every release file is checked against its SHA-256. By default it evaluates blocks 1–3 (the paper's average, about 30–60 minutes); `FULL = True` evaluates all five blocks.
+**What it does:** clones this repository first (settings `REPO` and `BRANCH`; the recorded numbers it compares against are read from `replication/peso/results/`), then clones PESO at `edbec5f`, installs the pinned torch 2.5.1 and transformers 4.52.4, downloads the pinned base model, and downloads our weights from the GitHub release of `REPO`. Every release file is checked against its SHA-256. By default it evaluates blocks 1–3 (the paper's average, about 30–60 minutes); `FULL = True` evaluates all five blocks. A closing side note plots the seed-42 J-lens probe from the committed report, with no GPU needed, and lists its implications.
 
 **The weights:**
 - **Where:** GitHub release `llama-peso-weights-seed43-v1`, named *Llama-3.2-1B-PESO-replication*: 13 assets, 9.71 GB, login-free once published.
@@ -187,5 +236,13 @@ Each experiment changes one variable against the replicated configuration. "Auth
 | O5 | Cross-domain shift | Ours; the team question | Our Electronics → Movies & TV stream; needs our own block builder and tokenizer |
 | O6 | Future-item tokenizer | Ours, finding 6 | Tokenizer built from block-0 items only vs from all items |
 | O7 | Internal vs output forgetting | Ours; Jacobian lens, Gurnee et al. 2026 | Per state, the mid-layer J-lens readout of the target item's first code token vs its output rank. Drift split into unembedding change (ΔW_U·J, unpenalized) and residual-pathway change (W_U·ΔJ). Exploratory; a null result is valid |
+| O8 | A penalty that acts | Ours, finding 10 | Released penalty vs the same KL scaled by each matrix's entry count n (in effect a proximal L2 term whose size no longer depends on matrix size), then a small λ sweep |
 
-Recommended next steps, given the result: first O3, the retention matrix and per-user flips for the existing seed-42 checkpoints. It shows *where* PESO and single LoRA differ, if anywhere, at no extra training cost. Then O2, penalty scope: with roughly 98% of trainable parameters outside the penalty, a near-zero effect is what finding 3 would predict. None of these directions has been run.
+**Status, 20 October 2026:**
+- **Done:** O1 (three seeds), and O3 and O7 for seed 42 (results above).
+- **Priorities changed:** finding 10 shows the released penalty is too small to act. A1, A2 and O2 reweight or extend that same penalty, so they would inherit the problem.
+
+Recommended next step: **O8**, using the existing block-0 checkpoints, so only the incremental blocks are retrained.
+- **Single variable:** the penalty's normalization (released vs scaled by n), with the seed and everything else fixed.
+- **Then:** O2, penalty scope, at the working strength. Roughly 98% of trainable parameters sit outside the penalty (finding 3).
+- **Not yet run:** none of O2, O4–O6, O8 or A1–A3.

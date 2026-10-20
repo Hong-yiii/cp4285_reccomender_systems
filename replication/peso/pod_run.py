@@ -275,10 +275,15 @@ def validate(run, seed, batch):
     return report
 
 
-def jlens(run, method, seed, port, states):
-    """Jacobian-lens probe (replication/peso/jlens.py) on saved block states, resumable."""
+def jlens(run, method, seed, port, states, drift_from=None):
+    """Jacobian-lens probe (replication/peso/jlens.py) on saved block states, resumable.
+
+    With drift_from (a reference lens.pt), computes only each state's item-head drift.
+    """
     root, out, _ = paths(run, method)
-    stage = f"jlens-{method}-s{states.replace(',', '')}"
+    stage = f"jlens{'-drift' if drift_from else ''}-{method}-s{states.replace(',', '')}"
+    if completed(run, stage):
+        return completed(run, stage)
     done = claim(root, stage)
     cmd = [
         "torchrun", "--nproc_per_node=1", f"--master_port={port}", "cp4285_jlens.py",
@@ -286,6 +291,8 @@ def jlens(run, method, seed, port, states):
         "--shift_flag", METHODS[method]["flag"], "--states", states,
         "--out_dir", root / "jlens" / method, *COMMON,
     ]  # fmt: skip
+    if drift_from:
+        cmd += ["--head_drift_from", drift_from]
     seconds = stream(cmd, root / "logs" / f"{stage}.log")
     record = {"stage": stage, "seed": seed, "seconds": seconds}
     publish(done, record)
@@ -312,7 +319,8 @@ def concurrently(*jobs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "stage", choices=["setup", "smoke", "replicate", "validate", "matrix", "jlens"]
+        "stage",
+        choices=["setup", "smoke", "replicate", "validate", "matrix", "jlens", "jlens-drift"],
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--run", default="")
@@ -343,6 +351,11 @@ def main():
         # Sequential: each state's backward passes use most of a 24 GB GPU.
         steps.append(jlens(run, "lora", seed, 29530, "0,1,2,3,4"))
         steps.append(jlens(run, "peso", seed, 29531, "1,2,3,4"))
+    elif args.stage == "jlens-drift":
+        # Item-head part of the drift from the shared block-0 state: (U_i - U_0) J_i.
+        reference = VOL / "runs" / run / "jlens" / "lora" / "state0" / "lens.pt"
+        steps.append(jlens(run, "lora", seed, 29530, "1,2,3,4", reference))
+        steps.append(jlens(run, "peso", seed, 29531, "1,2,3,4", reference))
     elif args.stage == "validate":
         steps.append(validate(run, seed, args.batch))
     else:
