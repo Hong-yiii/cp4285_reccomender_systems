@@ -268,3 +268,33 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 - A Jacobian-lens probe (Gurnee et al. 2026) is proposed but not run.
 
 **Limits:** No per-user significance test or retention matrix yet. The candidate causes of the PESO gap (environment deviations, unreleased data processing) are untested; see `docs/PESO-REPLICATION.md`. Results are on PESO's released Instruments blocks, not our Electronics/Movies & TV data, and are not comparable with SASRec or classical numbers. None of the extension directions has been run. The two environment deviations are documented. Nothing was committed, pushed or submitted, and the authors were not contacted.
+
+## 20 October 2026 — PESO transfer analysis, penalty size, J-lens probe and Colab weights
+
+**Tool:** Claude Code (Claude Opus 5.5), with Runpod (an RTX 4090 pod) and Modal billed to the user's account, and the GitHub CLI for releases on the user's fork and the team repository.
+
+**Request:** Make the Colab notebook work for another user by publishing the trained weights as a GitHub release and having the notebook download them; at the user's request, push the work to a personal fork for testing, clone the fork first, and publish the fork's release; carry on with the transfer matrix and the J-lens probe on the pod.
+
+**Assistance:**
+- Built a flattened, deduplicated weights bundle (`release_bundle.py`; 13 assets, 9.71 GB, Llama 3.2 licence, notice and "Built with Llama" README).
+- Re-downloaded six files that `modal volume get` had corrupted, verifying each one against the manifest.
+- Uploaded the bundle to a draft release on the team repository and a release on the fork. Every asset matches by GitHub's SHA-256 digest.
+  - The fork release was published at the user's request.
+  - The team release stays a draft.
+- Reworked `notebooks/03_peso_colab.ipynb`:
+  - it clones `REPO` at `BRANCH` first and reads recorded numbers from the clone;
+  - it installs `scipy`, which upstream imports;
+  - it retries downloads and shows the log tail when an evaluation fails.
+  
+  The test now runs the comparison cell on the committed files.
+- At the user's request, added a J-lens side note to notebook 03: a three-panel figure (readout quality by layer against chance, drift split by state, output vs internal forgetting) from the committed seed-42 report, followed by its implications. The figure was rendered in a throwaway matplotlib environment and checked visually; matplotlib is not added to the project's dependencies.
+- Ran the seed-42 transfer matrix: every saved state on every block, 20 beams, at most 2,500 users per block. Wrote `transfer_report.py` (per-method flips plus head-to-head McNemar tests).
+- Ran the J-lens probe and its drift split (`jlens.py`, `jlens_report.py`).
+- Measured PESO's penalty from checkpoints (`penalty_size.py`). It is about 10⁻⁶, against a loss of about 2, because the softmax over every matrix entry divides the KL by the matrix size (finding 10). This is the measured reason PESO tracks single LoRA in the released code.
+- Committed aggregate reports only, under `replication/peso/results/seed42/reports/` (no user IDs), and added notebook 02 sections for them.
+- Moved the private Hugging Face backup's name into ignored `local/WORKSPACE.md`.
+- Stopped the pod; the network volume keeps the checkpoints and per-user dumps.
+
+**Validation:** 49 tests and Ruff lint/format pass. The notebook-02 test pins the new report numbers. Anonymous downloads from the public fork release return the manifest byte-identical. The first Modal run of the new-user notebook test crashed on import (`Path(__file__).parents[2]` inside the container) and was cancelled; after the fix the container imported cleanly.
+
+**Limits:** The transfer matrix, flips and J-lens cover one seed. The J-lens reads only the first semantic-ID token. The penalty finding concerns the released code at `edbec5f`, not necessarily the authors' unreleased setup. Commits were made and pushed only to the user's fork at the user's request; nothing was pushed to the team repository's branches, and nothing was submitted or sent to the authors.

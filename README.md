@@ -45,9 +45,9 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | `src/cp4285/cli.py` | `cp4285` command |
 | `src/cp4285/experiment/` | Data, splits, shared `Recommender` ABC, protocol-specific runners/evaluators and artifacts |
 | `src/cp4285/models/` | SASRec network/learner and existing classical kernels; incremental QR-SVD implements the ABC |
-| `replication/peso/` | Our Modal launcher, retention-matrix evaluator and user-group labeller for the PESO replication; upstream code is cloned at run time, never vendored |
+| `replication/peso/` | Our Modal and Runpod runners, retention-matrix evaluator, transfer/flip, J-lens and penalty-size reports, weight-release scripts and user-group labeller for the PESO replication; upstream code is cloned at run time, never vendored |
 | `notebooks/01_shared_lifecycle.ipynb` | Thin synthetic lifecycle walkthrough; no notebook-local algorithm |
-| `notebooks/02_peso_replication.ipynb` | PESO replication tables from the committed metric files in `replication/peso/results/`; no training |
+| `notebooks/02_peso_replication.ipynb` | PESO replication tables, transfer matrix, flip counter, penalty size and J-lens probe from the committed files in `replication/peso/results/`; no training |
 | `notebooks/03_peso_colab.ipynb` | Colab: re-evaluate the trained seed-43 weights (GitHub release `llama-peso-weights-seed43-v1`) with upstream's evaluator; needs a GPU and a Hugging Face token for Meta's base model |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |

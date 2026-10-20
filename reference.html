@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#peso-replication"><strong>Latest · 21 · PESO replication</strong></a>
+          <a href="#peso-analysis"><strong>Latest · 22 · PESO analysis</strong></a>
+          <a href="#peso-replication">21 · PESO replication</a>
           <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
@@ -719,14 +720,16 @@
             tabindex="-1"
             role="note"
           >
-            <strong>Current review checkpoint — 19 October 2026.</strong>
+            <strong>Current review checkpoint — 20 October 2026.</strong>
             A user-requested, exploratory LLM workstream is replicating PESO
             (ICLR 2026) on its own released Instruments data before choosing an
             extension. Read <a href="#peso-replication">section 21</a> and the
             <a href="docs/PESO-REPLICATION.md">replication record</a>. It is not a
             team-confirmed protocol change and its numbers are not comparable with
             ours. Three-seed result (20 October): Pretrain and single LoRA reproduce;
-            PESO's reported gain does not. The 16 October integration remains
+            PESO's reported gain does not. <a href="#peso-analysis">Section 22</a> adds the
+            transfer matrix, per-user flips, the measured size of PESO's penalty (about
+            10⁻⁶ in the released code) and a Jacobian-lens probe. The 16 October integration remains
             the code baseline: it preserves main's real models and CLI under two
             responsibility packages: <code>experiment/</code> and <code>models/</code>.
             SASRec and incremental PureSVD use a shared learner ABC; classical
@@ -3583,6 +3586,39 @@ scores = branch.score(fixed_queries)</pre>
             <a href="replication/peso/peso_eval.py">peso_eval.py</a> and
             <a href="src/cp4285/experiment/flips.py">cp4285 flips</a> report the retention
             matrix and per-user kept/lost/gained counts.</p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <section id="peso-analysis">
+          <span class="section-num">22 / PESO ANALYSIS · 20 OCTOBER 2026</span>
+          <h2>Count which users change, then ask why the penalty does not act.</h2>
+          <div class="callout warn"><strong>Seed 42, PESO's own data.</strong>
+            These measurements use PESO's released Instruments blocks, 20 beams and at most
+            2,500 test users per block. They are not comparable with sections 01–20 or with
+            Table 2's 10-beam numbers.</div>
+          <p><span class="label fact">FACT</span> Transfer matrix (every saved state on every
+            block): backward transfer on NDCG@10 is −0.0038 for single LoRA and −0.0061 for
+            PESO. At each update about 45% of earlier top-10 hits are lost and nearly as many
+            gained. PESO and single LoRA differ on only 11–27 users per block, and none of 20
+            state–block pairs is significant (smallest McNemar p = 0.06).</p>
+          <p><span class="label fact">FACT</span> Measured from checkpoints with
+            <a href="replication/peso/penalty_size.py">penalty_size.py</a>, the released PESO
+            penalty is 0.7–1.3 × 10⁻⁶ against a training loss of about 2. Its gradient norm is
+            about 1.5 × 10⁻⁶ against 6–11. The KL is taken over a softmax of every entry of each
+            LoRA matrix (4,096–65,536 entries), which divides it by the matrix size.</p>
+          <p><span class="label fact">FACT</span> A Jacobian-lens probe
+            (<a href="replication/peso/jlens.py">jlens.py</a>) reads the target's first item
+            code from layer 4 about 4× better than the logit lens. Its drift is split between
+            the item head and the inner layers, and PESO's drift equals single LoRA's to three
+            decimals.</p>
+          <p><span class="label infer">INFERENCE</span> In the released code PESO trains almost
+            exactly like single LoRA, which explains the replication's null result. It says
+            nothing about an unreleased implementation.</p>
+          <p><span class="label fact">FACT</span> <a href="notebooks/03_peso_colab.ipynb">Notebook 03</a>
+            re-evaluates the trained seed-43 weights in Colab from a GitHub release. It is
+            being tested on a personal fork; the team release is a draft.</p>
+          <p><span class="label recommend">RECOMMENDATION</span> Next, change one variable: the
+            penalty scaled by matrix size, so that it acts (direction O8 in the
+            <a href="docs/PESO-REPLICATION.md">replication record</a>), then penalty scope.</p>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <footer>
