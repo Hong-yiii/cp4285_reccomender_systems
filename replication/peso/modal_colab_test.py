@@ -14,7 +14,9 @@ from pathlib import Path
 
 import modal
 
-NOTEBOOK = Path(__file__).resolve().parents[2] / "notebooks" / "03_peso_colab.ipynb"
+# Inside the container this file is /root/modal_colab_test.py, where parents[2] does not
+# exist; .parent stops at "/". Modal reads the local file only when deploying.
+NOTEBOOK = Path(__file__).resolve().parent.parent.parent / "notebooks" / "03_peso_colab.ipynb"
 app = modal.App("cp4285-colab-test")
 image = (
     modal.Image.from_registry("nvidia/cuda:12.1.1-runtime-ubuntu22.04", add_python="3.12")
