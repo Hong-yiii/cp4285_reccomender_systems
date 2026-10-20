@@ -76,6 +76,11 @@ def main():
     pi.add_argument("--output")
     de = commands.add_parser("demo", help="Synthetic end-to-end software check, not Amazon results")
     de.add_argument("--output", default=str(ROOT / "runs/synthetic-smoke"))
+    fl = commands.add_parser("flips", help="Flip counts and retention matrix from top-k dumps")
+    fl.add_argument("--predictions", required=True, help="Directory of state*_block*.jsonl dumps")
+    fl.add_argument("--output", required=True, help="New JSON report path")
+    fl.add_argument("--k", type=int, default=10)
+    fl.add_argument("--groups", help="JSON {test block: {user: label}} for sliced flip counts")
     cl = commands.add_parser("classical", help="Classical comparator under B contamination")
     from .experiment.classical import add_arguments
 
@@ -119,6 +124,14 @@ def main():
             output = args.output or cfg["training"]["output"]
             run(d["prepared"], cfg, output)
             print(f"Pilot saved: {output}")
+        elif args.command == "flips":
+            from .experiment.flips import report
+
+            groups = json.loads(Path(args.groups).read_text()) if args.groups else None
+            result = report(args.predictions, args.k, groups)
+            save_json(args.output, result)
+            print(json.dumps({"matrix": result["matrix"], "bwt": result["backward_transfer"]}))
+            print(f"Flip report saved: {args.output}")
         elif args.command == "classical":
             from .experiment.classical import run as classical
 
