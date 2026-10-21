@@ -41,7 +41,7 @@ uv sync --locked --extra meta
 uv run cp4285 meta-download --category all      # about 26 GB compressed; resumable
 uv run cp4285 meta-audit
 uv run cp4285 meta-classify --category all --device cuda
-uv run cp4285 download --domain all             # 5-core rating files for the density summary
+uv run cp4285 download --domain all             # 5-core rating files; six small categories have none
 uv run cp4285 meta-group
 HF_TOKEN=... uv run cp4285 meta-publish --repo <user>/amazon23-item-categories
 ```

@@ -187,7 +187,13 @@ def main():
                 if args.domain == "all" and (Path(args.directory) / f"{domain}.csv.gz").exists():
                     print(f"Skipping existing {domain}")
                     continue
-                print(json.dumps(download(domain, args.directory), indent=2))
+                try:
+                    print(json.dumps(download(domain, args.directory), indent=2))
+                except ValueError as exc:
+                    # Six small categories have no official 5-core file; report and continue.
+                    if args.domain != "all":
+                        raise
+                    print(f"Skipping {domain}: {exc}")
         elif args.command.startswith("meta-"):
             meta_command(args)
         elif args.command == "audit":
