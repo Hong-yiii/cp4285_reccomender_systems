@@ -57,6 +57,8 @@ def test_replication_notebook_runs_from_committed_results_in_a_fresh_process():
     assert "smallest p over 20 pairs: 0.06" in result.stdout
     assert "| block1 | 7.31e-07 | 7.29e-07 | 1.41e-06 | 4.7e-04 | 3.8% |" in result.stdout
     assert "| peso | l4 | 0.357 | 0.212 | 0.270 |" in result.stdout
+    assert "| PESO, size-normalized λ=400 | -0.0029 | 0.0140 | 0.0169 | 0.0165 |" in result.stdout
+    assert "90 users right only with the penalty, 75 only without" in result.stdout
 
 
 def test_colab_notebook_compares_against_the_cloned_repositorys_results(tmp_path):
@@ -104,3 +106,21 @@ def test_colab_jlens_side_note_reads_the_committed_seed42_report():
     assert "final output 0.213, chance 0.024" in result.stdout
     assert "jlens lens at layers (4, 8, 12): 0.097, 0.095, 0.107" in result.stdout
     assert "peso: 0.15 0.21 0.30 0.36 | 0.07 0.12 0.16 0.21 | 0.12 0.16 0.24 0.27" in result.stdout
+
+
+def test_colab_item_level_side_note_reads_the_committed_seed42_report():
+    notebook = json.loads((ROOT / "notebooks/03_peso_colab.ipynb").read_text())
+    sources = ["".join(c["source"]) for c in notebook["cells"] if c["cell_type"] == "code"]
+    data = next(s for s in sources if "ITEMS = " in s)  # the plot cell needs matplotlib
+    prelude = f"import json\nfrom pathlib import Path\nrepo = Path({str(ROOT)!r})\n"
+    result = subprocess.run(
+        [sys.executable, "-c", prelude + data],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "code 1 (broad) 41%, code 2 43%, code 3 24%, code 4 (exact) 17%" in result.stdout
+    assert "code 4 (exact): 0.727; 0.108 / 0.198 / 0.681" in result.stdout
+    assert "layer 8: 15.8% (chance pairing 22.4%)" in result.stdout
