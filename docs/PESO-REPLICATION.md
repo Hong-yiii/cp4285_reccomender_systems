@@ -98,6 +98,9 @@ Modal GPU containers are preemptible, and Modal's preemption guide says `nonpree
 - [`transfer_report.py`](../replication/peso/transfer_report.py) runs `cp4285 flips` on both methods' dumps and adds the head-to-head PESO-vs-single-LoRA flips on the same users.
 - [`jlens.py`](../replication/peso/jlens.py) and [`jlens_report.py`](../replication/peso/jlens_report.py) are our Jacobian-lens probe and its summary (direction O7).
 - [`penalty_size.py`](../replication/peso/penalty_size.py) measures the PESO penalty and its gradient from saved checkpoints (finding 10).
+- [`jlens_items.py`](../replication/peso/jlens_items.py) and [`jlens_items_report.py`](../replication/peso/jlens_items_report.py) read all four item codes at every layer, with a permutation baseline for internal vs output change.
+- [`penalty_calibrate.py`](../replication/peso/penalty_calibrate.py) compares each penalty variant's pull with the task gradient on the adapters. [`penalty_variants.py`](../replication/peso/penalty_variants.py) runs upstream training with the size-normalized penalty, and the `pod_run.py` stages `calibrate` and `variant` drive both.
+- [`variant_report.py`](../replication/peso/variant_report.py) and [`variant_jlens_compare.py`](../replication/peso/variant_jlens_compare.py) compare a variant with single LoRA and released PESO on the same users, inside and out.
 - [`user_groups.py`](../replication/peso/user_groups.py) labels each block's test users as new, dormant or continuing, following the paper's Table 3 groups (PDF p. 9). For Instruments block 3 (the paper's D4) this gives 1,684 new, 329 dormant and 276 continuing users.
 
 ## Results
@@ -198,7 +201,83 @@ MRR after the last block, with the share of targets ranked in the top 10 of 256 
 - **Internal and output changes mostly move together.** From each block's own state to the last state (blocks 1–3), changes in mid-layer and output ranks correlate at Spearman 0.59–0.65. For about 11% of users the output rank worsened while the J-lens rank did not. That is limited evidence of internal retention beneath output forgetting.
 - **The lens drifts steadily, through both parts.** By state 4 the layer-4 lens has moved 36% of its block-0 norm: an item-head part of 21% and an inner-layer part of 27% (vector parts, so the sizes do not add). At layer 12 the item head dominates (19% vs 14%).
 - **PESO's drift equals single LoRA's to three decimals at every state and layer,** as finding 10 predicts.
-- **Limits:** one seed and the first code token only (256 groups), which undercounts item-level forgetting. Workspace properties were shown on much larger models, so this is exploratory.
+- **Limits:** one seed and the first code token only (256 groups), which the item-level probe below extends. Workspace properties were shown on much larger models, so this is exploratory.
+
+### Item-level J-lens — 21 October 2026 (seed 42)
+
+[`jlens_items.py`](../replication/peso/jlens_items.py) extends the probe in two ways.
+- **All four codes.** The target's codes are fed teacher-forced after the prompt, so each code is read where the model writes it. Upstream's constrained decoding allows exactly that level's 256 codes there.
+- **All 15 layers before the output.** The same 200 lens prompts and 500 readout users per block are used.
+
+Run on single LoRA states 0–4 and PESO state 4, on an RTX 4090 in about 2.8 h. [`jlens_items_report.py`](../replication/peso/jlens_items_report.py) wrote [`results/seed42/reports/jlens_items.json`](../replication/peso/results/seed42/reports/jlens_items.json).
+
+**Checks:**
+- **Level 0 reproduces `jlens.py` up to bfloat16 numerics.** J-lens ranks match exactly for 79–83% of users, and final-output ranks for 77%.
+- **The state-1 drift split for code 1 reproduces the earlier run to three decimals,** although it is computed differently: as rows_i(U_i) − rows_i(U_0), not with a ΔU cotangent.
+
+| Code (state 4, single LoRA) | Final MRR | J-lens MRR, layer 4 / 10 / 14 | Users worse, own state → state 4 | Mean rank change | Layer-4 drift: item head / inner |
+| --- | --- | --- | --- | --- | --- |
+| 1 (broad group) | 0.212 | 0.097 / 0.106 / 0.205 | 41% | +0.40 | 0.21 / 0.27 |
+| 2 | 0.250 | 0.192 / 0.200 / 0.240 | 43% | −0.79 | 0.15 / 0.32 |
+| 3 | 0.607 | 0.151 / 0.268 / 0.585 | 24% | −2.6 | 0.11 / 0.46 |
+| 4 (exact item) | 0.727 | 0.108 / 0.198 / 0.681 | 17% | −4.5 | 0.10 / 0.50 |
+
+Chance MRR is 0.024 at every level. "Worse" compares each block's own state with state 4, for blocks 1–3 (1,500 users).
+
+- **Codes 3–4 are decided late.** Their readouts stay low until about layer 9 and then rise steeply, while codes 1–2 are flat through the middle layers.
+- **Forgetting sits in the broad codes, not the exact item.** This corrects an inference we drew from the first-code probe alone.
+  - Code 1 is the only code that worsens on average.
+  - Given the correct earlier codes, codes 3–4 *improve* for most users.
+  - Beam search keeps only the top candidates at each code, and the target's first code sits near rank 15. So a small slip at code 1 knocks items out of the top 10, which fits the 45% churn.
+- **No hidden retention.** Output and J-lens item-level changes correlate (Spearman 0.26 at layer 0, rising to 0.80 at layer 14). The share of users whose output got worse while the J-lens did not is 9–18%, *below* a within-block permutation baseline of 21–25% (sd ≈ 0.6%).
+- **Drift is not forgetting.** The largest drift (codes 3–4) is inner-layer and goes with improvement. The forgetting code (code 1) has the largest item-head part, at layer 14 even 0.18 against 0.10.
+  - **Prediction for O8:** a working LoRA-only penalty would mainly restrain learning. Penalizing the item layers (O2) is the likelier lever on forgetting.
+  - **Status:** these are correlations from one seed.
+- **PESO state 4 equals single LoRA state 4** to about three decimals in every readout and drift value.
+
+### Penalty calibration — 21 October 2026 (seed 42)
+
+[`penalty_calibrate.py`](../replication/peso/penalty_calibrate.py) measures the next-item loss gradient on the LoRA adapters alone, on 64 block-*b* test prompts in steps of 32 at the state where block *b* starts. It compares that with each penalty variant's gradient at PESO's actual end-of-block drift. The report is [`results/seed42/reports/penalty_calibration.json`](../replication/peso/results/seed42/reports/penalty_calibration.json).
+
+| λ = 2 | Penalty gradient ÷ task gradient (blocks 1–4) |
+| --- | --- |
+| Released (mean over 112 modules) | 2–3 × 10⁻⁷ |
+| Paper's Eq. 12 as written (sum over matrices, ×112) | 2–3.5 × 10⁻⁵ |
+| Size-normalized (KL × entries, float32) | 0.004–0.006 |
+
+- **The adapters' task gradient is 4.6–8.2, about as large as the item layers' (4.7–7.9).** The earlier comparison against the whole-model gradient norm was therefore not misleading.
+- **Even the paper's summed formula is far too weak at its largest λ (8).**
+- **The size-normalized form matches the task's pull at λ ≈ 390.** The O8 run uses λ = 400 (`peso-size-w400`).
+- **Direct evidence from the training logs (seed 42, block 1):** released PESO and single LoRA log the same training loss to three or four decimals (2.9075 vs 2.9075, 2.7933 vs 2.7936, 2.6767 vs 2.6769). With the size-normalized penalty at λ = 400, the logged loss, which includes the penalty, runs 0.3–0.5 higher from the first logging step, and the gradient norms rise. That penalty acts.
+
+### O8: a penalty that acts — 21 October 2026 (seed 42)
+
+**Setup.** PESO was retrained on blocks 1–4 from the shared block-0 checkpoint, with one change: the size-normalized penalty at λ = 400 (`pod_run.py variant --method peso-size-w400`, wrapper [`penalty_variants.py`](../replication/peso/penalty_variants.py)).
+- **Training:** about 2.2 h on an A100. The publish step was recovered by hand after the network volume filled up; the completion record says so.
+- **Evaluation:** our evaluator on the 8 pairs that backward transfer and new-block accuracy need, with the same users and settings as the transfer matrix above (20 beams, at most 2,500 users).
+- **Reports:** [`variant_report.py`](../replication/peso/variant_report.py) and [`variant_jlens_compare.py`](../replication/peso/variant_jlens_compare.py) wrote [`o8_peso-size-w400.json`](../replication/peso/results/seed42/reports/o8_peso-size-w400.json) and [`o8_jlens_peso-size-w400.json`](../replication/peso/results/seed42/reports/o8_jlens_peso-size-w400.json).
+
+| NDCG@10 | Single LoRA | Released PESO | PESO, λ = 400 (size-normalized) |
+| --- | --- | --- | --- |
+| Backward transfer (blocks 0–3) | −0.0038 | −0.0061 | **−0.0029** |
+| Old blocks 0–3 after block 4 | 0.0130 | 0.0110 | **0.0140** |
+| Own state, blocks 1–3 (Table 2's view) | 0.0167 | 0.0172 | 0.0169 |
+| Own state, blocks 1–4 | 0.0165 | 0.0166 | 0.0165 |
+| Newest block 4 | 0.0157 | 0.0146 | 0.0154 |
+
+NDCG@20 and Hit@10 point the same way. For example, NDCG@20 backward transfer goes from −0.0053 to −0.0038, but the NDCG@20 own-state average over blocks 1–4 drops from 0.0198 to 0.0192.
+
+- **An acting penalty reduces list-level forgetting a little.** Backward transfer improves by about a quarter, and old blocks end about 8% higher.
+- **That gain is not significant on this seed.** On the old blocks after block 4, the variant gets 90 users right that single LoRA misses, against 75 the other way (exact test p = 0.28; at top-20, 114 vs 93, p = 0.16). No single state–block pair is significant.
+- **It does not raise Table 2's own-state score** (0.0169 vs 0.0167). Table 2 only scores each block right after training, so it cannot see a retention effect. The paper's reported +0.0012 own-state gain is not reproduced even with an acting penalty.
+- **The mechanism acts where expected.** At state 4 the inner-layer part of the J-lens drift shrinks by 26–50% across the four codes (layer 4). The item-head part is unchanged for code 1 (0.21 → 0.22) and slightly larger for codes 3–4 (0.10 → 0.13).
+- **It has a learning cost on fine detail.** On the newest block, the exact-item codes rank lower: code 3 MRR 0.589 → 0.535, code 4 MRR 0.711 → 0.655. At top-20 the newest block has 28 variant-only against 44 LoRA-only hits (p = 0.08). On old blocks, codes 1–2 readouts are unchanged and codes 3–4 dip slightly.
+- **Reading:** penalizing only the adapters restrains the inner drift, much of which is learning. It leaves the item-head drift tied to code 1 untouched. This is one seed and one λ.
+
+**Next:**
+- repeat single LoRA and λ = 400 on seeds 43–44, with the same matrix pairs;
+- O2 (penalize the item layers) at a matched strength;
+- a short λ sweep (100, 400, 1,600).
 
 ## Reproduce in Colab (trained weights)
 
@@ -219,6 +298,20 @@ MRR after the last block, with the share of targets ranked in the top 10 of 256 
 - **Earlier copy:** a private Hugging Face repo holds the same weights in the unflattened layout (`modal_bundle.py --repo`; its location is in the ignored `local/WORKSPACE.md`).
 
 **Testing:** [`modal_colab_test.py`](../replication/peso/modal_colab_test.py) runs the notebook file top to bottom in a clean container on a Colab-like A100-40GB, with only a Hugging Face token. That is the "another user" test.
+
+**Fresh-user test, 20 October 2026.** The notebook ran top to bottom with no cell errors. It used a clean Python 3.12 container on an A100-40GB, cloned the fork, and downloaded the base model and the public release. Blocks 1–3, reproduced against recorded:
+
+| Method | NDCG@10 reproduced | Recorded | Hit@10 reproduced | Recorded |
+| --- | --- | --- | --- | --- |
+| Pretrain | 0.0111 | 0.0128 | 0.0200 | 0.0223 |
+| Single evolving LoRA | 0.0148 | 0.0152 | 0.0270 | 0.0260 |
+| PESO | 0.0144 | 0.0149 | 0.0259 | 0.0264 |
+
+- **The comparison holds.** The paired PESO − single LoRA NDCG@10 is −0.0004 both times, and single LoRA and PESO land within about 3%.
+- **Pretrain does not match.** It is 13% lower on average and 24% lower on block 2, where about 8 of 1,821 users change.
+- **The weights are not the cause.** On the seed-42 checkpoints, every one of the 145 frozen tensors the release leaves out equals Meta's base model. The frozen embedding and output originals also match on all 128,256 original token rows; their 1,024 added item-code rows are never used at inference, which runs on the trained copies the release ships.
+- **What differs is the environment.** The test used Python 3.12, numpy 2 and the A100-40GB; the recorded run used Python 3.10, numpy 1.26.4 and the A100-80GB. Upstream's evaluation path has no version-sensitive randomness, so we attribute the gap to numerics in beam search but have not isolated it.
+- **Read reproduced numbers with this spread in mind:** larger than the 1–4 users seen between GPU types on block 1.
 
 ## Directions after replication
 
@@ -245,4 +338,4 @@ Each experiment changes one variable against the replicated configuration. "Auth
 Recommended next step: **O8**, using the existing block-0 checkpoints, so only the incremental blocks are retrained.
 - **Single variable:** the penalty's normalization (released vs scaled by n), with the seed and everything else fixed.
 - **Then:** O2, penalty scope, at the working strength. Roughly 98% of trainable parameters sit outside the penalty (finding 3).
-- **Not yet run:** none of O2, O4–O6, O8 or A1–A3.
+- **Not yet run:** O2, O4–O6 and A1–A3. O8 has one setting (λ = 400, seed 42; results above).

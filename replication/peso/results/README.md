@@ -42,11 +42,19 @@ Aggregate counts and statistics only, with no user IDs, items or weights. Writte
 | `transfer.json` | [`transfer_report.py`](../transfer_report.py) | State × block NDCG/Hit matrices (20 beams, at most 2,500 users per block), backward transfer, per-step kept/lost/gained counts by user group, and PESO-vs-single-LoRA McNemar tests |
 | `jlens.json` | [`jlens_report.py`](../jlens_report.py) | J-lens and logit-lens readout quality per state, internal vs output rank change, and the drift split |
 | `penalty.json` | [`penalty_size.py`](../penalty_size.py) | PESO's KL penalty and its gradient at the end of each block, in float32 and bfloat16 |
+| `jlens_items.json` | [`jlens_items_report.py`](../jlens_items_report.py) | Item-level J-lens (all four codes, 15 layers): readout quality, forgetting by code, internal vs output with a permutation baseline, drift split by code and layer, and a level-0 check against `jlens.json` |
+| `penalty_calibration.json` | [`penalty_calibrate.py`](../penalty_calibrate.py) | Task gradient on the LoRA adapters vs each penalty variant's gradient (released, summed Eq. 12, size-normalized) |
+| `o8_peso-size-w400.json` | [`variant_report.py`](../variant_report.py) | O8: PESO with the size-normalized penalty at λ = 400 against single LoRA and released PESO: NDCG/Hit per state–block pair, backward transfer, own-state averages, head-to-head flips with McNemar tests |
+| `o8_jlens_peso-size-w400.json` | [`variant_jlens_compare.py`](../variant_jlens_compare.py) | O8 at state 4 against single LoRA: item-level drift split by code and layer, per-code readout ranks on old and new blocks |
 
 ```text
 d8c0277824fa6e9202403cd69e61c75c221dca71fff44973ada55142f8c0b19b  seed42/reports/transfer.json
 95fd838a6298ae2aa2fab7db4996d757fe40c3a8e503414a2c21cfbc984f0568  seed42/reports/jlens.json
 184866ac4ef08c8ee9ca28ecb7c3f62cde28b86c9ba0923fefd0fc4b41e661ae  seed42/reports/penalty.json
+b0e078d9fb254934e59359ca53d8b1676247ff05a4588a46255cfa491b1219a2  seed42/reports/jlens_items.json
+777f389f8955f2cc40e6f442e1a96c80d9f6508748c79bf002cd96f9bdc04990  seed42/reports/penalty_calibration.json
+7248d70bc37b7660787714111fbf4e433e5c080f427f3120060442355975d013  seed42/reports/o8_peso-size-w400.json
+19c308a5c0c577935068304e40a306d2a9100d1b4f42c6112229e17d63925928  seed42/reports/o8_jlens_peso-size-w400.json
 ```
 
 Per-user prediction dumps, J-lens tensors and the user-group file are not committed. The groups can be regenerated from PESO's released blocks with [`user_groups.py`](../user_groups.py).

@@ -49,6 +49,40 @@ METHODS = {
     "lora": {"flag": "lora", "weight": 0.0, "tag": "lora_cl_0.0"},
     "peso": {"flag": "lora_kldiv_latest", "weight": 2.0, "tag": "lora_kldiv_latest_cl_2.0"},
 }
+# Penalty variants for direction O8, named peso-<variant>-w<continual_loss_weight>:
+# "sum" is the paper's Eq. 12 with upstream code (which averages over the 112 modules, so
+# pass 112 * lambda); "size" scales each matrix's KL by its entry count (penalty_variants.py).
+VARIANT_SCRIPTS = {"sum": "continual_train.py", "size": "cp4285_penalty_train.py"}
+# Our scripts the upstream directory needs, installed under these names.
+SCRIPTS = {
+    "peso_eval.py": "cp4285_peso_eval.py", "jlens.py": "cp4285_jlens.py",
+    "jlens_items.py": "cp4285_jlens_items.py", "penalty_size.py": "cp4285_penalty_size.py",
+    "penalty_calibrate.py": "cp4285_penalty_calibrate.py",
+    "penalty_variants.py": "cp4285_penalty_train.py",
+}  # fmt: skip
+
+
+def spec(method):
+    """A replicated method, or a penalty variant parsed from its name."""
+    if method in METHODS:
+        return {**METHODS[method], "script": "continual_train.py", "args": []}
+    prefix, variant, weight = method.split("-")
+    if prefix != "peso" or variant not in VARIANT_SCRIPTS or not weight.startswith("w"):
+        raise ValueError(f"Unknown method {method}; expected peso-<sum|size>-w<weight>")
+    return {
+        "flag": "lora_kldiv_latest", "weight": float(weight[1:]),
+        "tag": f"lora_kldiv_latest_{variant}_cl_{float(weight[1:]):g}",
+        "script": VARIANT_SCRIPTS[variant],
+        "args": ["--penalty_variant", variant] if variant == "size" else [],
+    }  # fmt: skip
+
+
+def install_scripts():
+    """Copy our scripts (siblings of this file) into the upstream directory."""
+    for source, target in SCRIPTS.items():
+        shutil.copyfile(Path(__file__).with_name(source), WORK / target)
+
+
 COMMON = [
     "--dataset", DATASET, "--data_path", "../data",
     "--index_file", ".index.epoch20000_edim32_beta0.0.json",
@@ -83,14 +117,14 @@ def setup():
     sh([*pip, "torch==2.5.1", "--index-url", "https://download.pytorch.org/whl/cu121"])
     sh([*pip, "-r", UPSTREAM_DIR / "requirements.txt"])
     sh([*pip, FLASH_ATTN])
-    shutil.copyfile(EVAL, WORK / "cp4285_peso_eval.py")
+    install_scripts()
     if not (MODEL / "model.safetensors").exists():
         raise FileNotFoundError(f"Environment ready; copy the pinned base model to {MODEL}")
 
 
 def paths(run, method):
     root = VOL / "runs" / run
-    tag = TAG.format(flag=METHODS[method]["tag"])
+    tag = TAG.format(flag=spec(method)["tag"])
     out = root / "ckpt" / DATASET / "lama3-1b_edim32_beta0.0" / "data_v2" / tag
     return root, out, root / "results" / f"{tag}.json"
 
@@ -158,13 +192,13 @@ def train(run, method, seed, port, debug=False):
     if local.exists():
         shutil.rmtree(local)  # container-local leftovers of an interrupted attempt
     environment(root, f"train-{method}")
-    spec = METHODS[method]
+    method_spec = spec(method)
     cmd = [
-        "torchrun", "--nproc_per_node=1", f"--master_port={port}", "continual_train.py",
+        "torchrun", "--nproc_per_node=1", f"--master_port={port}", method_spec["script"],
         "--base_model", MODEL, "--output_dir", local, "--seed", seed,
         *COMMON, *TRAIN,
-        "--shift_flag", spec["flag"], "--continual_loss_weight", spec["weight"],
-        "--wandb_project", "data_v2", "--wandb_run_name", out.name,
+        "--shift_flag", method_spec["flag"], "--continual_loss_weight", method_spec["weight"],
+        "--wandb_project", "data_v2", "--wandb_run_name", out.name, *method_spec["args"],
     ]  # fmt: skip
     if method != "pretrain":
         shared = out.parent / TAG.format(flag="lora_pretrain") / "block_0"
@@ -209,7 +243,7 @@ def test(run, method, seed, port, block=None):
         "torchrun", "--nproc_per_node=1", f"--master_port={port}", "continual_test.py",
         "--ckpt_path", out, "--base_model", MODEL, "--seed", seed,
         "--results_file", results, "--test_batch_size", "1", "--num_beams", "10",
-        "--shift_flag", METHODS[method]["flag"], *COMMON,
+        "--shift_flag", spec(method)["flag"], *COMMON,
     ]  # fmt: skip
     cmd += ["--test_all_blocks"] if block is None else ["--test_block", block]
     if method != "pretrain":
@@ -236,7 +270,7 @@ def matrix(run, method, seed, port, states, blocks="0,1,2,3,4", beams=10, batch=
         "--ckpt_path", out, "--base_model", MODEL, "--seed", seed,
         "--test_batch_size", batch, "--num_beams", beams, "--max_users", max_users,
         "--metrics", METRICS_20 if beams >= 20 else "hit@1,hit@5,hit@10,ndcg@5,ndcg@10",
-        "--shift_flag", METHODS[method]["flag"], "--states", states, "--test_blocks", blocks,
+        "--shift_flag", spec(method)["flag"], "--states", states, "--test_blocks", blocks,
         "--dump_dir", root / tag / method, *COMMON,
     ]  # fmt: skip
     seconds = stream(cmd, root / "logs" / f"{stage}.log")
@@ -288,13 +322,35 @@ def jlens(run, method, seed, port, states, drift_from=None):
     cmd = [
         "torchrun", "--nproc_per_node=1", f"--master_port={port}", "cp4285_jlens.py",
         "--ckpt_path", out, "--base_model", MODEL, "--seed", seed,
-        "--shift_flag", METHODS[method]["flag"], "--states", states,
+        "--shift_flag", spec(method)["flag"], "--states", states,
         "--out_dir", root / "jlens" / method, *COMMON,
     ]  # fmt: skip
     if drift_from:
         cmd += ["--head_drift_from", drift_from]
     seconds = stream(cmd, root / "logs" / f"{stage}.log")
     record = {"stage": stage, "seed": seed, "seconds": seconds}
+    publish(done, record)
+    return record
+
+
+def calibrate(run, seed, port=29550):
+    """Penalty-variant strength against the task gradient (penalty_calibrate.py)."""
+    root, lora, _ = paths(run, "lora")
+    _, peso, _ = paths(run, "peso")
+    if completed(run, "calibrate"):
+        return completed(run, "calibrate")
+    done = claim(root, "calibrate")
+    install_scripts()
+    out = root / "reports" / "penalty_calibration.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        "torchrun", "--nproc_per_node=1", f"--master_port={port}", "cp4285_penalty_calibrate.py",
+        "--ckpt_path", lora, "--base_model", MODEL, "--seed", seed,
+        "--shift_flag", spec("lora")["flag"], "--peso_ckpt", peso, "--out", out, *COMMON,
+    ]  # fmt: skip
+    seconds = stream(cmd, root / "logs" / "calibrate.log")
+    record = {"stage": "calibrate", "seed": seed, "seconds": seconds,
+              "report": json.loads(out.read_text())}  # fmt: skip
     publish(done, record)
     return record
 
@@ -320,7 +376,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "stage",
-        choices=["setup", "smoke", "replicate", "validate", "matrix", "jlens", "jlens-drift"],
+        choices=[
+            "setup",
+            "smoke",
+            "replicate",
+            "validate",
+            "matrix",
+            "jlens",
+            "jlens-drift",
+            "calibrate",
+            "variant",
+        ],
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--run", default="")
@@ -328,6 +394,9 @@ def main():
     parser.add_argument("--beams", type=int, default=20)
     parser.add_argument("--max_users", type=int, default=2500, help="Per-block subsample cap")
     parser.add_argument("--sequential", action="store_true", help="One evaluator at a time")
+    parser.add_argument("--method", help="variant stage: peso-<sum|size>-w<weight>")
+    parser.add_argument("--with_test", action="store_true", help="variant: also Table 2 test")
+    parser.add_argument("--full_matrix", action="store_true", help="variant: all 20 pairs")
     args = parser.parse_args()
     if args.stage == "setup":
         return setup()
@@ -358,6 +427,25 @@ def main():
         steps.append(jlens(run, "peso", seed, 29531, "1,2,3,4", reference))
     elif args.stage == "validate":
         steps.append(validate(run, seed, args.batch))
+    elif args.stage == "calibrate":
+        steps.append(calibrate(run, seed))
+    elif args.stage == "variant":
+        # One penalty variant: train blocks 1-4 from the shared block 0, then evaluate on the
+        # same users and settings as single LoRA's transfer matrix. By default only the
+        # pairs backward transfer and new-block accuracy need: each block's own state, and
+        # the last state on every block (--full_matrix for all 20; --with_test for Table 2).
+        method = args.method
+        spec(method)  # fail fast on a malformed name
+        install_scripts()
+        steps.append(completed(run, f"train-{method}") or train(run, method, seed, 29500))
+        if args.with_test:
+            steps.append(completed(run, f"test-{method}") or test(run, method, seed, 29503))
+        settings = (args.beams, args.batch, args.max_users, f"matrix-beam{args.beams}")
+        pairs = [("1,2,3,4", "0,1,2,3,4")] if args.full_matrix else [
+            ("4", "0,1,2,3,4"), ("1", "1"), ("2", "2"), ("3", "3"),
+        ]  # fmt: skip
+        for states, blocks in pairs:
+            steps.append(matrix(run, method, seed, 29510, states, blocks, *settings))
     else:
         # State 0 is the shared block-0 checkpoint, so PESO reuses single LoRA's state 0.
         settings = (args.beams, args.batch, args.max_users, f"matrix-beam{args.beams}")
