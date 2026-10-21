@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#next-items-checkpoint"><strong>Latest · 22 · Next-items proposal</strong></a>
+          <a href="#item-categories-checkpoint"><strong>Latest · 23 · Item subcategories</strong></a>
+          <a href="#next-items-checkpoint">22 · Next-items proposal</a>
           <a href="#metrics-checkpoint">21 · Hit@K and several targets</a>
           <a href="#update-classical-study">20 · Classical rigour</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
@@ -733,12 +734,14 @@
             <a href="#update-classical-study">section 20: classical rigour</a> and
             <a href="#metrics-checkpoint">section 21: Hit@K and several targets</a> and
             <a href="#next-items-checkpoint">section 22: next-items proposal</a>.
+            Branch <code>item-categories</code> (22 October 2026) adds
+            <a href="#item-categories-checkpoint">section 23: item subcategories</a>.
             <strong
               >Sections 01–10 are an earlier historical snapshot, not current
               instructions:</strong
             >
             their uncommitted-SASRec, missing-classical, 11-test and
-            unfixed-safety statements are superseded by sections 11–22. Read
+            unfixed-safety statements are superseded by sections 11–23. Read
             <a href="#layout-checkpoint">section 18: package layout</a> for the
             current file map, then
             <a href="#sasrec-architecture">section 17: SASRec step by step</a>
@@ -3670,6 +3673,35 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
           <p class="small"><a href="#review-status">Current PR status</a></p>
         </section>
         <!-- APPENDED NEXT-ITEMS CHECKPOINT 2026-09-28 END -->
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 -->
+        <section id="item-categories-checkpoint">
+          <span class="section-num">23 / ITEM SUBCATEGORIES · 22 OCTOBER 2026</span>
+          <h2>Items grouped by metadata subcategory, with a classifier for missing paths.</h2>
+          <p>
+            <span class="label fact">FACT</span> New <code>cp4285 meta-*</code> commands
+            (<a href="src/cp4285/common/metadata.py">metadata.py</a>) download item metadata for
+            all 34 Amazon 2023 files and audit the <code>categories</code> paths. They group items
+            by the first two path levels. Items with no path that deep get a predicted subcategory
+            from a sentence-embedding classifier, kept only above a confidence threshold set for 0.8
+            held-out precision. Every row records <code>observed</code>, <code>predicted</code> or
+            <code>unknown</code>.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> A sample of each file showed six files with no
+            paths at all, including All_Beauty and Amazon_Fashion. Those files learn labels from a
+            related donor file. A CPU dry run on Magazine_Subscriptions and Video_Games reconciled
+            all 140,660 items. Video_Games reached 0.77 held-out accuracy.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> The full run across 26 GB of metadata is
+            planned on Runpod, with the derived tables published to a private Hugging Face dataset.
+            Subcategory density is a candidate way to pick a denser experiment domain; the team has
+            not chosen one. See <a href="docs/ITEM-CATEGORIES.md">ITEM-CATEGORIES.md</a>.
+          </p>
+          <p class="ref">All 51 tests passed at this checkpoint.</p>
+          <p class="small"><a href="#review-status">Current PR status</a></p>
+        </section>
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

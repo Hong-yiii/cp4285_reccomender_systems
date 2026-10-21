@@ -13,7 +13,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
 - [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
-- [Dataset assessment](docs/DATASET-ASSESSMENT.md)
+- [Dataset assessment](docs/DATASET-ASSESSMENT.md) and [item subcategories](docs/ITEM-CATEGORIES.md)
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
@@ -39,7 +39,7 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | Path | Purpose |
 | --- | --- |
 | `src/cp4285/cli.py` | `cp4285` command |
-| `src/cp4285/common/` | Shared download, validated loading and audit (`data.py`); create-only JSON, hashing and UTC dates (`utils.py`) |
+| `src/cp4285/common/` | Shared download, validated loading and audit (`data.py`); item-metadata subcategories (`metadata.py`); create-only JSON, hashing and UTC dates (`utils.py`) |
 | `src/cp4285/neural/` | Neural workstream: cutoff pilot split, SASRec model and A-only training |
 | `src/cp4285/classical/` | Classical comparator (`cp4285 classical ...`) |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |

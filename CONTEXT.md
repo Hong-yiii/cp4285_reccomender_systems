@@ -19,7 +19,10 @@ This is an offline study, not a deployed service. Improvement or no measurable d
 | Original SASRec architecture ported to PyTorch, validation-selected checkpoint | Original TensorFlow runtime / paper benchmark reproduction |
 | Checkpoint reload, frozen control, fresh A-only continuation | B adaptation evaluation, multi-seed results and mitigations |
 | Synthetic lifecycle tests | Final team deck / submission |
+| Item metadata download, category audit, subcategory grouping with a text classifier for missing paths, Hugging Face publishing ([ITEM-CATEGORIES.md](docs/ITEM-CATEGORIES.md)) | Full 34-file run, subcategory density results and any choice of subcategory as a domain |
 | Classical comparator on real Amazon A/B: Markov, QR-factorised Markov, SLIST, contamination sweeps ([CLASSICAL.md](docs/CLASSICAL.md)) | Classical results under the pilot's cutoff protocol; the multi-seed classical study (`cp4285 classical study`, validation-tuned, paired CIs) is implemented and partly run, see section 20 of `reference.html` |
+
+**Item subcategories, 22 October:** branch `item-categories` adds `cp4285 meta-*` commands that group Amazon 2023 items by the first two levels of their metadata `categories` path. A sentence-embedding classifier predicts a subcategory for items without one, and each row records whether its label is observed or predicted. Six metadata files have no paths and borrow labels from a donor file. Only a two-file CPU dry run has run. The full run is planned on Runpod, with output to a private Hugging Face dataset. This is agent tooling proposed to the team, not a dataset decision.
 
 **Model decision, 28 September:** Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) architecture, replacing the generic Transformer. See [SASREC.md](docs/SASREC.md) for the pinned source, faithful block structure, original sequence-wise initial loss and explicit experiment differences. The old model's checkpoints are incompatible.
 

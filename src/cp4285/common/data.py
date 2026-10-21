@@ -15,21 +15,41 @@ import httpx
 from .utils import millis, save_json, sha256
 
 DOMAINS = ("Electronics", "Movies_and_TV")
+# Every Amazon Reviews 2023 category; the pilot uses DOMAINS, item metadata covers all of them.
+CATEGORIES = (
+    "All_Beauty", "Amazon_Fashion", "Appliances", "Arts_Crafts_and_Sewing", "Automotive",
+    "Baby_Products", "Beauty_and_Personal_Care", "Books", "CDs_and_Vinyl",
+    "Cell_Phones_and_Accessories", "Clothing_Shoes_and_Jewelry", "Digital_Music", "Electronics",
+    "Gift_Cards", "Grocery_and_Gourmet_Food", "Handmade_Products", "Health_and_Household",
+    "Health_and_Personal_Care", "Home_and_Kitchen", "Industrial_and_Scientific", "Kindle_Store",
+    "Magazine_Subscriptions", "Movies_and_TV", "Musical_Instruments", "Office_Products",
+    "Patio_Lawn_and_Garden", "Pet_Supplies", "Software", "Sports_and_Outdoors",
+    "Subscription_Boxes", "Tools_and_Home_Improvement", "Toys_and_Games", "Video_Games", "Unknown",
+)  # fmt: skip
 BASE = "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/5core/rating_only"
 
 
 def download(domain, directory):
-    if domain not in DOMAINS:
-        raise ValueError(f"Choose one of {DOMAINS}")
-    directory = Path(directory)
-    directory.mkdir(parents=True, exist_ok=True)
-    dest = directory / f"{domain}.csv.gz"
-    manifest = directory / f"{domain}.csv.gz.manifest.json"
+    if domain not in CATEGORIES:
+        raise ValueError(f"Choose one of {CATEGORIES}")
+
+    def check(f):
+        header = next(csv.reader(f), [])
+        if not {"user_id", "parent_asin", "rating", "timestamp"}.issubset(header):
+            raise ValueError("Downloaded file has an unexpected header")
+
+    return fetch(f"{BASE}/{domain}.csv.gz", Path(directory) / f"{domain}.csv.gz", check)
+
+
+def fetch(url, dest, check):
+    """Stream a gzip file, validate its first record and whole CRC, then publish it once."""
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    manifest = dest.with_name(f"{dest.name}.manifest.json")
     for path in (dest, manifest):
         if os.path.lexists(path):
             raise FileExistsError(f"Already exists: {path}; inspect it or choose a new directory")
-    url = f"{BASE}/{domain}.csv.gz"
-    with NamedTemporaryFile(dir=directory, prefix=f".{domain}-", suffix=".part") as partial:
+    with NamedTemporaryFile(dir=dest.parent, prefix=f".{dest.name}-", suffix=".part") as partial:
         try:
             with httpx.stream("GET", url, follow_redirects=True, timeout=120) as response:
                 response.raise_for_status()
@@ -37,14 +57,12 @@ def download(domain, directory):
                     partial.write(chunk)
             partial.flush()
             with gzip.open(partial.name, "rt", encoding="utf-8") as f:
-                header = next(csv.reader(f), [])
-                if not {"user_id", "parent_asin", "rating", "timestamp"}.issubset(header):
-                    raise ValueError("Downloaded file has an unexpected header")
+                check(f)
                 # Read through the CRC/trailer in bounded chunks before publishing anything.
                 while f.read(1024 * 1024):
                     pass
         except (httpx.HTTPError, gzip.BadGzipFile, EOFError, zlib.error, UnicodeError) as exc:
-            raise ValueError(f"Invalid or incomplete download for {domain}: {exc}") from exc
+            raise ValueError(f"Invalid or incomplete download for {dest.name}: {exc}") from exc
         record = {"source_url": url, "bytes": partial.tell(), "sha256": sha256(partial.name)}
         os.link(partial.name, dest)
         # ponytail: data/manifest publish separately; keep valid data on manifest failure.

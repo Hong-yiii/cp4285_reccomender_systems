@@ -235,3 +235,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 44 tests plus Ruff passed, including a hand-built time split and end-to-end synthetic studies for both protocols. A 100K-user real-data smoke sweep with `--protocol time` completed (5,000 users, 10,651 targets); smoke numbers only. A started full study was stopped during tuning at the user's request so the method can be agreed first.
 
 **Limits:** Neither study has run with Hit@10 tuning or the time protocol. The 5-core filter uses whole-history counts. The neural next-items variant and its held-out user group are not built.
+
+## 22 October 2026 — Item subcategories from metadata
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Use the `categories` field of Amazon 2023 item metadata to group items into subcategories across all categories. Fill empty or missing paths with a zero-shot style text classifier. Run it on the cloud and publish the result through LFS.
+
+**Assistance:** Proposed a plan the user approved: Hugging Face dataset instead of GitHub LFS, all 34 metadata files, Runpod for compute. Added `src/cp4285/common/metadata.py` and the `meta-download`, `meta-audit`, `meta-classify`, `meta-group` and `meta-publish` commands. Moved the validated download into a reusable `fetch` in `common/data.py`; `download` now accepts every category. Added the optional `meta` extra and `tests/test_metadata.py`. Sampled each metadata file and found six files with no paths, so empty files learn from a donor file. Ran a CPU dry run on Magazine_Subscriptions and Video_Games and changed the L2 default after a comparison. Wrote ITEM-CATEGORIES.md and reference section 23, and updated CONTEXT, README, IMPLEMENTATION and DATASET-ASSESSMENT.
+
+**Validation:** 51 tests plus Ruff lint and format passed. The dry run reconciled all 140,660 items.
+
+**Limits:** The full run, the Runpod job and the Hugging Face upload have not run. Predicted labels and donor mappings are model output and assumptions. No subcategory has been chosen as an experiment domain.

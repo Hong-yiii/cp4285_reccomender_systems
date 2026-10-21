@@ -109,6 +109,7 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `pyproject.toml`, `uv.lock`, `.python-version` | Managed environment and console command |
 | `src/cp4285/common/utils.py` | Standard-library helpers: `save_json`, file `sha256`, UTC `millis` |
 | `src/cp4285/common/data.py` | Official download, validated ID-file loading and A/B audit |
+| `src/cp4285/common/metadata.py` | Item-metadata download, category audit, subcategory classifier and grouping; see [ITEM-CATEGORIES.md](ITEM-CATEGORIES.md) |
 | `src/cp4285/neural/data.py` | Neural cutoff pilot partitions (`prepare`) |
 | `src/cp4285/neural/model.py`, `pilot.py` | Neural baseline, training, checkpoints and metrics |
 | `src/cp4285/cli.py` | `cp4285` command |
@@ -119,6 +120,6 @@ The frozen control and A-only continued training are implemented. Before adding 
 | `slides/README.md` | Link to the team Google Slides deck and slide principles (no code) |
 | `data/`, `runs/`, `reports/` | Ignored generated inputs and outputs |
 
-Import shared helpers from `cp4285.common.utils` and protocol-independent dataset handling (download, validated loading, audit) from `cp4285.common.data`. Keep each workstream's split construction and evaluation in its own package (`neural/`, `classical/`): their research protocols differ. `common.utils` imports only the standard library; `common.data` uses DuckDB and HTTPX but no model libraries.
+Import shared helpers from `cp4285.common.utils` and protocol-independent dataset handling (download, validated loading, audit) from `cp4285.common.data`. Keep each workstream's split construction and evaluation in its own package (`neural/`, `classical/`): their research protocols differ. `common.utils` imports only the standard library; `common.data` uses DuckDB and HTTPX but no model libraries. `common.metadata` imports `sentence-transformers` and `huggingface_hub` (the `meta` extra) only inside the functions that need them.
 
 The project now lives in its own repository, separate from the course archive. See [MIGRATION.md](MIGRATION.md) for the layout change. No deployment or course submission is configured.
