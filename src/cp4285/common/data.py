@@ -100,8 +100,9 @@ def load(con, path, name):
 
 def connection():
     con = duckdb.connect()
-    con.execute("SET memory_limit='2GB'")
-    con.execute("SET threads=4")
+    # Laptop-safe defaults; a larger machine can raise them through the environment.
+    con.execute("SET memory_limit=?", [os.environ.get("CP4285_DUCKDB_MEMORY", "2GB")])
+    con.execute("SET threads=?", [int(os.environ.get("CP4285_DUCKDB_THREADS", "4"))])
     con.execute("SET temp_directory='data/.duckdb-spill'")
     return con
 

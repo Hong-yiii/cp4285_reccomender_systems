@@ -46,7 +46,7 @@ uv run cp4285 meta-group
 HF_TOKEN=... uv run cp4285 meta-publish --repo <user>/amazon23-item-categories
 ```
 
-Outputs go to `data/meta/out`. Each stage refuses to overwrite its outputs. With `--category all`, finished categories are skipped, so a rerun resumes.
+On a large machine, set `CP4285_DUCKDB_MEMORY` (default `2GB`) and `CP4285_DUCKDB_THREADS` (default `4`). Outputs go to `data/meta/out`. Each stage refuses to overwrite its outputs. With `--category all`, finished categories are skipped, so a rerun resumes.
 
 ## Local dry run (CPU, 22 October)
 
