@@ -298,3 +298,39 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 49 tests and Ruff lint/format pass. The notebook-02 test pins the new report numbers. Anonymous downloads from the public fork release return the manifest byte-identical. The first Modal run of the new-user notebook test crashed on import (`Path(__file__).parents[2]` inside the container) and was cancelled; after the fix the container imported cleanly.
 
 **Limits:** The transfer matrix, flips and J-lens cover one seed. The J-lens reads only the first semantic-ID token. The penalty finding concerns the released code at `edbec5f`, not necessarily the authors' unreleased setup. Commits were made and pushed only to the user's fork at the user's request; nothing was pushed to the team repository's branches, and nothing was submitted or sent to the authors.
+
+## 21 October 2026 — Item-level J-lens, penalty calibration, O8 and the general-audience talk
+
+**Tool:** Claude Code (Claude Opus 5.5), with Runpod (RTX 4090 and A100 pods), Modal and the GitHub CLI.
+
+**Request:**
+- Broaden the J-lens (the user chose item-level, all layers).
+- Run the "settle it" experiment for PESO.
+- Write a talk for a college-educated non-specialist.
+- Check the Colab notebook still works.
+- Check progress every 15 minutes.
+
+**Assistance:**
+- Wrote `jlens_items.py` and `jlens_items_report.py`. The level-0 and state-1 drift checks reproduce the first-code run.
+- Corrected an earlier inference: forgetting sits in the broad first code, not the exact item.
+- Wrote `penalty_calibrate.py`, `penalty_variants.py`, `variant_report.py` and `variant_jlens_compare.py`, and added `calibrate` and `variant` stages to `pod_run.py`. The size-normalized penalty was unit-tested on the pod against a hand computation before training.
+- Ran O8 (λ = 400, seed 42). It gave a small, non-significant retention gain, no Table 2 gain, a 26–50% smaller inner drift, and a fine-code learning cost on the newest block.
+- Added a two-figure J-lens side note to notebook 03 (rendered and checked locally; matplotlib not added to the project), notebook 02 sections and tests.
+- Wrote `docs/TALK-GENERAL-AUDIENCE.md` and the 21 Oct progress update.
+- Fixed the Modal notebook test twice:
+  - an import that crashed inside the container;
+  - parsing of nbformat's list-or-string text, which lost one finished run (about $2).
+- Infrastructure:
+  - **Pods:** two pods hit Runpod's EUR-IS-1 registry DNS failure and were terminated within minutes.
+  - **Full volume:** it stalled the O8 publish while the A100 idled for about 3.8 h. At the user's choice, the 19 Oct debug runs' weights (82.6 GB) were deleted and the checkpoint was published by hand with SHA-256 checks.
+  - **Monitoring:** a 15-minute health check with a volume write test ran until completion.
+
+**Validation:**
+- **Tests:** 51 tests, Ruff lint and format pass. Notebook tests pin the item-level, penalty and O8 numbers to committed reports.
+- **Colab:** the fresh-user notebook ran end to end on Modal (A100-40GB, Python 3.12) with no cell errors. The PESO − single LoRA gap reproduced exactly, and Pretrain was about 13% lower from environment numerics; the released weights were verified lossless.
+
+**Limits:**
+- **Single seed:** O8 and both J-lens probes cover seed 42 only, and O8 has a single λ.
+- **Teacher forcing:** codes 2–4 are read with the correct earlier codes fed in.
+- **Correlations:** the drift–forgetting links are correlations.
+- **External actions:** no team contact or submission. Commits are pushed only to the user's fork.

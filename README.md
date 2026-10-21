@@ -19,7 +19,8 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
 - [PESO replication](docs/PESO-REPLICATION.md): exploratory LLM continual-recommendation workstream on PESO's released Instruments data, with retention/flip analysis; not comparable with the SASRec or classical numbers
-- [Progress updates](docs/updates/README.md): dated team shares in the meeting-notes format; latest [20 Oct, PESO replication](docs/updates/2026-10-20-peso-replication.md)
+- [Progress updates](docs/updates/README.md): dated team shares in the meeting-notes format; latest [21 Oct, a PESO penalty that acts](docs/updates/2026-10-21-peso-penalty.md)
+- [General-audience talk](docs/TALK-GENERAL-AUDIENCE.md): a 12-minute, ten-slide script explaining the continual-recommendation approach and the PESO findings to non-specialists, with likely questions
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 
 The September notes recorded the **29 September 2026 design critique** as their next milestone; this is historical, not a current deadline. The official template's weekday/date conflict remains unresolved; verify Canvas rather than assuming a submission deadline.

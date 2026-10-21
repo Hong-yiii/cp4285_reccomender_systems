@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#peso-analysis"><strong>Latest · 22 · PESO analysis</strong></a>
+          <a href="#peso-penalty"><strong>Latest · 23 · A penalty that acts</strong></a>
+          <a href="#peso-analysis">22 · PESO analysis</a>
           <a href="#peso-replication">21 · PESO replication</a>
           <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
@@ -720,7 +721,7 @@
             tabindex="-1"
             role="note"
           >
-            <strong>Current review checkpoint — 20 October 2026.</strong>
+            <strong>Current review checkpoint — 21 October 2026.</strong>
             A user-requested, exploratory LLM workstream is replicating PESO
             (ICLR 2026) on its own released Instruments data before choosing an
             extension. Read <a href="#peso-replication">section 21</a> and the
@@ -729,7 +730,8 @@
             ours. Three-seed result (20 October): Pretrain and single LoRA reproduce;
             PESO's reported gain does not. <a href="#peso-analysis">Section 22</a> adds the
             transfer matrix, per-user flips, the measured size of PESO's penalty (about
-            10⁻⁶ in the released code) and a Jacobian-lens probe. The 16 October integration remains
+            10⁻⁶ in the released code) and a Jacobian-lens probe. <a href="#peso-penalty">Section 23</a>
+            makes the penalty act: a small, not-yet-significant retention gain. The 16 October integration remains
             the code baseline: it preserves main's real models and CLI under two
             responsibility packages: <code>experiment/</code> and <code>models/</code>.
             SASRec and incremental PureSVD use a shared learner ABC; classical
@@ -3619,6 +3621,29 @@ scores = branch.score(fixed_queries)</pre>
           <p><span class="label recommend">RECOMMENDATION</span> Next, change one variable: the
             penalty scaled by matrix size, so that it acts (direction O8 in the
             <a href="docs/PESO-REPLICATION.md">replication record</a>), then penalty scope.</p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <section id="peso-penalty">
+          <span class="section-num">23 / A PENALTY THAT ACTS · 21 OCTOBER 2026</span>
+          <h2>Make the penalty pull, then check what it changes inside and out.</h2>
+          <div class="callout warn"><strong>One seed, one setting.</strong> PESO's Instruments
+            data, seed 42, λ = 400. Nothing here is significant yet.</div>
+          <p><span class="label fact">FACT</span> Calibration: at λ = 2 the released penalty pulls
+            about 3 × 10⁻⁷ as hard as the task gradient on the adapters, and the paper's summed
+            Eq. 12 about 3 × 10⁻⁵. Released PESO and single LoRA log the same training loss to three
+            or four decimals.</p>
+          <p><span class="label fact">FACT</span> With the KL scaled by matrix size at λ = 400,
+            backward transfer is −0.0029 against −0.0038 for single LoRA, and old blocks end about 8%
+            higher. The own-state score (Table 2's view) is unchanged. User by user, 90 vs 75
+            shoppers differ (p = 0.28).</p>
+          <p><span class="label fact">FACT</span> The item-level J-lens shows that forgetting sits in
+            each item's broad first code; the exact-item codes improve over updates. The acting
+            penalty shrinks the inner-layer drift by 26–50%, leaves the item-head drift on code 1
+            unchanged, and lowers the newest block's exact-item ranks.</p>
+          <p><span class="label recommend">RECOMMENDATION</span> Repeat on seeds 43–44, then
+            penalize the item layers (O2) and sweep λ. See the
+            <a href="docs/PESO-REPLICATION.md">replication record</a> and the
+            <a href="docs/TALK-GENERAL-AUDIENCE.md">general-audience talk</a>.</p>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <footer>
