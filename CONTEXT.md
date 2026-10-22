@@ -26,6 +26,7 @@ The CLI remains `cp4285`; a thin notebook imports the packages. Old `common/`, `
 - Both protocol-specific evaluators live in `experiment/`. **They remain scientifically different**, including splits, vocabularies, seen masking, ties and learning units. A shared ABC does not make scores comparable.
 - Existing validated downloader/audit, holdout isolation, validation-selected SASRec weights, checkpoint reload, frozen control and create-only artifacts are retained.
 - Runnable development guide and `notebooks/01_shared_lifecycle.ipynb`, with executable documentation and model-lifecycle checks in addition to the existing tests.
+- Item subcategories, 22 October ([ITEM-CATEGORIES.md](docs/ITEM-CATEGORIES.md)): `cp4285 meta-*` commands group Amazon 2023 items by the first two levels of their metadata `categories` path and predict a subcategory for items without one with a TF-IDF classifier. Each row records whether its label is observed or predicted. The full run labelled 35.4M items (89.0% observed, 8.3% predicted, 2.7% unknown) and is published as the private Hugging Face dataset `randomwish/amazon23-item-categories`. The optional `meta` extra adds scikit-learn and huggingface-hub. No subcategory has been chosen as an experiment domain.
 
 The tagged boilerplate's single-target `Example` contract and generic runner are **not** copied into this integration: enforcing them unchanged would silently alter main's all-position SASRec training and classical row-chunk semantics. Neither is presented as the final common benchmark.
 

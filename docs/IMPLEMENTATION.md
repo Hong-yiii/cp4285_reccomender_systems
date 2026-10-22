@@ -110,6 +110,7 @@ The frozen control and A-only continued training are implemented. Before adding 
 | --- | --- |
 | `pyproject.toml`, `uv.lock`, `.python-version` | Managed environment and console command |
 | `src/cp4285/experiment/utils.py`, `data.py` | Create-only JSON, hashing, dates, official download, validated loading and audit |
+| `src/cp4285/experiment/metadata.py` | Item-metadata download, category audit, subcategory classifier and grouping; see [ITEM-CATEGORIES.md](ITEM-CATEGORIES.md) |
 | `src/cp4285/experiment/model.py` | Shared generic `Recommender` lifecycle ABC |
 | `src/cp4285/experiment/neural_data.py`, `pilot.py`, `neural_evaluation.py` | Neural cutoff split, sampling/selection/checkpoints and fixed evaluation |
 | `src/cp4285/models/sasrec.py`, `sasrec_learner.py` | Unchanged network architecture; stateful optimizer/update/scoring adapter |
