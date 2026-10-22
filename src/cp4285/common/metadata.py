@@ -3,7 +3,7 @@
 Amazon Reviews 2023 item files give each item a hierarchical `categories` path, but many paths
 are empty, missing or too shallow. Items are grouped by the path prefix at a fixed `level`
 (2 = root and one subcategory). An item without a path that deep gets a predicted subcategory
-from a sentence-embedding softmax classifier. The classifier is trained on items of the same
+from a TF-IDF text classifier. The classifier is trained on items of the same
 category file whose path is observed (or of a donor file, see DONORS), and only labels that
 extend the item's own shallow path are allowed. Predictions below a confidence threshold, chosen on held-out labelled items for a
 target precision, stay `unknown`. Every output row records whether its label was observed or
@@ -47,6 +47,7 @@ DONORS = {
     "Subscription_Boxes": CATEGORIES,
     "Unknown": CATEGORIES,
 }
+MODEL = "hashed TF-IDF word 1-2 grams, SGD logistic regression"
 TEXT = """left(concat_ws(' | ', nullif(trim(title), ''), nullif(trim(brand), ''),
     nullif(array_to_string(features, ' '), ''), nullif(array_to_string(description, ' '), '')),
     2000)"""
@@ -180,42 +181,32 @@ def audit(directory, output, level=2):
     return result
 
 
-def encoder(model, batch_size, device=None):
-    from sentence_transformers import SentenceTransformer
+def fit(texts, labels, n_classes, seed=0, features=2**18):
+    """Hashed word and word-pair TF-IDF with a logistic-loss linear model.
 
-    encoder = SentenceTransformer(model, device=device)
-    encoder.max_seq_length = 128
-    return lambda texts: encoder.encode(
-        list(texts), batch_size=batch_size, normalize_embeddings=True, convert_to_numpy=True
-    ).astype(np.float32)
+    Returns a function mapping texts (and an optional allowed-class mask) to class probabilities.
+    """
+    from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer
+    from sklearn.linear_model import SGDClassifier
 
+    hashing = HashingVectorizer(
+        n_features=features, ngram_range=(1, 2), alternate_sign=False, norm=None
+    )
+    tfidf = TfidfTransformer(sublinear_tf=True)
+    linear = SGDClassifier(
+        loss="log_loss", alpha=1e-6, max_iter=20, tol=None, random_state=seed, n_jobs=-1
+    ).fit(tfidf.fit_transform(hashing.transform(texts)), labels)
 
-def fit(x, y, n_classes, l2=1e-5, steps=300):
-    """Multinomial logistic regression by full-batch L-BFGS; returns weights and bias."""
-    import torch
+    def predict(texts, mask=None):
+        probs = np.zeros((len(texts), n_classes))
+        probs[:, linear.classes_] = linear.predict_proba(tfidf.transform(hashing.transform(texts)))
+        if mask is not None:
+            probs *= mask
+            total = probs.sum(axis=1, keepdims=True)
+            probs = np.divide(probs, total, out=np.zeros_like(probs), where=total > 0)
+        return probs
 
-    x, y = torch.as_tensor(x), torch.as_tensor(y)
-    weight = torch.zeros(x.shape[1], n_classes, requires_grad=True)
-    bias = torch.zeros(n_classes, requires_grad=True)
-    optimizer = torch.optim.LBFGS([weight, bias], max_iter=steps, line_search_fn="strong_wolfe")
-
-    def closure():
-        optimizer.zero_grad()
-        loss = torch.nn.functional.cross_entropy(x @ weight + bias, y) + l2 * weight.square().sum()
-        loss.backward()
-        return loss
-
-    optimizer.step(closure)
-    return weight.detach().numpy(), bias.detach().numpy()
-
-
-def softmax(x, weight, bias, mask=None):
-    logits = x @ weight + bias
-    if mask is not None:
-        logits = np.where(mask, logits, -np.inf)
-    logits -= logits.max(axis=1, keepdims=True)
-    probs = np.exp(logits)
-    return probs / probs.sum(axis=1, keepdims=True)
+    return predict
 
 
 def threshold(confidence, correct, precision):
@@ -242,14 +233,12 @@ def classify(
     directory,
     output,
     category,
-    embed,
     level=2,
     min_items=200,
     sample=200_000,
     precision=0.8,
     seed=0,
     chunk=65_536,
-    model=None,
     train_on=None,
 ):
     """Train on observed paths of one domain (or its donors), label its unlabelled items."""
@@ -273,7 +262,7 @@ def classify(
         ]
         metrics = {
             "category": category,
-            "model": model,
+            "model": MODEL,
             "level": level,
             "min_items": min_items,
             "target_precision": precision,
@@ -281,7 +270,7 @@ def classify(
             "train_on": train_on if len(train_on) < len(CATEGORIES) else "all",
             "classes": len(classes),
         }
-        weight = None
+        model = None
         if len(classes) >= 2:
             # Uniform sample of labelled items, so held-out scores reflect the real label mix.
             con.register("classes", {"observed": np.array(classes, dtype=object)})
@@ -294,11 +283,11 @@ def classify(
             index = {name: k for k, name in enumerate(classes)}
             labels = np.array([index[row[1]] for row in rows])
             held = np.array([row[2] for row in rows], dtype=bool)
-            x = embed([row[0] for row in rows])
+            texts = np.array([row[0] for row in rows], dtype=object)
             if held.all() or not held.any():
                 raise ValueError(f"{category}: too few labelled items to train and hold out")
-            weight, bias = fit(x[~held], labels[~held], len(classes))
-            probs = softmax(x[held], weight, bias)
+            model = fit(texts[~held], labels[~held], len(classes), seed)
+            probs = model(texts[held])
             guess, confidence = probs.argmax(axis=1), probs.max(axis=1)
             correct = guess == labels[held]
             cutoff = threshold(confidence, correct, precision)
@@ -341,11 +330,11 @@ def classify(
                 has_text = text != ""
                 counts["pending"] += len(batch)
                 counts["no_text"] += int((~has_text).sum())
-                if weight is not None and has_text.any():
+                if model is not None and has_text.any():
                     allowed = np.stack([mask(p) for p in prefix[has_text]])
                     usable = allowed.any(axis=1)
                     rows = np.flatnonzero(has_text)[usable]
-                    probs = softmax(embed(text[rows]), weight, bias, allowed[usable])
+                    probs = model(text[rows], allowed[usable])
                     best = probs.max(axis=1)
                     confident = best >= cutoff
                     label[rows[confident]] = np.array(classes, dtype=object)[
@@ -467,7 +456,7 @@ reviews remain at the original source and its terms.
 - `subcategory` is the first {level} levels of each item's `categories` path, joined with
   `"{sep}"`.
 - `label_source = observed` comes from the metadata. `predicted` comes from a
-  sentence-embedding classifier ({model}) trained on observed items of the same category file,
+  text classifier ({model}) trained on observed items of the same category file,
   kept only above a confidence threshold chosen on held-out items for
   {precision:.0%} precision. `unknown` items fell below it or had no text.
 - `subcategory_summary` joins groups to the official 5-core rating files where available

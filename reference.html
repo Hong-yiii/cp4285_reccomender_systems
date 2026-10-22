@@ -3682,7 +3682,7 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
             (<a href="src/cp4285/common/metadata.py">metadata.py</a>) download item metadata for
             all 34 Amazon 2023 files and audit the <code>categories</code> paths. They group items
             by the first two path levels. Items with no path that deep get a predicted subcategory
-            from a sentence-embedding classifier, kept only above a confidence threshold set for 0.8
+            from a TF-IDF text classifier, kept only above a confidence threshold set for 0.8
             held-out precision. Every row records <code>observed</code>, <code>predicted</code> or
             <code>unknown</code>.
           </p>
@@ -3693,8 +3693,13 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
             all 140,660 items. Video_Games reached 0.77 held-out accuracy.
           </p>
           <p>
-            <span class="label infer">INFERENCE</span> The full run across 26 GB of metadata is
-            planned on Runpod, with the derived tables published to a private Hugging Face dataset.
+            <span class="label fact">FACT</span> The full audit covers 35,393,189 items; 11% have
+            an empty path. The TF-IDF classifier replaced an embedding model after it scored higher
+            on Video_Games and ran without a GPU.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> The full run is planned on a Runpod CPU pod,
+            with the derived tables published to a private Hugging Face dataset.
             Subcategory density is a candidate way to pick a denser experiment domain; the team has
             not chosen one. See <a href="docs/ITEM-CATEGORIES.md">ITEM-CATEGORIES.md</a>.
           </p>

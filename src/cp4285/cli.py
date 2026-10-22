@@ -79,7 +79,6 @@ def meta_command(args):
         result = metadata.audit(args.directory, args.output, args.level)
         print(json.dumps({k: v["rows"] for k, v in result["domains"].items()}, indent=2))
     elif args.command == "meta-classify":
-        embed = metadata.encoder(args.model, args.batch_size, args.device)
         for category in chosen:
             if not metadata.items_path(args.directory, category).exists():
                 print(f"Skipping {category}: no converted metadata")
@@ -94,13 +93,11 @@ def meta_command(args):
                 args.directory,
                 args.output,
                 category,
-                embed,
                 level=args.level,
                 min_items=args.min_items,
                 sample=args.sample,
                 precision=args.precision,
                 seed=args.seed,
-                model=args.model,
             )
             print(json.dumps(result))
     elif args.command == "meta-group":
@@ -143,9 +140,6 @@ def main():
     mc.add_argument("--min-items", type=int, default=200, help="Smallest trainable class")
     mc.add_argument("--sample", type=int, default=200_000, help="Labelled items to embed")
     mc.add_argument("--precision", type=float, default=0.8, help="Held-out target precision")
-    mc.add_argument("--model", default="BAAI/bge-small-en-v1.5")
-    mc.add_argument("--batch-size", type=int, default=512)
-    mc.add_argument("--device")
     mc.add_argument("--seed", type=int, default=0)
     mg = commands.add_parser(
         "meta-group", parents=[meta], help="Partitioned item groups and density summary"

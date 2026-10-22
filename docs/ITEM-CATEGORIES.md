@@ -10,11 +10,11 @@ Many items have no path. A text classifier assigns them a predicted subcategory,
 
 ## Coverage of `categories`
 
-A read of the first 3,000 items of each of the 34 metadata files (33 categories plus `Unknown`) gives this picture. The full audit replaces it after the cloud run.
+The full audit (`meta-audit`, run on Runpod on 21 October) covers 35,393,189 items in the 34 metadata files (33 categories plus `Unknown`). No `parent_asin` repeats within a file, and no item lacks the `categories` key. 3,892,249 items (11.0%) have an empty path and 7,778 have a path shorter than two levels.
 
-- Most files have 0–9% empty paths. Exceptions are Cell Phones (17%) and Magazine Subscriptions (23%).
-- `All_Beauty`, `Amazon_Fashion`, `Digital_Music`, `Health_and_Personal_Care`, `Subscription_Boxes` and `Unknown` are 100% empty. `Software` is 85% empty.
-- Roots usually match the file. Some files mix in other roots. Movies_and_TV, for example, has `Comedy` as a root on 10% of the sample.
+- `All_Beauty`, `Amazon_Fashion`, `Digital_Music`, `Health_and_Personal_Care`, `Subscription_Boxes` and `Unknown` are 100% empty. `Software` is 79% empty and Movies_and_TV 43%.
+- Most other files are 0–12% empty; Cell Phones is 19% and Magazine Subscriptions 25%.
+- Roots usually match the file. Some files mix in other roots; Movies_and_TV, for example, has genre roots such as `Comedy`.
 - Level-2 paths contain promotional nodes, for example `Video Games > Save up to 50% on Astro Gaming`. They form small groups that the summary exposes.
 
 ## Method
@@ -23,7 +23,7 @@ A subcategory is the first $L$ levels of the path, with $L = 2$ by default (root
 
 1. `meta-download` fetches `meta_<Category>.jsonl.gz` from the official UCSD mirror, verifies the gzip and keeps the grouping and text columns as parquet.
 2. `meta-audit` counts missing, empty and shallow paths per file and writes the full category tree.
-3. `meta-classify` embeds item text (title, brand, features, description) with `BAAI/bge-small-en-v1.5`. It then fits a softmax classifier on items whose path is observed.
+3. `meta-classify` represents item text (title, brand, features, description) as hashed TF-IDF word and word-pair counts. It fits a logistic-loss linear model (scikit-learn `SGDClassifier`) on items whose path is observed. Only items without a path deep enough are predicted.
    - Classes are level-$L$ paths with at least 200 items.
    - Training uses a uniform sample of up to 200,000 labelled items. A fifth of the sample is held out for metrics.
    - An item with a shallow path may only receive labels below that path.
@@ -32,7 +32,7 @@ A subcategory is the first $L$ levels of the path, with $L = 2$ by default (root
 4. `meta-group` writes one row per item and file, with `parent_asin, domain, subcategory, full_path, label_source, confidence`. It also writes `subcategory_summary.parquet` with item counts per label source. Where a 5-core rating file is present, the summary adds users, ratings and density $= \text{ratings} / (\text{users} \times \text{rated items})$.
 5. `meta-publish` uploads only these derived tables to a private Hugging Face dataset. Raw metadata stays at the source.
 
-A full-scale zero-shot NLI model would need one forward pass per item and label, over about 48M items and hundreds of labels. The embedding classifier needs one pass per item.
+A full-scale zero-shot NLI model would need one forward pass per item and label, over 35M items and hundreds of labels. An earlier version used `BAAI/bge-small-en-v1.5` sentence embeddings. On Video_Games the TF-IDF model was more accurate (0.859 against 0.770 held-out accuracy, macro-F1 0.620 against 0.334) and ran in 34 seconds on a laptop instead of 12 minutes, so the pipeline no longer needs a GPU.
 
 ## Commands
 
@@ -40,7 +40,7 @@ A full-scale zero-shot NLI model would need one forward pass per item and label,
 uv sync --locked --extra meta
 uv run cp4285 meta-download --category all      # about 26 GB compressed; resumable
 uv run cp4285 meta-audit
-uv run cp4285 meta-classify --category all --device cuda
+uv run cp4285 meta-classify --category all
 uv run cp4285 download --domain all             # 5-core rating files; six small categories have none
 uv run cp4285 meta-group
 HF_TOKEN=... uv run cp4285 meta-publish --repo <user>/amazon23-item-categories
@@ -52,14 +52,16 @@ On a large machine, set `CP4285_DUCKDB_MEMORY` (default `2GB`) and `CP4285_DUCKD
 
 This was a software check on two small files. It is not the reported result.
 
-| file | items | empty paths | classes | held-out accuracy | macro-F1 | predicted / pending |
-|---|---:|---:|---:|---:|---:|---:|
-| Magazine_Subscriptions | 3,391 | 834 | 4 | 0.760 | 0.725 | 714 / 834 |
-| Video_Games | 137,269 | 12,637 | 12 | 0.770 | 0.334 | 12,038 / 12,637 |
+| file | items | empty paths | classes | model | held-out accuracy | macro-F1 | predicted / pending |
+|---|---:|---:|---:|---|---:|---:|---:|
+| Magazine_Subscriptions | 3,391 | 834 | 4 | embedding | 0.760 | 0.725 | 714 / 834 |
+| Magazine_Subscriptions | | | 4 | TF-IDF | 0.744 | 0.683 | 712 / 834 |
+| Video_Games | 137,269 | 12,637 | 12 | embedding | 0.770 | 0.334 | 12,038 / 12,637 |
+| Video_Games | | | 12 | TF-IDF | 0.859 | 0.620 | 12,637 / 12,637 |
 
-Row counts reconciled: all 140,660 items appear once.
+Row counts reconciled: all 140,660 items appear once. Low macro-F1 comes from rare platform classes such as Virtual Reality.
 
-A follow-up comparison on 12,000 Video_Games items changed the default L2 penalty from $10^{-4}$ to $10^{-5}$. This raised accuracy from 0.779 to 0.808 and macro-F1 from 0.325 to 0.467. The table above predates that change. Low macro-F1 comes from rare platform classes such as Virtual Reality. Video_Games classification took 12 minutes on a 16-core CPU.
+A first full run with the embedding model on a Runpod RTX 4090 finished the download, the audit and 30 of 34 files before the pod stopped over a billing issue. Its host GPU was then taken, so the pod could not restart and its disk was unreachable.
 
 ## Limits
 

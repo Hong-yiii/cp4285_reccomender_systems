@@ -247,3 +247,5 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 51 tests plus Ruff lint and format passed. The dry run reconciled all 140,660 items.
 
 **Limits:** The full run, the Runpod job and the Hugging Face upload have not run. Predicted labels and donor mappings are model output and assumptions. No subcategory has been chosen as an experiment domain.
+
+**Follow-up, 22 October:** Ran the embedding pipeline on a Runpod RTX 4090. It completed the download, the full audit and 30 of 34 files before the pod stopped over a billing issue, and the host GPU was then unavailable. At the user's prompt, compared a hashed TF-IDF linear classifier. It was more accurate and about 20 times faster on Video_Games, so it replaced the embedding model and the GPU requirement. Made DuckDB limits configurable and let `download --domain all` skip the six categories without 5-core files.

@@ -41,14 +41,6 @@ def synthetic():
     return rows
 
 
-def fake_embed(texts):
-    out = np.zeros((len(texts), len(WORDS)), dtype=np.float32)
-    for i, text in enumerate(texts):
-        for word, k in WORDS.items():
-            out[i, k] = word.lower() in text.lower()
-    return out
-
-
 @pytest.fixture
 def converted(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)  # DuckDB spill directory is relative to the working directory
@@ -88,9 +80,7 @@ def test_audit_counts_and_tree(converted):
 
 def test_classify_and_group_keep_every_item_once(converted):
     out = converted / "out"
-    metrics = metadata.classify(
-        converted, out, "Appliances", fake_embed, min_items=5, precision=0.9, seed=3
-    )
+    metrics = metadata.classify(converted, out, "Appliances", min_items=5, precision=0.9, seed=3)
     assert metrics["classes"] == 3 and metrics["holdout_accuracy"] == 1.0
     result = metadata.group(converted, out)
     rows = {
@@ -154,10 +144,10 @@ def test_download_rejects_non_metadata_without_publishing(tmp_path, monkeypatch)
 def test_empty_file_borrows_labels_from_its_donor(converted):
     raw = metadata.raw_path(converted, "Unknown")
     with gzip.open(raw, "wt") as f:
-        f.write(json.dumps(item("stray", [], title="nails polish")) + "\n")
+        f.write(json.dumps(item("stray", [], title="nails thing")) + "\n")
     metadata.convert("Unknown", converted)
     out = converted / "out"
-    metrics = metadata.classify(converted, out, "Unknown", fake_embed, min_items=5, precision=0.9)
+    metrics = metadata.classify(converted, out, "Unknown", min_items=5, precision=0.9)
     assert metrics["train_on"] == "all" and metrics["predicted"] == 1
     [(label,)] = duckdb.sql(
         f"SELECT subcategory FROM '{out / 'predictions' / 'Unknown' / '*.parquet'}'"
