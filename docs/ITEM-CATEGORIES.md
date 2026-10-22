@@ -48,6 +48,18 @@ HF_TOKEN=... uv run cp4285 meta-publish --repo <user>/amazon23-item-categories
 
 On a large machine, set `CP4285_DUCKDB_MEMORY` (default `2GB`) and `CP4285_DUCKDB_THREADS` (default `4`). Outputs go to `data/meta/out`. Each stage refuses to overwrite its outputs. With `--category all`, finished categories are skipped, so a rerun resumes.
 
+## Full run (22 October)
+
+A Runpod CPU pod (16 vCPU) ran every stage. The output is the private Hugging Face dataset [`randomwish/amazon23-item-categories`](https://huggingface.co/datasets/randomwish/amazon23-item-categories), which holds `item_categories/` (one parquet folder per file), `subcategory_summary.parquet`, `category_tree.parquet`, `audit.json` and per-file `metrics/`.
+
+- 35,393,189 rows, one per item and file. 31,493,162 (89.0%) are observed, 2,935,207 (8.3%) predicted and 964,820 (2.7%) unknown.
+- Of the 3,900,027 items without a deep enough path, 75% received a prediction above the threshold.
+- Product files score 0.90–0.98 held-out accuracy. Files whose second level is a genre score lower: Books 0.588, CDs_and_Vinyl 0.422, Movies_and_TV 0.372. No Movies_and_TV threshold reached 0.8 precision, so its 322,638 unlabelled items stay `unknown`. Books labelled 104,316 of 528,673.
+- Donor-trained files: Amazon_Fashion, All_Beauty and Health_and_Personal_Care labelled almost every item. Digital_Music (CDs_and_Vinyl donor) labelled 7,095 of 70,530, and Unknown (all files) 267,032 of 390,005.
+- Among groups with at least 2,000 rated items and 20,000 users, the densest are `Video Games > Nintendo Switch` (density $1.1 \times 10^{-3}$), `Industrial & Scientific > Adhesives, Sealants & Lubricants` and `Musical Instruments > Microphones & Accessories`. Without a size filter, tiny promotional groups top the density ranking.
+
+The density ranking is a starting point for choosing a domain. It has not been checked against the experiment's cutoff and sequence-length requirements.
+
 ## Local dry run (CPU, 22 October)
 
 This was a software check on two small files. It is not the reported result.

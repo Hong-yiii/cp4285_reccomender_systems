@@ -456,8 +456,8 @@ reviews remain at the original source and its terms.
 - `subcategory` is the first {level} levels of each item's `categories` path, joined with
   `"{sep}"`.
 - `label_source = observed` comes from the metadata. `predicted` comes from a
-  text classifier ({model}) trained on observed items of the same category file,
-  kept only above a confidence threshold chosen on held-out items for
+  text classifier ({model}) trained on observed items of the same category file
+  (files without paths use a donor file, see `train_on` in `metrics/`), kept only above a confidence threshold chosen on held-out items for
   {precision:.0%} precision. `unknown` items fell below it or had no text.
 - `subcategory_summary` joins groups to the official 5-core rating files where available
   (`density = ratings / (users * rated_items)`).

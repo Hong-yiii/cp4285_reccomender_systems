@@ -3698,12 +3698,18 @@ uv run cp4285 classical study --b data/raw/0core/Movies_and_TV.csv.gz --k 256 --
             on Video_Games and ran without a GPU.
           </p>
           <p>
-            <span class="label infer">INFERENCE</span> The full run is planned on a Runpod CPU pod,
-            with the derived tables published to a private Hugging Face dataset.
+            <span class="label fact">FACT</span> The full run on a Runpod CPU pod labelled all 35.4M
+            items: 89.0% observed, 8.3% predicted, 2.7% unknown. The tables are in the private
+            Hugging Face dataset <code>randomwish/amazon23-item-categories</code>. Product files reach
+            0.90–0.98 held-out accuracy; genre-level Books, CDs and Movies do not, and Movies_and_TV
+            receives no predictions.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span>
             Subcategory density is a candidate way to pick a denser experiment domain; the team has
             not chosen one. See <a href="docs/ITEM-CATEGORIES.md">ITEM-CATEGORIES.md</a>.
           </p>
-          <p class="ref">All 51 tests passed at this checkpoint.</p>
+          <p class="ref">All 52 tests passed at this checkpoint.</p>
           <p class="small"><a href="#review-status">Current PR status</a></p>
         </section>
         <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 END -->
