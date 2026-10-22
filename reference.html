@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#abc-integration"><strong>Latest · 20 · Shared learner ABC</strong></a>
+          <a href="#item-categories-checkpoint"><strong>Latest · 21 · Item subcategories</strong></a>
+          <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
           <a href="#sasrec-architecture">17 · SASRec explained</a>
@@ -726,6 +727,8 @@
             <a href="#abc-integration">section 20</a> and the
             <a href="docs/PACKAGES-AND-BUILDING.md">runnable development guide</a>.
             The lightweight reference is tagged <code>boilerplate-v1</code>.
+            Branch <code>item-categories-main</code> (22 October 2026) adds
+            <a href="#item-categories-checkpoint">section 21: item subcategories</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3533,6 +3536,34 @@ scores = branch.score(fixed_queries)</pre>
             concurrent threads; accelerator validation and interrupted-run resume remain future work.</p>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 -->
+        <section id="item-categories-checkpoint">
+          <span class="section-num">21 / ITEM SUBCATEGORIES · 22 OCTOBER 2026</span>
+          <h2>Items grouped by metadata subcategory, with a classifier for missing paths.</h2>
+          <p>
+            <span class="label fact">FACT</span> New <code>cp4285 meta-*</code> commands
+            (<a href="src/cp4285/experiment/metadata.py">metadata.py</a>) download item metadata for
+            all 34 Amazon 2023 files and audit the <code>categories</code> paths. They group items
+            by the first two path levels. Items with no path that deep get a predicted subcategory
+            from a TF-IDF text classifier, kept only above a confidence threshold set for 0.8
+            held-out precision. Every row records <code>observed</code>, <code>predicted</code> or
+            <code>unknown</code>. Six files with no paths learn from a related donor file.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The full run on a Runpod CPU pod labelled all 35.4M
+            items: 89.0% observed, 8.3% predicted, 2.7% unknown. The tables are in the private
+            Hugging Face dataset <code>randomwish/amazon23-item-categories</code>. Product files reach
+            0.90–0.98 held-out accuracy; genre-level Books, CDs and Movies do not, and Movies_and_TV
+            receives no predictions.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Subcategory density is a candidate way to pick
+            a denser experiment domain; the team has not chosen one. See
+            <a href="docs/ITEM-CATEGORIES.md">ITEM-CATEGORIES.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />
