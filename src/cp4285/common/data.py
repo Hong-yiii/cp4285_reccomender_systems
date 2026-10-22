@@ -103,6 +103,8 @@ def connection():
     # Laptop-safe defaults; a larger machine can raise them through the environment.
     con.execute("SET memory_limit=?", [os.environ.get("CP4285_DUCKDB_MEMORY", "2GB")])
     con.execute("SET threads=?", [int(os.environ.get("CP4285_DUCKDB_THREADS", "4"))])
+    # DuckDB creates only the last path component, so make the parents first.
+    os.makedirs("data/.duckdb-spill", exist_ok=True)
     con.execute("SET temp_directory='data/.duckdb-spill'")
     return con
 
