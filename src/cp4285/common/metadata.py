@@ -209,6 +209,17 @@ def fit(texts, labels, n_classes, seed=0, features=2**18):
     return predict
 
 
+def write_part(con, path, asin, label, confidence):
+    """One parquet part of predictions; a missing label is NULL."""
+    # DuckDB sniffs object columns from their first rows and fails when those are all None,
+    # so labels travel as strings with "" for none.
+    label = np.array(["" if name is None else name for name in label], dtype=object)
+    con.register("part", {"parent_asin": asin, "subcategory": label, "confidence": confidence})
+    con.execute(f"""COPY (SELECT parent_asin, nullif(subcategory, '') AS subcategory, confidence
+        FROM part) TO {quote(path)} (FORMAT parquet)""")
+    con.unregister("part")
+
+
 def threshold(confidence, correct, precision):
     """Lowest confidence whose predictions at or above it reach the target precision."""
     order = np.argsort(-confidence, kind="stable")
@@ -342,18 +353,7 @@ def classify(
                     ]
                     confidence[rows] = best
                 counts["predicted"] += sum(name is not None for name in label)
-                con.register(
-                    "part",
-                    {
-                        "parent_asin": asin,
-                        "subcategory": label,
-                        "confidence": confidence,
-                    },
-                )
-                con.execute(
-                    f"COPY part TO {quote(path / f'part-{part:05d}.parquet')} (FORMAT parquet)"
-                )
-                con.unregister("part")
+                write_part(con, path / f"part-{part:05d}.parquet", asin, label, confidence)
                 part += 1
 
         publish(dest, write)

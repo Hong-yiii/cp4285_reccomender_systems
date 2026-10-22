@@ -153,3 +153,12 @@ def test_empty_file_borrows_labels_from_its_donor(converted):
         f"SELECT subcategory FROM '{out / 'predictions' / 'Unknown' / '*.parquet'}'"
     ).fetchall()
     assert label == "Beauty > Nails"
+
+
+def test_prediction_parts_survive_long_runs_of_missing_labels(tmp_path):
+    n = 70_000  # Longer than DuckDB's type-sniffing sample, all None at the start.
+    label = np.array([None] * (n - 1) + ["Beauty > Hair"], dtype=object)
+    asin = np.array([f"i{k}" for k in range(n)], dtype=object)
+    path = tmp_path / "part.parquet"
+    metadata.write_part(duckdb.connect(), path, asin, label, np.full(n, np.nan, dtype=np.float32))
+    assert duckdb.sql(f"SELECT count(*), count(subcategory) FROM '{path}'").fetchall() == [(n, 1)]
