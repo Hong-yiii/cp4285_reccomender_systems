@@ -1,0 +1,1010 @@
+{
+  "variant": "peso-size-w1600",
+  "pairs": [
+    "state4_block0",
+    "state4_block1",
+    "state4_block2",
+    "state4_block3",
+    "state4_block4",
+    "state1_block1",
+    "state2_block2",
+    "state3_block3"
+  ],
+  "methods": {
+    "lora": {
+      "cells": {
+        "state4_block0": {
+          "hit@10": 0.0208,
+          "ndcg@10": 0.01161999863660224,
+          "users": 2500,
+          "hit@20": 0.028,
+          "ndcg@20": 0.013470862562894802
+        },
+        "state4_block1": {
+          "hit@10": 0.030474040632054177,
+          "ndcg@10": 0.016074909820670866,
+          "users": 1772,
+          "hit@20": 0.03724604966139955,
+          "ndcg@20": 0.01780195288997712
+        },
+        "state4_block2": {
+          "hit@10": 0.022515101592531575,
+          "ndcg@10": 0.01279870951037651,
+          "users": 1821,
+          "hit@20": 0.032399780340472265,
+          "ndcg@20": 0.015305401266331297
+        },
+        "state4_block3": {
+          "hit@10": 0.023591087811271297,
+          "ndcg@10": 0.011547708531223243,
+          "users": 2289,
+          "hit@20": 0.02927042376583661,
+          "ndcg@20": 0.01293469423400762
+        },
+        "state4_block4": {
+          "hit@10": 0.02993744414655943,
+          "ndcg@10": 0.01568741604763995,
+          "users": 2238,
+          "hit@20": 0.0451295799821269,
+          "ndcg@20": 0.01947951749313943
+        },
+        "state1_block1": {
+          "hit@10": 0.035553047404063204,
+          "ndcg@10": 0.020910146413028366,
+          "users": 1772,
+          "hit@20": 0.051354401805869074,
+          "ndcg@20": 0.024944365663007496
+        },
+        "state2_block2": {
+          "hit@10": 0.027457440966501923,
+          "ndcg@10": 0.015210053382905084,
+          "users": 1821,
+          "hit@20": 0.03844041735310269,
+          "ndcg@20": 0.017991415814029514
+        },
+        "state3_block3": {
+          "hit@10": 0.023591087811271297,
+          "ndcg@10": 0.014016157887918889,
+          "users": 2289,
+          "hit@20": 0.03494975972040192,
+          "ndcg@20": 0.01691359189338829
+        },
+        "state0_block0": {
+          "hit@10": 0.0284,
+          "ndcg@10": 0.016907793103231088,
+          "users": 2500,
+          "hit@20": 0.0448,
+          "ndcg@20": 0.021028472117649473
+        }
+      },
+      "ndcg@10": {
+        "backward_transfer": -0.0037507060720526415,
+        "last_state_old_blocks_mean": 0.013010331624718215,
+        "own_state_blocks_1_3": 0.01671211922795078,
+        "own_state_blocks_1_4": 0.01645594343287307
+      },
+      "ndcg@20": {
+        "backward_transfer": -0.005341233633715983,
+        "last_state_old_blocks_mean": 0.01487822773830271,
+        "own_state_blocks_1_3": 0.0199497911234751,
+        "own_state_blocks_1_4": 0.019832222715891183
+      },
+      "hit@10": {
+        "backward_transfer": -0.004405336536494844,
+        "last_state_old_blocks_mean": 0.024345057508964263,
+        "own_state_blocks_1_3": 0.02886719206061214,
+        "own_state_blocks_1_4": 0.029134755082098965
+      }
+    },
+    "peso": {
+      "cells": {
+        "state4_block0": {
+          "hit@10": 0.0176,
+          "ndcg@10": 0.009152487658287339,
+          "users": 2500,
+          "hit@20": 0.0268,
+          "ndcg@20": 0.01154419251506073
+        },
+        "state4_block1": {
+          "hit@10": 0.02708803611738149,
+          "ndcg@10": 0.013199483307156479,
+          "users": 1772,
+          "hit@20": 0.03837471783295711,
+          "ndcg@20": 0.016101968704566785
+        },
+        "state4_block2": {
+          "hit@10": 0.0214168039538715,
+          "ndcg@10": 0.011572273963033404,
+          "users": 1821,
+          "hit@20": 0.03130148270181219,
+          "ndcg@20": 0.014068541316927382
+        },
+        "state4_block3": {
+          "hit@10": 0.019659239842726082,
+          "ndcg@10": 0.010174137947839718,
+          "users": 2289,
+          "hit@20": 0.02927042376583661,
+          "ndcg@20": 0.01256478106423107
+        },
+        "state4_block4": {
+          "hit@10": 0.026362823949955316,
+          "ndcg@10": 0.014624127052744448,
+          "users": 2238,
+          "hit@20": 0.041108132260947276,
+          "ndcg@20": 0.018347976021402337
+        },
+        "state1_block1": {
+          "hit@10": 0.03668171557562077,
+          "ndcg@10": 0.020410631439094253,
+          "users": 1772,
+          "hit@20": 0.04853273137697517,
+          "ndcg@20": 0.02341236513901833
+        },
+        "state2_block2": {
+          "hit@10": 0.02800658978583196,
+          "ndcg@10": 0.015508170161612357,
+          "users": 1821,
+          "hit@20": 0.036792970895112576,
+          "ndcg@20": 0.017710047312686307
+        },
+        "state3_block3": {
+          "hit@10": 0.02927042376583661,
+          "ndcg@10": 0.015692150862229595,
+          "users": 2289,
+          "hit@20": 0.039318479685452164,
+          "ndcg@20": 0.018217582073389586
+        },
+        "state0_block0": {
+          "hit@10": 0.0284,
+          "ndcg@10": 0.016907793103231088,
+          "users": 2500,
+          "hit@20": 0.0448,
+          "ndcg@20": 0.021028472117649473
+        }
+      },
+      "ndcg@10": {
+        "backward_transfer": -0.006105090672462588,
+        "last_state_old_blocks_mean": 0.011024595719079235,
+        "own_state_blocks_1_3": 0.017203650820978734,
+        "own_state_blocks_1_4": 0.016558769878920163
+      },
+      "ndcg@20": {
+        "backward_transfer": -0.006522245760489431,
+        "last_state_old_blocks_mean": 0.013569870900196492,
+        "own_state_blocks_1_3": 0.019779998175031406,
+        "own_state_blocks_1_4": 0.01942199263662414
+      },
+      "hit@10": {
+        "backward_transfer": -0.009148662303327566,
+        "last_state_old_blocks_mean": 0.02144101997849477,
+        "own_state_blocks_1_3": 0.03131957637576312,
+        "own_state_blocks_1_4": 0.030080388269311163
+      }
+    },
+    "peso-size-w1600": {
+      "cells": {
+        "state4_block0": {
+          "hit@10": 0.0248,
+          "ndcg@10": 0.01423738326789954,
+          "users": 2500,
+          "hit@20": 0.0328,
+          "ndcg@20": 0.01630834177073231
+        },
+        "state4_block1": {
+          "hit@10": 0.031038374717832957,
+          "ndcg@10": 0.017131717487959375,
+          "users": 1772,
+          "hit@20": 0.041196388261851014,
+          "ndcg@20": 0.01973085105051503
+        },
+        "state4_block2": {
+          "hit@10": 0.023613399231191653,
+          "ndcg@10": 0.012911253288602275,
+          "users": 1821,
+          "hit@20": 0.034047226798462386,
+          "ndcg@20": 0.015648010805220686
+        },
+        "state4_block3": {
+          "hit@10": 0.02708606378331149,
+          "ndcg@10": 0.014013779099375678,
+          "users": 2289,
+          "hit@20": 0.03494975972040192,
+          "ndcg@20": 0.015961542482135993
+        },
+        "state4_block4": {
+          "hit@10": 0.02546916890080429,
+          "ndcg@10": 0.013664854876014673,
+          "users": 2238,
+          "hit@20": 0.035746201966041107,
+          "ndcg@20": 0.016334666229641727
+        },
+        "state1_block1": {
+          "hit@10": 0.035553047404063204,
+          "ndcg@10": 0.021589141012513465,
+          "users": 1772,
+          "hit@20": 0.04683972911963882,
+          "ndcg@20": 0.024466383815176913
+        },
+        "state2_block2": {
+          "hit@10": 0.030203185063152116,
+          "ndcg@10": 0.016519155080886246,
+          "users": 1821,
+          "hit@20": 0.03789126853377265,
+          "ndcg@20": 0.018468582266425445
+        },
+        "state3_block3": {
+          "hit@10": 0.02621231979030144,
+          "ndcg@10": 0.013967330578565912,
+          "users": 2289,
+          "hit@20": 0.03363914373088685,
+          "ndcg@20": 0.01587514611706185
+        },
+        "state0_block0": {
+          "hit@10": 0.0284,
+          "ndcg@10": 0.016907793103231088,
+          "users": 2500,
+          "hit@20": 0.0448,
+          "ndcg@20": 0.021028472117649473
+        }
+      },
+      "ndcg@10": {
+        "backward_transfer": -0.0026723216578399605,
+        "last_state_old_blocks_mean": 0.014573533285959218,
+        "own_state_blocks_1_3": 0.01735854222398854,
+        "own_state_blocks_1_4": 0.016435120386995072
+      },
+      "ndcg@20": {
+        "backward_transfer": -0.003047459551927416,
+        "last_state_old_blocks_mean": 0.016912186527151006,
+        "own_state_blocks_1_3": 0.019603370732888068,
+        "own_state_blocks_1_4": 0.018786194607076485
+      },
+      "hit@10": {
+        "backward_transfer": -0.003457678631295166,
+        "last_state_old_blocks_mean": 0.026634459433084026,
+        "own_state_blocks_1_3": 0.03065618408583892,
+        "own_state_blocks_1_4": 0.02935943028958026
+      }
+    }
+  },
+  "head_to_head": {
+    "k10": {
+      "state4_block0": {
+        "all": {
+          "users": 2500,
+          "kept": 31,
+          "lost": 21,
+          "gained": 31,
+          "never": 2417,
+          "moved_up": 14,
+          "moved_down": 5,
+          "same_position": 12,
+          "net": 10,
+          "lost_hit_rate": 0.40384615384615385,
+          "mcnemar_p": 0.21160856876151612
+        }
+      },
+      "state4_block1": {
+        "all": {
+          "users": 1772,
+          "kept": 34,
+          "lost": 20,
+          "gained": 21,
+          "never": 1697,
+          "moved_up": 16,
+          "moved_down": 8,
+          "same_position": 10,
+          "net": 1,
+          "lost_hit_rate": 0.37037037037037035,
+          "mcnemar_p": 1.0
+        },
+        "continuing": {
+          "users": 589,
+          "kept": 9,
+          "lost": 4,
+          "gained": 7,
+          "never": 569,
+          "moved_up": 6,
+          "moved_down": 2,
+          "same_position": 1,
+          "net": 3,
+          "lost_hit_rate": 0.3076923076923077,
+          "mcnemar_p": 0.548828125
+        },
+        "new": {
+          "users": 1183,
+          "kept": 25,
+          "lost": 16,
+          "gained": 14,
+          "never": 1128,
+          "moved_up": 10,
+          "moved_down": 6,
+          "same_position": 9,
+          "net": -2,
+          "lost_hit_rate": 0.3902439024390244,
+          "mcnemar_p": 0.8555355519056321
+        }
+      },
+      "state4_block2": {
+        "all": {
+          "users": 1821,
+          "kept": 26,
+          "lost": 15,
+          "gained": 17,
+          "never": 1763,
+          "moved_up": 13,
+          "moved_down": 5,
+          "same_position": 8,
+          "net": 2,
+          "lost_hit_rate": 0.36585365853658536,
+          "mcnemar_p": 0.860050065908581
+        },
+        "new": {
+          "users": 1265,
+          "kept": 22,
+          "lost": 11,
+          "gained": 15,
+          "never": 1217,
+          "moved_up": 11,
+          "moved_down": 3,
+          "same_position": 8,
+          "net": 4,
+          "lost_hit_rate": 0.3333333333333333,
+          "mcnemar_p": 0.557197093963623
+        },
+        "continuing": {
+          "users": 249,
+          "kept": 2,
+          "lost": 1,
+          "gained": 1,
+          "never": 245,
+          "moved_up": 2,
+          "moved_down": 0,
+          "same_position": 0,
+          "net": 0,
+          "lost_hit_rate": 0.3333333333333333,
+          "mcnemar_p": 1.0
+        },
+        "dormant": {
+          "users": 307,
+          "kept": 2,
+          "lost": 3,
+          "gained": 1,
+          "never": 301,
+          "moved_up": 0,
+          "moved_down": 2,
+          "same_position": 0,
+          "net": -2,
+          "lost_hit_rate": 0.6,
+          "mcnemar_p": 0.625
+        }
+      },
+      "state4_block3": {
+        "all": {
+          "users": 2289,
+          "kept": 30,
+          "lost": 24,
+          "gained": 32,
+          "never": 2203,
+          "moved_up": 14,
+          "moved_down": 10,
+          "same_position": 6,
+          "net": 8,
+          "lost_hit_rate": 0.4444444444444444,
+          "mcnemar_p": 0.34968195298368476
+        },
+        "new": {
+          "users": 1684,
+          "kept": 24,
+          "lost": 19,
+          "gained": 23,
+          "never": 1618,
+          "moved_up": 12,
+          "moved_down": 8,
+          "same_position": 4,
+          "net": 4,
+          "lost_hit_rate": 0.4418604651162791,
+          "mcnemar_p": 0.6439689563703723
+        },
+        "continuing": {
+          "users": 276,
+          "kept": 2,
+          "lost": 1,
+          "gained": 5,
+          "never": 268,
+          "moved_up": 0,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 4,
+          "lost_hit_rate": 0.3333333333333333,
+          "mcnemar_p": 0.21875
+        },
+        "dormant": {
+          "users": 329,
+          "kept": 4,
+          "lost": 4,
+          "gained": 4,
+          "never": 317,
+          "moved_up": 2,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 0,
+          "lost_hit_rate": 0.5,
+          "mcnemar_p": 1.0
+        }
+      },
+      "state4_block4": {
+        "all": {
+          "users": 2238,
+          "kept": 29,
+          "lost": 38,
+          "gained": 28,
+          "never": 2143,
+          "moved_up": 13,
+          "moved_down": 7,
+          "same_position": 9,
+          "net": -10,
+          "lost_hit_rate": 0.5671641791044776,
+          "mcnemar_p": 0.2678116648465871
+        },
+        "new": {
+          "users": 1699,
+          "kept": 22,
+          "lost": 26,
+          "gained": 23,
+          "never": 1628,
+          "moved_up": 10,
+          "moved_down": 4,
+          "same_position": 8,
+          "net": -3,
+          "lost_hit_rate": 0.5416666666666666,
+          "mcnemar_p": 0.7754496546815659
+        },
+        "dormant": {
+          "users": 192,
+          "kept": 2,
+          "lost": 2,
+          "gained": 4,
+          "never": 184,
+          "moved_up": 1,
+          "moved_down": 0,
+          "same_position": 1,
+          "net": 2,
+          "lost_hit_rate": 0.5,
+          "mcnemar_p": 0.6875
+        },
+        "continuing": {
+          "users": 347,
+          "kept": 5,
+          "lost": 10,
+          "gained": 1,
+          "never": 331,
+          "moved_up": 2,
+          "moved_down": 3,
+          "same_position": 0,
+          "net": -9,
+          "lost_hit_rate": 0.6666666666666666,
+          "mcnemar_p": 0.01171875
+        }
+      },
+      "state1_block1": {
+        "all": {
+          "users": 1772,
+          "kept": 47,
+          "lost": 16,
+          "gained": 16,
+          "never": 1693,
+          "moved_up": 14,
+          "moved_down": 16,
+          "same_position": 17,
+          "net": 0,
+          "lost_hit_rate": 0.25396825396825395,
+          "mcnemar_p": 1.0
+        },
+        "continuing": {
+          "users": 589,
+          "kept": 7,
+          "lost": 3,
+          "gained": 4,
+          "never": 575,
+          "moved_up": 2,
+          "moved_down": 4,
+          "same_position": 1,
+          "net": 1,
+          "lost_hit_rate": 0.3,
+          "mcnemar_p": 1.0
+        },
+        "new": {
+          "users": 1183,
+          "kept": 40,
+          "lost": 13,
+          "gained": 12,
+          "never": 1118,
+          "moved_up": 12,
+          "moved_down": 12,
+          "same_position": 16,
+          "net": -1,
+          "lost_hit_rate": 0.24528301886792453,
+          "mcnemar_p": 1.0
+        }
+      },
+      "state2_block2": {
+        "all": {
+          "users": 1821,
+          "kept": 37,
+          "lost": 13,
+          "gained": 18,
+          "never": 1753,
+          "moved_up": 9,
+          "moved_down": 13,
+          "same_position": 15,
+          "net": 5,
+          "lost_hit_rate": 0.26,
+          "mcnemar_p": 0.47312965989112854
+        },
+        "new": {
+          "users": 1265,
+          "kept": 31,
+          "lost": 10,
+          "gained": 13,
+          "never": 1211,
+          "moved_up": 8,
+          "moved_down": 9,
+          "same_position": 14,
+          "net": 3,
+          "lost_hit_rate": 0.24390243902439024,
+          "mcnemar_p": 0.6776394844055176
+        },
+        "continuing": {
+          "users": 249,
+          "kept": 3,
+          "lost": 1,
+          "gained": 2,
+          "never": 243,
+          "moved_up": 1,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 1,
+          "lost_hit_rate": 0.25,
+          "mcnemar_p": 1.0
+        },
+        "dormant": {
+          "users": 307,
+          "kept": 3,
+          "lost": 2,
+          "gained": 3,
+          "never": 299,
+          "moved_up": 0,
+          "moved_down": 3,
+          "same_position": 0,
+          "net": 1,
+          "lost_hit_rate": 0.4,
+          "mcnemar_p": 1.0
+        }
+      },
+      "state3_block3": {
+        "all": {
+          "users": 2289,
+          "kept": 31,
+          "lost": 23,
+          "gained": 29,
+          "never": 2206,
+          "moved_up": 8,
+          "moved_down": 11,
+          "same_position": 12,
+          "net": 6,
+          "lost_hit_rate": 0.42592592592592593,
+          "mcnemar_p": 0.48845566937989204
+        },
+        "new": {
+          "users": 1684,
+          "kept": 25,
+          "lost": 20,
+          "gained": 20,
+          "never": 1619,
+          "moved_up": 5,
+          "moved_down": 10,
+          "same_position": 10,
+          "net": 0,
+          "lost_hit_rate": 0.4444444444444444,
+          "mcnemar_p": 1.0
+        },
+        "continuing": {
+          "users": 276,
+          "kept": 3,
+          "lost": 1,
+          "gained": 3,
+          "never": 269,
+          "moved_up": 1,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 2,
+          "lost_hit_rate": 0.25,
+          "mcnemar_p": 0.625
+        },
+        "dormant": {
+          "users": 329,
+          "kept": 3,
+          "lost": 2,
+          "gained": 6,
+          "never": 318,
+          "moved_up": 2,
+          "moved_down": 0,
+          "same_position": 1,
+          "net": 4,
+          "lost_hit_rate": 0.4,
+          "mcnemar_p": 0.2890625
+        }
+      }
+    },
+    "k20": {
+      "state4_block0": {
+        "all": {
+          "users": 2500,
+          "kept": 45,
+          "lost": 25,
+          "gained": 37,
+          "never": 2393,
+          "moved_up": 23,
+          "moved_down": 9,
+          "same_position": 13,
+          "net": 12,
+          "lost_hit_rate": 0.35714285714285715,
+          "mcnemar_p": 0.16188140552559763
+        }
+      },
+      "state4_block1": {
+        "all": {
+          "users": 1772,
+          "kept": 43,
+          "lost": 23,
+          "gained": 30,
+          "never": 1676,
+          "moved_up": 21,
+          "moved_down": 12,
+          "same_position": 10,
+          "net": 7,
+          "lost_hit_rate": 0.3484848484848485,
+          "mcnemar_p": 0.4101027163746913
+        },
+        "continuing": {
+          "users": 589,
+          "kept": 12,
+          "lost": 3,
+          "gained": 8,
+          "never": 566,
+          "moved_up": 8,
+          "moved_down": 3,
+          "same_position": 1,
+          "net": 5,
+          "lost_hit_rate": 0.2,
+          "mcnemar_p": 0.2265625
+        },
+        "new": {
+          "users": 1183,
+          "kept": 31,
+          "lost": 20,
+          "gained": 22,
+          "never": 1110,
+          "moved_up": 13,
+          "moved_down": 9,
+          "same_position": 9,
+          "net": 2,
+          "lost_hit_rate": 0.39215686274509803,
+          "mcnemar_p": 0.8776143287523154
+        }
+      },
+      "state4_block2": {
+        "all": {
+          "users": 1821,
+          "kept": 39,
+          "lost": 20,
+          "gained": 23,
+          "never": 1739,
+          "moved_up": 21,
+          "moved_down": 7,
+          "same_position": 11,
+          "net": 3,
+          "lost_hit_rate": 0.3389830508474576,
+          "mcnemar_p": 0.7607916425613439
+        },
+        "new": {
+          "users": 1265,
+          "kept": 31,
+          "lost": 14,
+          "gained": 19,
+          "never": 1201,
+          "moved_up": 15,
+          "moved_down": 5,
+          "same_position": 11,
+          "net": 5,
+          "lost_hit_rate": 0.3111111111111111,
+          "mcnemar_p": 0.48685024166479707
+        },
+        "continuing": {
+          "users": 249,
+          "kept": 5,
+          "lost": 2,
+          "gained": 0,
+          "never": 242,
+          "moved_up": 5,
+          "moved_down": 0,
+          "same_position": 0,
+          "net": -2,
+          "lost_hit_rate": 0.2857142857142857,
+          "mcnemar_p": 0.5
+        },
+        "dormant": {
+          "users": 307,
+          "kept": 3,
+          "lost": 4,
+          "gained": 4,
+          "never": 296,
+          "moved_up": 1,
+          "moved_down": 2,
+          "same_position": 0,
+          "net": 0,
+          "lost_hit_rate": 0.5714285714285714,
+          "mcnemar_p": 1.0
+        }
+      },
+      "state4_block3": {
+        "all": {
+          "users": 2289,
+          "kept": 39,
+          "lost": 28,
+          "gained": 41,
+          "never": 2181,
+          "moved_up": 20,
+          "moved_down": 13,
+          "same_position": 6,
+          "net": 13,
+          "lost_hit_rate": 0.417910447761194,
+          "mcnemar_p": 0.1480321806927584
+        },
+        "new": {
+          "users": 1684,
+          "kept": 31,
+          "lost": 22,
+          "gained": 31,
+          "never": 1600,
+          "moved_up": 17,
+          "moved_down": 10,
+          "same_position": 4,
+          "net": 9,
+          "lost_hit_rate": 0.41509433962264153,
+          "mcnemar_p": 0.27167916606550335
+        },
+        "continuing": {
+          "users": 276,
+          "kept": 3,
+          "lost": 3,
+          "gained": 4,
+          "never": 266,
+          "moved_up": 1,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 1,
+          "lost_hit_rate": 0.5,
+          "mcnemar_p": 1.0
+        },
+        "dormant": {
+          "users": 329,
+          "kept": 5,
+          "lost": 3,
+          "gained": 6,
+          "never": 315,
+          "moved_up": 2,
+          "moved_down": 2,
+          "same_position": 1,
+          "net": 3,
+          "lost_hit_rate": 0.375,
+          "mcnemar_p": 0.5078125
+        }
+      },
+      "state4_block4": {
+        "all": {
+          "users": 2238,
+          "kept": 47,
+          "lost": 54,
+          "gained": 33,
+          "never": 2104,
+          "moved_up": 22,
+          "moved_down": 14,
+          "same_position": 11,
+          "net": -21,
+          "lost_hit_rate": 0.5346534653465347,
+          "mcnemar_p": 0.03141811023384611
+        },
+        "new": {
+          "users": 1699,
+          "kept": 35,
+          "lost": 41,
+          "gained": 27,
+          "never": 1596,
+          "moved_up": 17,
+          "moved_down": 9,
+          "same_position": 9,
+          "net": -14,
+          "lost_hit_rate": 0.5394736842105263,
+          "mcnemar_p": 0.11425430684992327
+        },
+        "dormant": {
+          "users": 192,
+          "kept": 3,
+          "lost": 2,
+          "gained": 5,
+          "never": 182,
+          "moved_up": 1,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 3,
+          "lost_hit_rate": 0.4,
+          "mcnemar_p": 0.453125
+        },
+        "continuing": {
+          "users": 347,
+          "kept": 9,
+          "lost": 11,
+          "gained": 1,
+          "never": 326,
+          "moved_up": 4,
+          "moved_down": 4,
+          "same_position": 1,
+          "net": -10,
+          "lost_hit_rate": 0.55,
+          "mcnemar_p": 0.00634765625
+        }
+      },
+      "state1_block1": {
+        "all": {
+          "users": 1772,
+          "kept": 64,
+          "lost": 27,
+          "gained": 19,
+          "never": 1662,
+          "moved_up": 23,
+          "moved_down": 23,
+          "same_position": 18,
+          "net": -8,
+          "lost_hit_rate": 0.2967032967032967,
+          "mcnemar_p": 0.3019956131896606
+        },
+        "continuing": {
+          "users": 589,
+          "kept": 12,
+          "lost": 6,
+          "gained": 4,
+          "never": 567,
+          "moved_up": 4,
+          "moved_down": 6,
+          "same_position": 2,
+          "net": -2,
+          "lost_hit_rate": 0.3333333333333333,
+          "mcnemar_p": 0.75390625
+        },
+        "new": {
+          "users": 1183,
+          "kept": 52,
+          "lost": 21,
+          "gained": 15,
+          "never": 1095,
+          "moved_up": 19,
+          "moved_down": 17,
+          "same_position": 16,
+          "net": -6,
+          "lost_hit_rate": 0.2876712328767123,
+          "mcnemar_p": 0.4050322461407632
+        }
+      },
+      "state2_block2": {
+        "all": {
+          "users": 1821,
+          "kept": 51,
+          "lost": 19,
+          "gained": 18,
+          "never": 1733,
+          "moved_up": 12,
+          "moved_down": 22,
+          "same_position": 17,
+          "net": -1,
+          "lost_hit_rate": 0.2714285714285714,
+          "mcnemar_p": 1.0
+        },
+        "new": {
+          "users": 1265,
+          "kept": 42,
+          "lost": 17,
+          "gained": 14,
+          "never": 1192,
+          "moved_up": 9,
+          "moved_down": 17,
+          "same_position": 16,
+          "net": -3,
+          "lost_hit_rate": 0.288135593220339,
+          "mcnemar_p": 0.720100131817162
+        },
+        "continuing": {
+          "users": 249,
+          "kept": 5,
+          "lost": 1,
+          "gained": 1,
+          "never": 242,
+          "moved_up": 3,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 0,
+          "lost_hit_rate": 0.16666666666666666,
+          "mcnemar_p": 1.0
+        },
+        "dormant": {
+          "users": 307,
+          "kept": 4,
+          "lost": 1,
+          "gained": 3,
+          "never": 299,
+          "moved_up": 0,
+          "moved_down": 4,
+          "same_position": 0,
+          "net": 2,
+          "lost_hit_rate": 0.2,
+          "mcnemar_p": 0.625
+        }
+      },
+      "state3_block3": {
+        "all": {
+          "users": 2289,
+          "kept": 45,
+          "lost": 35,
+          "gained": 32,
+          "never": 2177,
+          "moved_up": 15,
+          "moved_down": 17,
+          "same_position": 13,
+          "net": -3,
+          "lost_hit_rate": 0.4375,
+          "mcnemar_p": 0.8071946913670247
+        },
+        "new": {
+          "users": 1684,
+          "kept": 37,
+          "lost": 30,
+          "gained": 24,
+          "never": 1593,
+          "moved_up": 10,
+          "moved_down": 16,
+          "same_position": 11,
+          "net": -6,
+          "lost_hit_rate": 0.44776119402985076,
+          "mcnemar_p": 0.49661743531793345
+        },
+        "continuing": {
+          "users": 276,
+          "kept": 4,
+          "lost": 2,
+          "gained": 3,
+          "never": 267,
+          "moved_up": 2,
+          "moved_down": 1,
+          "same_position": 1,
+          "net": 1,
+          "lost_hit_rate": 0.3333333333333333,
+          "mcnemar_p": 1.0
+        },
+        "dormant": {
+          "users": 329,
+          "kept": 4,
+          "lost": 3,
+          "gained": 5,
+          "never": 317,
+          "moved_up": 3,
+          "moved_down": 0,
+          "same_position": 1,
+          "net": 2,
+          "lost_hit_rate": 0.42857142857142855,
+          "mcnemar_p": 0.7265625
+        }
+      }
+    }
+  }
+}

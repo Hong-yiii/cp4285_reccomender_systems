@@ -58,3 +58,23 @@ b0e078d9fb254934e59359ca53d8b1676247ff05a4588a46255cfa491b1219a2  seed42/reports
 ```
 
 Per-user prediction dumps, J-lens tensors and the user-group file are not committed. The groups can be regenerated from PESO's released blocks with [`user_groups.py`](../user_groups.py).
+
+## NUS SoC cluster reports (`category/`, `decoding-seed43/`, `noise/`)
+
+Aggregates only, written from runs on the NUS SoC cluster in October 2026. Protocol and interpretation are in [`docs/PESO-REPLICATION.md`](../../../docs/PESO-REPLICATION.md).
+
+| Path | Script | What it holds |
+| --- | --- | --- |
+| `category/category_stats.json`, `category/level3/`, `category/level4/` | [`category_index.py`](../category_index.py) | Join coverage, label sources and per-block density for PR 14's subcategories at levels 2, 3 and 4 |
+| `category/seed42/`, `category/seed43/`, `category/seed44/` | [`category_report.py`](../category_report.py) | Category-target PESO: every state–block cell beside the popularity and history baselines |
+| `category/summary-3seeds.json` | [`category_summary.py`](../category_summary.py) | Own-block averages over seeds 42–44, paired PESO − single LoRA and backward transfer |
+| `category/explore-3seeds.json` | [`category_explore.py`](../category_explore.py) | Experiment 2: repeat and exploration targets, the Markov rule, novel ranks and the split of the lead over the history rule |
+| `category/level3/`, `category/level4/` | [`category_report.py`](../category_report.py), [`category_summary.py`](../category_summary.py), [`category_explore.py`](../category_explore.py) | The same reports, summaries and experiment 2 at PR 14 levels 3 and 4 (seeds 42–44) |
+| `ladder/ladder-2026-10-24.json` | [`ladder.py`](../ladder.py) | Experiment 1: per rung and seed, update gain, PESO − single LoRA, drift after k updates and backward transfer; data-only label statistics and block shift; trend tests |
+| `category/item-projection-seed43.json` | [`category_report.py`](../category_report.py) on [`category_projection.py`](../category_projection.py) output | The released seed-43 item model's predictions read as categories |
+| `decoding-seed43/` | `pod_run.py table2` | Metric files of the released seed-43 weights under sampling and deterministic decoding, 10 and 20 beams |
+| `noise/noise-components-2026-10-23.json` | [`noise_components.py`](../noise_components.py) | Evaluation, test-user and seed variance of Table 2 comparisons, smallest detectable effects and Hit@10 flip counts |
+| `new_items/new-items-2026-10-23.json` | [`new_items.py`](../new_items.py) | Hits on cold, input-only, rare and common products for PESO's seed-43 matrix and SASRec's six runs, the code-prefix check and retention by group |
+| `new_items/new-items-2026-10-24.json` | [`new_items.py`](../new_items.py) | The same with the prefix run's item-only arm as a second PESO seed |
+| `noise/noise-components-2026-10-24.json` | [`noise_components.py`](../noise_components.py) | Final experiment 4 report: adds the second deterministic product seed and category seeds 42–44 |
+| `prefix/prefix-seed42.json` | [`prefix_report.py`](../prefix_report.py) | The prefix run: category-prefixed against plain item IDs, seed 42, per-user differences, McNemar flips, category accuracy and forgetting |

@@ -334,3 +334,107 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 - **Teacher forcing:** codes 2–4 are read with the correct earlier codes fed in.
 - **Correlations:** the drift–forgetting links are correlations.
 - **External actions:** no team contact or submission. Commits are pushed only to the user's fork.
+
+## 21 October 2026 — O2 and λ-sweep tooling (seed 42, not yet run)
+
+**Request:** the user chose O2 (penalty scope) and the λ sweep as the next directions, to relate penalty strength and scope to retention and learning.
+
+**Assistance:**
+- Added `--item_penalty_weight` to `penalty_variants.py`: weight × ||W − W_start||² / 2 over the trained item layers, anchored at each block's start. Upstream's frozen originals hold the base model, so they cannot serve as the anchor.
+- Extended `pod_run.py` method names to `peso-size-w<λ>-i<μ>`. Added an `item-drift` stage running the new `item_drift.py`, which measures item-layer drift per block and the μ whose pull matches the task gradient (the O8 calibration rule).
+- Drew an O2-motivation figure from the committed O8 J-lens report, outside the repo (matplotlib not added).
+
+**Validation:**
+- **CPU smoke test** under transformers 4.52.4: the penalty is zero on a block's first loss, adds exactly μ·Δ to the item-layer gradient, works in the evaluation path and re-anchors for the next block. `item_drift.py` reports the right rows and weights on synthetic checkpoints.
+- **Ruff:** lint and format pass.
+
+**Limits:**
+- **Not yet run on GPU:** no O2 or λ-sweep results exist yet.
+
+## 22 October 2026 — Category targets on the NUS SoC cluster
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** redo PESO on the SoC cluster with PR 14's item subcategories instead of items, using the standard metrics (Hit@5, Hit@10, NDCG@10 and others suitable).
+
+**Assistance:**
+- Joined PESO's items to Amazon 2023 metadata by exact title and path, and to PR 14's level-2 labels (`category_index.py`): all 53,509 items, 30 categories, no unknowns. Downloaded the Musical_Instruments metadata (155 MB) with PR 14's `cp4285 meta-download` for the join.
+- Added `category_report.py` and `category_summary.py`: standard metrics through `cp4285.experiment.metrics` (copied unchanged from branch `standard-metrics`), popularity and history baselines on the same users, observed-label targets, paired PESO − LoRA and backward transfer.
+- Made `pod_run.py` paths, dataset, index, venv and model configurable through `PESO_*` variables, with unchanged defaults. Added `replication/peso/slurm/`: a bootstrap, an environment build on node-local disk (cluster NFS writes about 20 files per second), the job wrapper and a per-seed job chain.
+- Found that upstream evaluation samples inside beam search (finding 11). The first smoke run crashed on one-token targets; a CPU reproduction confirmed the cause. The category runs decode deterministically through a base-model copy whose generation config sets `do_sample: false`.
+- At the user's go, queued 3 seeds × (pretrain, single LoRA, PESO, upstream test, full transfer matrix) on H100 NVL GPUs, estimated at 12–21 GPU-hours.
+
+**Validation:**
+- The second smoke run passed. Upstream and our evaluator agree exactly on block 1, and `category_report.py` reproduces their five metrics from the dump.
+- New tests check report and summary values against hand-computed ranks; the suite (56 tests) and Ruff pass.
+- The base-model copy's SHA-256 matches the documented revision checksum.
+
+**Limits:**
+- Category scores answer a 30-way question and are not comparable with item-level scores. Hit@10 saturates; Hit@1, Hit@5, NDCG@10 and MRR@10 carry the comparison.
+- Category runs use H100 NVL GPUs and deterministic beam search, where the item replication used A100s and the released beam sampling.
+- 6.5% of item labels come from PR 14's classifier; results are also reported for observed-label targets.
+
+
+## 23 October 2026 — Decoding check, category results and experiments 1–4
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** extend the category study. Check upstream's decoding, compare item and category models, try category-prefixed item IDs, then run four designed experiments: a granularity ladder, exploration against repeats, new items and detectable effects. Report every earlier block after each update.
+
+**Assistance:**
+- Rebuilt the released seed-43 checkpoints from the GitHub release (`release_ckpt.py`). Re-evaluated them with sampling and deterministic decoding (`pod_run.py table2`), then with five more sampling draws for experiment 4.
+- Added `category_projection.py` (item predictions read as categories), `category_prefix.py` (a category token before the item codes), `category_explore.py` (experiment 2), `new_items.py` (experiment 3), `noise_components.py` (experiment 4) and `ladder.py` (experiment 1). Built level-3 and level-4 category data with PR 14's pipeline for experiment 1.
+- At the user's go, queued the ladder (two levels, three seeds), the prefix run (two arms) and the seed-43 deterministic transfer matrix on the cluster, estimated at about 34 GPU-hours.
+
+**Validation:**
+- Tests check the category scripts, the variance components, the exposure groups and the ladder summary against hand-computed values; the suite (66 tests) and Ruff pass.
+- The deterministic product matrix reproduces the earlier deterministic Table 2 lists exactly for all 17,646 user–cell pairs.
+- Cluster incidents and their fixes (port clashes on shared nodes, out-of-memory on 46 GB GPU shares, aarch64 nodes) are recorded in ignored `local/WORKSPACE.md`.
+
+**Limits:**
+- Experiment 2, 3 and 4 results are preliminary. Category seed 44, the prefix run's deterministic item seed and the ladder are still running.
+- Product seed variance rests on three sampled seeds, so its 95% interval is wide.
+
+## 24 October 2026 — Cluster recovery and final results for experiments 2–4
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** recover the cluster runs after the scratch quota filled (the user approved clearing space), then finish what the results allow.
+
+**Assistance:**
+- Traced the 23 October job failures to the scratch quota. Each LoRA and PESO block kept a full 3.8 GB model, because upstream's `extract_modules_subset.py` declares its delete flag with `store_false` and `pod_run.py` passes it deliberately. With the user's approval, removed the smoke runs' checkpoints and the redundant full models (the evaluator reads only the final model and per-block subsets, as the released checkpoint's layout shows). Scratch went from 501 to 169 GB. Resubmitted 31 jobs resuming from published stages.
+- Made the job watcher stop instead of retrying when the stujump connection drops, after repeated key-only logins appear to have triggered a temporary block.
+- Added `prefix_report.py` (category-prefixed against plain item IDs) and the repeat share to `ladder.py`, both with tests. Scored category seed 44, the three-seed category summary, experiment 2 on three seeds, experiment 3 with a second PESO seed, the final experiment 4 report and the prefix run.
+
+**Validation:** The nested suite (67 tests) and Ruff pass. Matrix jobs on the cleaned checkpoints load them as the released checkpoint's matrix did.
+
+**Limits:** Experiment 1 waits for levels 3 and 4. Product results rest on two training seeds; the seed term of single LoRA − Pretrain stays unsettled.
+
+## 24 October 2026 — Cluster job status check and ladder status notes
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** check how the recommender jobs on the cluster were doing, then make the documentation state clear.
+
+**Assistance:**
+- Read the queue from `xlogin2` with `status.sh`, `squeue`, `scontrol show job` and `sacct`, plus `df`, `quota` and the runs' `done/` markers and logs. Nothing on the cluster was changed and no job was submitted, cancelled or resubmitted.
+- Recorded the result: level 3 complete for seeds 42–44, level 4 complete for seed 43, level 4's matrices for seeds 42 and 44 running on H100 NVL nodes. Updated `CONTEXT.md` and added the ladder's status subsection to `docs/PESO-REPLICATION.md`. Job ids, the failure counts and the access state went to ignored `local/WORKSPACE.md`.
+
+**Validation:** The status comes from Slurm's job records and the runs' `done/` markers, not from log tails alone. The new subsection states explicitly that a finished stage says nothing about its scores.
+
+**Limits:** No level-3 or level-4 number is claimed; `ladder.py` needs the running matrices. The finish estimate (roughly 45 minutes to two hours per seed) comes from per-block timings in the current logs and can move with queue waits or a slow co-tenant on a shared H100.
+
+## 24 October 2026 — Levels 3 and 4, the granularity ladder and experiment 2 at finer labels
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** check the results once the cluster runs finished.
+
+**Assistance:**
+- Moved level 4 seed 42 off node xgpi17, where PESO trained at about a third of the normal speed and timed out twice, and excluded that node from the pending jobs.
+- Scored levels 3 and 4 (`category_report.py`, `category_summary.py`), ran experiment 1 across all rungs (`ladder.py`) and experiment 2 at levels 3 and 4 (`category_explore.py`). Replaced the in-progress ladder notes in `docs/PESO-REPLICATION.md` and `CONTEXT.md` with the results.
+- Removed the finished runs' redundant per-block full models, as approved earlier for clearing scratch.
+
+**Validation:** The suite (67 tests) and Ruff pass for the files this work added. The reports hold aggregates only. Scoring observed labels only leaves each level's update gain unchanged.
+
+**Limits:** Product results rest on two training seeds. The ladder cannot separate product identity from the block-to-block shift as the cause of forgetting, since both change at the same rung.

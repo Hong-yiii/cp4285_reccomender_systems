@@ -1,0 +1,381 @@
+{
+  "source": "Instruments_cl_ori",
+  "dataset": "Instruments_cl_cat3",
+  "index_file": ".index.cat3.json",
+  "level": 3,
+  "join": {
+    "items": 53509,
+    "single_match": 52228,
+    "several_matches": 1281,
+    "conflicting_labels_resolved_by_confidence": 1,
+    "label_source": {
+      "observed": 49578,
+      "predicted": 3863,
+      "ancestor observed": 68
+    }
+  },
+  "events_by_label_source": {
+    "observed": 197185,
+    "predicted": 7356,
+    "ancestor observed": 162
+  },
+  "categories": {
+    "<cat_0>": {
+      "subcategory": "Instrument Accessories > Drum & Percussion Accessories > Concert Percussion Accessories",
+      "items": 150
+    },
+    "<cat_1>": {
+      "subcategory": "Musical Instruments > 20% back on select brands",
+      "items": 2
+    },
+    "<cat_2>": {
+      "subcategory": "Musical Instruments > 20% off select Musical Instruments",
+      "items": 1
+    },
+    "<cat_3>": {
+      "subcategory": "Musical Instruments > Acoustic Guitars: Beginners",
+      "items": 1
+    },
+    "<cat_4>": {
+      "subcategory": "Musical Instruments > Amplifiers & Effects > Guitar & Bass Amplifiers & Preamps",
+      "items": 770
+    },
+    "<cat_5>": {
+      "subcategory": "Musical Instruments > Amplifiers & Effects > Guitar Effects",
+      "items": 2308
+    },
+    "<cat_6>": {
+      "subcategory": "Musical Instruments > Amplifiers & Effects > Signal Path & Pedal Tuners",
+      "items": 44
+    },
+    "<cat_7>": {
+      "subcategory": "Musical Instruments > Band & Orchestra > Brass",
+      "items": 144
+    },
+    "<cat_8>": {
+      "subcategory": "Musical Instruments > Band & Orchestra > Orchestral Strings",
+      "items": 209
+    },
+    "<cat_9>": {
+      "subcategory": "Musical Instruments > Band & Orchestra > Wind & Woodwinds",
+      "items": 350
+    },
+    "<cat_10>": {
+      "subcategory": "Musical Instruments > Bass Guitars > Beginner Kits",
+      "items": 5
+    },
+    "<cat_11>": {
+      "subcategory": "Musical Instruments > Bass Guitars > Electric Basses",
+      "items": 296
+    },
+    "<cat_12>": {
+      "subcategory": "Musical Instruments > Bass Guitars > Electro-Acoustic Bass Guitars",
+      "items": 26
+    },
+    "<cat_13>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Concert Percussion",
+      "items": 269
+    },
+    "<cat_14>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Drum Sets & Set Components",
+      "items": 990
+    },
+    "<cat_15>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Electronic Drums",
+      "items": 250
+    },
+    "<cat_16>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Folk & World Hand Drums",
+      "items": 373
+    },
+    "<cat_17>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Hand Percussion",
+      "items": 975
+    },
+    "<cat_18>": {
+      "subcategory": "Musical Instruments > Drums & Percussion > Marching Percussion",
+      "items": 8
+    },
+    "<cat_19>": {
+      "subcategory": "Musical Instruments > Electronic Music, DJ & Karaoke > DJ Equipment",
+      "items": 1263
+    },
+    "<cat_20>": {
+      "subcategory": "Musical Instruments > Electronic Music, DJ & Karaoke > Electronic Music",
+      "items": 110
+    },
+    "<cat_21>": {
+      "subcategory": "Musical Instruments > Electronic Music, DJ & Karaoke > Karaoke Equipment",
+      "items": 221
+    },
+    "<cat_22>": {
+      "subcategory": "Musical Instruments > Guitars > Acoustic Guitars",
+      "items": 820
+    },
+    "<cat_23>": {
+      "subcategory": "Musical Instruments > Guitars > Acoustic-Electric Guitars",
+      "items": 256
+    },
+    "<cat_24>": {
+      "subcategory": "Musical Instruments > Guitars > Classical & Nylon-String Guitars",
+      "items": 98
+    },
+    "<cat_25>": {
+      "subcategory": "Musical Instruments > Guitars > Electric Guitars",
+      "items": 1707
+    },
+    "<cat_26>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Brass Accessories",
+      "items": 536
+    },
+    "<cat_27>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Drum & Percussion Accessories",
+      "items": 2709
+    },
+    "<cat_28>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Folk & World Instrument Accessories",
+      "items": 801
+    },
+    "<cat_29>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > General Accessories",
+      "items": 1073
+    },
+    "<cat_30>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Guitar & Bass Accessories",
+      "items": 17288
+    },
+    "<cat_31>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Keyboard Accessories",
+      "items": 1180
+    },
+    "<cat_32>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Orchestral Strings Accessories & Parts",
+      "items": 1042
+    },
+    "<cat_33>": {
+      "subcategory": "Musical Instruments > Instrument Accessories > Wind & Woodwind Accessories",
+      "items": 1296
+    },
+    "<cat_34>": {
+      "subcategory": "Musical Instruments > Keyboards & MIDI > Electronic Keyboards",
+      "items": 578
+    },
+    "<cat_35>": {
+      "subcategory": "Musical Instruments > Keyboards & MIDI > Folk & World",
+      "items": 287
+    },
+    "<cat_36>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Bags & Cases",
+      "items": 16
+    },
+    "<cat_37>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Lighting Equipment & Accessories",
+      "items": 1213
+    },
+    "<cat_38>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Microphones",
+      "items": 1
+    },
+    "<cat_39>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Monitors, Speakers & Subwoofers",
+      "items": 620
+    },
+    "<cat_40>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > PA Systems",
+      "items": 319
+    },
+    "<cat_41>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Power Amplifiers",
+      "items": 119
+    },
+    "<cat_42>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Powered Mixers",
+      "items": 89
+    },
+    "<cat_43>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Special Effects",
+      "items": 215
+    },
+    "<cat_44>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage > Stage & Studio Cables",
+      "items": 2977
+    },
+    "<cat_45>": {
+      "subcategory": "Musical Instruments > Microphones & Accessories > Accessories",
+      "items": 1754
+    },
+    "<cat_46>": {
+      "subcategory": "Musical Instruments > Microphones & Accessories > Microphones",
+      "items": 3009
+    },
+    "<cat_47>": {
+      "subcategory": "Musical Instruments > Musical Instruments Beginner Store",
+      "items": 3
+    },
+    "<cat_48>": {
+      "subcategory": "Musical Instruments > Musical Instruments Low Return Rate Alert",
+      "items": 10
+    },
+    "<cat_49>": {
+      "subcategory": "Musical Instruments > Musical Instruments Outlet",
+      "items": 5
+    },
+    "<cat_50>": {
+      "subcategory": "Musical Instruments > Musical Instruments Savings",
+      "items": 4
+    },
+    "<cat_51>": {
+      "subcategory": "Musical Instruments > Musican's Lifestyle Store > Shirts",
+      "items": 2
+    },
+    "<cat_52>": {
+      "subcategory": "Musical Instruments > Presidents Day Savings",
+      "items": 4
+    },
+    "<cat_53>": {
+      "subcategory": "Musical Instruments > Prime Card Bonus",
+      "items": 24
+    },
+    "<cat_54>": {
+      "subcategory": "Musical Instruments > Pro & DJ Headphones",
+      "items": 3
+    },
+    "<cat_55>": {
+      "subcategory": "Musical Instruments > Promark Drum Accessories",
+      "items": 1
+    },
+    "<cat_56>": {
+      "subcategory": "Musical Instruments > Stringed Instruments > Folk & World",
+      "items": 127
+    },
+    "<cat_57>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Computer Recording",
+      "items": 696
+    },
+    "<cat_58>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Headphone & In-Ear Audio Monitors",
+      "items": 154
+    },
+    "<cat_59>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Mastering Recorders",
+      "items": 6
+    },
+    "<cat_60>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Mixers & Accessories",
+      "items": 180
+    },
+    "<cat_61>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Multitrack Recorders",
+      "items": 45
+    },
+    "<cat_62>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Portable Recorders",
+      "items": 107
+    },
+    "<cat_63>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Power Conditioners",
+      "items": 17
+    },
+    "<cat_64>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Signal Processors",
+      "items": 269
+    },
+    "<cat_65>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Studio Environment",
+      "items": 963
+    },
+    "<cat_66>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Studio Monitors",
+      "items": 176
+    },
+    "<cat_67>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment > Studio Subwoofers",
+      "items": 12
+    },
+    "<cat_68>": {
+      "subcategory": "Musical Instruments > Ukuleles, Mandolins & Banjos > Banjos",
+      "items": 96
+    },
+    "<cat_69>": {
+      "subcategory": "Musical Instruments > Ukuleles, Mandolins & Banjos > Mandolins",
+      "items": 73
+    },
+    "<cat_70>": {
+      "subcategory": "Musical Instruments > Ukuleles, Mandolins & Banjos > Ukuleles",
+      "items": 788
+    },
+    "<cat_71>": {
+      "subcategory": "Musical Instruments > V4 Customers Keep It - 30%",
+      "items": 2
+    },
+    "<cat_72>": {
+      "subcategory": "Musical Instruments > V4 Customers Keep It - 50%",
+      "items": 1
+    },
+    "<cat_73>": {
+      "subcategory": "Musical Instruments > Vintage Musical Instruments",
+      "items": 7
+    },
+    "<cat_74>": {
+      "subcategory": "Musical Instruments > Wind & Woodwind Instruments > Folk & World",
+      "items": 966
+    }
+  },
+  "blocks": {
+    "block_0": {
+      "users": 17046,
+      "events": 141788,
+      "items": 40471,
+      "categories": 75,
+      "item_density": 0.0002055289752788975,
+      "category_density": 0.11090617544683015,
+      "test_users": 17046,
+      "most_common_test_category": "<cat_30>",
+      "most_common_test_category_share": 0.3678282294966561
+    },
+    "block_1": {
+      "users": 1772,
+      "events": 13197,
+      "items": 8346,
+      "categories": 61,
+      "item_density": 0.0008923456661900998,
+      "category_density": 0.1220904414757799,
+      "test_users": 1772,
+      "most_common_test_category": "<cat_30>",
+      "most_common_test_category_share": 0.404627539503386
+    },
+    "block_2": {
+      "users": 1821,
+      "events": 13334,
+      "items": 8325,
+      "categories": 59,
+      "item_density": 0.000879561604438046,
+      "category_density": 0.1241076331685887,
+      "test_users": 1821,
+      "most_common_test_category": "<cat_30>",
+      "most_common_test_category_share": 0.41515650741350907
+    },
+    "block_3": {
+      "users": 2289,
+      "events": 18811,
+      "items": 9617,
+      "categories": 62,
+      "item_density": 0.0008545283483680989,
+      "category_density": 0.13254837300412914,
+      "test_users": 2289,
+      "most_common_test_category": "<cat_30>",
+      "most_common_test_category_share": 0.36609873307121016
+    },
+    "block_4": {
+      "users": 2238,
+      "events": 17573,
+      "items": 9131,
+      "categories": 60,
+      "item_density": 0.0008599386802503017,
+      "category_density": 0.13086833482275842,
+      "test_users": 2238,
+      "most_common_test_category": "<cat_30>",
+      "most_common_test_category_share": 0.3418230563002681
+    }
+  }
+}
