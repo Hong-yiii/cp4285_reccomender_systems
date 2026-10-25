@@ -237,3 +237,86 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Ruff lint and format and the full test suite passed. The output reconciles to 35,393,189 unique rows; published counts match the local copy.
 
 **Limits:** Predicted labels and donor mappings are model output and assumptions. Genre-level files (Books, CDs, Movies) classify poorly. No subcategory has been chosen as an experiment domain or checked against the cutoff protocol.
+
+## 22 October 2026 — Shared ranking metrics
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Look across the open PRs for a standard metric, then report Hit@5, Hit@10, NDCG@10 and other suitable metrics in every workstream.
+
+**Assistance:** Compared the metric code on main and PRs 9, 12 and 14 and the decision in issue #8. Added `src/cp4285/experiment/metrics.py` (`from_ranks`, `selection_key`) and routed the classical and neural evaluators through it. Renamed the single-target `recall` sums to `hit`, keeping `recall@K` as an alias. Switched the pilot's checkpoint selection to Hit@10 with NDCG@10 as tie-break and updated the docs that named NDCG@10 as primary.
+
+**Validation:** Ruff and the full suite passed (53 tests, 3 new on hand-computed ranks). The synthetic demo ran end to end.
+
+**Limits:** No real-data run used these metrics yet. Selection by Hit@10 is a proposal from PR #9 pending team confirmation. Evaluators still differ in candidates, seen-item masking and splits, so their scores remain incomparable.
+
+## 22 October 2026 — Adapter survey
+
+**Tool:** Claude Code (Claude Opus 5.5), with a research subagent.
+
+**Request:** Look into whether adapters help with sparsity here: LoRA, adapters on SASRec and other suitable approaches.
+
+**Assistance:** Wrote `docs/ADAPTERS.md`, a sourced survey of LoRA and continual LoRA, bottleneck adapters, adapter transfer in sequential recommenders, prompt tuning, LLM recommenders, category-aware models and replay. It ends with a comparison table and one proposed experiment. Parameter counts come from the repo's `SASRec` class; local data figures come from the PESO category statistics.
+
+**Validation:** The parameter counts (2,704,000 total, 98.9% in the item table, 8,000 for rank-8 LoRA), density ratios (481–1,349×) and the 13,038 items first seen after block 0 were recomputed independently. Fu et al.'s Tables 2–4 were checked against the PDF. Every other source was checked online by the subagent.
+
+**Limits:** No adapter or category-channel code was written or run. The recommended experiment is an agent proposal, not a team decision. Paper figures use each paper's own protocol, several with sampled metrics.
+
+## 22 October 2026 — Category-channel SASRec on PESO's blocks
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Run the adapter survey's proposed experiment, SASRec with a category channel, on the cluster's CPU nodes.
+
+**Assistance:** Added `models/category_sasrec.py`, a second SASRec encoder over category sequences whose output joins the item encoder's and predicts the next category, inside the unchanged `SASRecLearner`. Added `experiment/blocks.py` and `cp4285 blocks`: PESO's users, blocks and targets; block-0 training with the pilot's regime; fresh-target continuation after one Adam reset; validation-best epochs; and the full transfer matrix with exposure buckets and a popularity baseline. Documented the study in the runbook.
+
+**Validation:** Six new tests cover the model, the split and an end-to-end run of both arms on toy blocks; the suite (59 tests) and Ruff pass. A one-epoch run on the real blocks took 112 s (SASRec) and 193 s (category arm) on 4 threads.
+
+**Results:** three seeds per arm on the NUS SoC cluster's CPU nodes, with the continuation learning rate ($10^{-4}$) chosen on block-1 validation of the plain arm. The channel leaves top-10 ranking unchanged and lifts rare targets' ranks about threefold, still far outside the top 10 (see `docs/ADAPTERS.md`).
+
+**Limits:** One category level (PR 14's level 2) and one learning-rate sweep on one seed. The category design follows CaFe but is our own, and its ranking rule is one of several reasonable choices.
+
+
+## 23 October 2026 — Per-user dumps for the PESO-block study
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Experiment 3 of the category study asks whether SASRec and PESO can recommend products they never trained on, which needs SASRec's per-user rankings.
+
+**Assistance:** Added `--dumps` to `cp4285 blocks`. Each cell then writes one row per test user (PESO item IDs, the exact target rank and the top 20 by score) inside the ignored run folder. Reran both arms for three seeds on the cluster's CPU nodes with the flag.
+
+**Validation:** A new test checks that the dumps agree with each cell's metrics; the suite (61 tests) and Ruff pass. All six reruns reproduce the 22 October metrics exactly on the original CPU type. One extra category-arm rerun on a different CPU type drifted to own-state Hit@10 0.0181 from 0.0190, recorded as a hardware sensitivity.
+
+**Limits:** Dumps hold user IDs, so they are never committed; only aggregate reports from the PESO branch are.
+
+## 24 October 2026 — Corrupted streams and a language model with adapters
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** drop PESO, try a language model with an adapter, and align the study with the course's robustness framing (shill manipulation) while keeping the original continued-training protocol.
+
+**Assistance:**
+- Wrote the variant as a dated agent proposal in `docs/CONTINUED-TRAINING.md`, with a pointer in `docs/EXPERIMENT.md`. B is the protocol's third option, corrupted interactions; the mitigation is adapter isolation.
+- Added `models/category_lm.py` (frozen language model, LoRA adapters, exact category ranking in one packed pass per user), `experiment/shilling.py` (random, average, bandwagon, segment and clone push attacks, with realism checks) and `experiment/adapter_blocks.py` (`cp4285 adapter-blocks`, `cp4285 adapter-summary`). Added the optional `llm` extra (transformers 5.20, peft 0.21).
+- Built a cluster environment with the extra and ran a one-seed pilot: the shared start state and six branches (shared or isolated adapters; clean, bandwagon or clone shills at 3%).
+
+**Validation:** Packed scores match one-sequence-per-candidate scoring to 1e-5 on SmolLM2-135M and on a tiny random Llama in the tests. Tests cover training, adapter freezing and rollback, state round trips, shill shares and sources, injected users' exclusion from evaluation, the runner end to end and the summary; the suite (74 tests) and Ruff pass.
+
+**Limits:** One seed and one pushed category. Shills are synthetic, and bandwagon profiles are trivially detectable (AUC 1.00). The A task is PESO's released Instruments blocks.
+
+## 24 October 2026 — Corrupted-stream grid across three domains
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** run the full grid so the result is not tied to one dataset.
+
+**Assistance:**
+- Added `experiment/block_categories.py` (`cp4285 block-categories`): PR 14's level-N category rule for any PESO-format domain, from its own item paths, with PR 14's text classifier for items without one. Built categories for Instruments (30), Video Games (43) and CDs & Vinyl (59).
+- Added `--push-share` (the pushed category by test-target share, so no target is picked by hand), `--rollback-after` with `CategoryLMLearner.drop` (remove the poisoned adapter right after its block) and top-5 push rates. The summary now matches clean references on condition and pushed category.
+- Wrote `grid_plans.py` and `adapter_grid.sbatch` in the PESO branch checkout (sequential runs per plan, resumable after a timeout) and submitted 12 plans, 114 runs, on the SoC cluster.
+
+**Validation:** On Instruments the new labels agree with PR 14's on every observed item and on 94% of predicted ones. Tests cover the category builder, adapter dropping, immediate rollback, rule-chosen targets and push-matched summaries; the suite (78 tests) and Ruff pass. The three domains' cluster copies match the local ones by checksum.
+
+**Limits:** Video Games and CDs & Vinyl test sets are smaller (866–1,949 users per block). Video Games labels rely on a classifier with 0.81 holdout accuracy for 4% of items. Yelp is excluded because its tags have no hierarchy.
+
+**Result, 25 October:** all 114 runs completed (22.6 GPU-hours; one 3-hour timeout resumed by its follow-up job). Added `grid_aggregate.py` and `grid_checks.py` to the PESO branch checkout and wrote the results into `docs/CONTINUED-TRAINING.md`. The pilot's five predictions hold across the three domains, with seed counts reported for each; the rare-target arm has one seed, and Video Games' rare category was already in every clean top 10.

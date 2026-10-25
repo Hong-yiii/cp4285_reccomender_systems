@@ -15,6 +15,7 @@ import torch
 
 from ..models.sasrec import IMPLEMENTATION, UPSTREAM_COMMIT, SASRec
 from ..models.sasrec_learner import SASRecLearner, tensors
+from .metrics import selection_key
 from .neural_evaluation import evaluate
 from .utils import save_json, sha256
 
@@ -67,7 +68,7 @@ def run(prepared_path, cfg, output, synthetic=False):
     if not initial:
         raise ValueError("Initial training needs at least one user sequence")
     validation_trace = []
-    best = -math.inf
+    best = (-math.inf, -math.inf)
     best_state = None
     for epoch in range(training["epochs"]):
         losses = []
@@ -77,8 +78,8 @@ def run(prepared_path, cfg, output, synthetic=False):
             losses.append(learner.train(examples))
         metrics = evaluate(learner, data["validation"], batch, k, device)
         validation_trace.append({"epoch": epoch + 1, "loss": float(np.mean(losses)), **metrics})
-        if metrics[f"ndcg@{k}"] > best:
-            best = metrics[f"ndcg@{k}"]
+        if selection_key(metrics, k) > best:
+            best = selection_key(metrics, k)
             best_state = copy.deepcopy(learner.model.state_dict())
     if best_state is None:
         raise ValueError("Validation did not select a finite initial checkpoint")

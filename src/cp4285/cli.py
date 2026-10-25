@@ -149,6 +149,32 @@ def main():
         "meta-publish", parents=[meta], help="Upload derived tables to a private HF dataset"
     )
     mp.add_argument("--repo", required=True, help="Hugging Face dataset id, e.g. user/name")
+    bl = commands.add_parser(
+        "blocks", help="SASRec, with or without a category channel, on PESO's blocks"
+    )
+    from .experiment.blocks import add_arguments as block_arguments
+
+    block_arguments(bl)
+    bc = commands.add_parser(
+        "block-categories", help="PR 14-rule category labels for a PESO-format dataset"
+    )
+    from .experiment.block_categories import add_arguments as category_arguments
+
+    category_arguments(bc)
+    ab = commands.add_parser(
+        "adapter-blocks",
+        help="Category language model with adapters on PESO's blocks; optional shill stream",
+    )
+    from .experiment.adapter_blocks import add_arguments as adapter_arguments
+
+    adapter_arguments(ab)
+    asum = commands.add_parser("adapter-summary", help="Outcomes of `cp4285 adapter-blocks` runs")
+    asum.add_argument("init", help="The init run's metrics.json")
+    asum.add_argument("branches", nargs="+", help="Branch runs' metrics.json files")
+    asum.add_argument("--json", help="Also save the summary here (create-only)")
+    bs = commands.add_parser("blocks-summary", help="Seeds and arms of `cp4285 blocks`")
+    bs.add_argument("runs", nargs="+", help="metrics.json files")
+    bs.add_argument("--json", help="Also save the summary here (create-only)")
     cl = commands.add_parser("classical", help="Classical comparator under B contamination")
     from .experiment.classical import add_arguments
 
@@ -208,6 +234,39 @@ def main():
             from .experiment.classical import run as classical
 
             classical(args)
+        elif args.command == "blocks":
+            from .experiment.blocks import run as blocks
+
+            result = blocks(args)
+            print(f"Blocks run saved: {args.output} ({result['parameters']:,} parameters)")
+        elif args.command == "block-categories":
+            from .experiment.block_categories import run as block_categories
+
+            stats = block_categories(args)
+            print(
+                json.dumps({k: stats[k] for k in ("source", "level", "label_source", "classifier")})
+            )
+            print(f"{len(stats['categories'])} categories; saved {args.output}")
+        elif args.command == "adapter-blocks":
+            from .experiment.adapter_blocks import run as adapter_blocks
+
+            result = adapter_blocks(args)
+            print(f"Adapter-blocks {args.stage} run saved: {args.output}")
+        elif args.command == "adapter-summary":
+            from .experiment.adapter_blocks import markdown as adapter_markdown
+            from .experiment.adapter_blocks import summarize as adapter_summarize
+
+            summary = adapter_summarize(args.init, args.branches)
+            if args.json:
+                save_json(args.json, summary)
+            print(adapter_markdown(summary))
+        elif args.command == "blocks-summary":
+            from .experiment.blocks import markdown, summarize
+
+            summary = summarize(args.runs)
+            if args.json:
+                save_json(args.json, summary)
+            print(markdown(summary))
         elif args.command == "demo":
             result = demo(args.output)
             print(

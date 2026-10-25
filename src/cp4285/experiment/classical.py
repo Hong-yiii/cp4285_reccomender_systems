@@ -49,7 +49,7 @@ def _report(rows, tag, level, info, metrics, **extra):
     tail = "".join(f"  {k}={v:.2f}" for k, v in extra.items())
     print(
         f"{tag:<18} {level:>5.0%}  ndcg@10={metrics['ndcg@10']:.4f}  "
-        f"recall@10={metrics['recall@10']:.4f}  mrr={metrics['mrr']:.4f}{tail}",
+        f"hit@10={metrics['hit@10']:.4f}  mrr={metrics['mrr']:.4f}{tail}",
         flush=True,
     )
 

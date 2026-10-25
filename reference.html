@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#item-categories-checkpoint"><strong>Latest · 21 · Item subcategories</strong></a>
+          <a href="#metrics-checkpoint"><strong>Latest · 22 · Shared metrics</strong></a>
+          <a href="#item-categories-checkpoint">21 · Item subcategories</a>
           <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
           <a href="#layout-checkpoint">18 · Package layout</a>
@@ -729,6 +730,8 @@
             The lightweight reference is tagged <code>boilerplate-v1</code>.
             Branch <code>item-categories-main</code> (22 October 2026) adds
             <a href="#item-categories-checkpoint">section 21: item subcategories</a>.
+            Branch <code>standard-metrics</code> adds
+            <a href="#metrics-checkpoint">section 22: shared ranking metrics</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3564,6 +3567,33 @@ scores = branch.score(fixed_queries)</pre>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 END -->
+        <!-- APPENDED METRICS CHECKPOINT 2026-10-22 -->
+        <section id="metrics-checkpoint">
+          <span class="section-num">22 / SHARED METRICS · 22 OCTOBER 2026</span>
+          <h2>One set of ranking metrics for every evaluator.</h2>
+          <p>
+            <span class="label fact">FACT</span>
+            <a href="src/cp4285/experiment/metrics.py">metrics.py</a> turns the 1-based rank of each
+            held-out target into Hit@K, NDCG@K and MRR@K at K = 5, 10 and 20. The classical and
+            neural evaluators both call it. With one target Recall@K equals Hit@K, so
+            <code>recall@K</code> stays only as an alias for older run files.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Hit@10 for the next item and Recall@10 for the next
+            items are the team's reported metrics (issue #8, 28 September). The SASRec pilot now
+            selects its checkpoint on validation Hit@10 with NDCG@10 as tie-break. That selection
+            rule was proposed on PR #9 and still needs team confirmation.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Shared formulas do not make the protocols
+            comparable: candidates, seen-item masking and splits still differ by workstream. With
+            few candidates, such as 30 item categories, Hit@10 saturates; compare Hit@1, Hit@5,
+            NDCG@10 and MRR@10 there, beside a popularity baseline. See
+            <a href="docs/EXPERIMENT.md#ranking-metrics">EXPERIMENT.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED METRICS CHECKPOINT 2026-10-22 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

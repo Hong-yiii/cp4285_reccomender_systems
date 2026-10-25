@@ -1,9 +1,11 @@
-"""Full-ranking leave-one-out evaluation: NDCG@K, Recall@K and MRR."""
+"""Full-ranking leave-one-out evaluation: Hit@K, NDCG@K and MRR."""
 
 from __future__ import annotations
 
 import numpy as np
 import scipy.sparse as sp
+
+from .metrics import DEFAULT_KS, from_ranks
 
 
 def sample_pairs(pairs: np.ndarray, n: int | None, seed: int = 0) -> np.ndarray:
@@ -18,7 +20,7 @@ def evaluate(
     seen: sp.csr_matrix,
     pairs: np.ndarray,
     n_candidates: int,
-    ks: tuple[int, ...] = (10, 20),
+    ks: tuple[int, ...] = DEFAULT_KS,
     batch: int = 1000,
 ) -> dict[str, float]:
     """Rank the held-out item of each (user, item) pair among n_candidates items.
@@ -41,10 +43,4 @@ def evaluate(
         s[seen_b.row, seen_b.col] = -np.inf
         target = s[np.arange(len(u)), t]
         ranks[lo : lo + batch] = (s > target[:, None]).sum(axis=1)
-    out = {}
-    for k in ks:
-        hit = ranks < k
-        out[f"ndcg@{k}"] = float(np.where(hit, 1 / np.log2(ranks + 2), 0).mean())
-        out[f"recall@{k}"] = float(hit.mean())
-    out["mrr"] = float((1 / (ranks + 1)).mean())
-    return out
+    return from_ranks(ranks + 1, ks)
