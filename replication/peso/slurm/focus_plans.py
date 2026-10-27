@@ -26,6 +26,14 @@ PUSH_SHARE, RARE_SHARE = 0.013, 0.005
 ATTACKS = {"bw": "bandwagon", "clone": "clone"}  # verified against the cluster's plan files
 RARE_ARMS = [("iso-clean-rare", None, None, ""), ("iso-bw3-rare", "bw", 0.03, ""),
              ("iso-clone3-rare", "clone", 0.03, "")]  # fmt: skip
+# Discriminator (CDs, seed 42): is Blue Note's persistence the label semantics or the
+# domain's buried-tail geometry? Push a second jazz label (Verve, 0.29% test share) and a
+# non-label genre (Reggae, 0.17%), each tracking the other beside it — one clean run covers
+# both targets, so three runs answer what six would. Reference: Blue Note 0.55%, in the
+# lattice as bandwagon@3%+rare.
+RARE2 = [("iso-clean-rare2", "--push 57 --rival 44"),
+         ("iso-bw3-rare2a", "--push 57 --rival 44 --attack bandwagon --alpha 0.03"),
+         ("iso-bw3-rare2b", "--push 44 --rival 57 --attack bandwagon --alpha 0.03")]  # fmt: skip
 # Deferred until the runner grows a "corrupt blocks 1-2 then stop" placement:
 # STOP_ARM = ("iso-slow12-stop", "slow", 0.01, "--attack-blocks 1,2")
 
@@ -40,14 +48,21 @@ def branch(attack, alpha, extra):
 def plans(workspace):
     out = {}
     for short in DOMAINS:
-        for seed in SEEDS[1:]:  # seed 42's rare runs exist from the core grid
+        for seed in SEEDS:
             init = f"lm-{short}-s{seed}-init"
             common = f"--seed {seed} --dumps"
             rare_base = (f"--stage branch --init {workspace}/lm-runs/{init} {common} "
                          f"--push-share {RARE_SHARE}")  # fmt: skip
-            lines = [(f"lm-{short}-s{seed}-{name}", f"{rare_base} {branch(a, alpha, extra)}")
-                     for name, a, alpha, extra in RARE_ARMS]
-            out[f"focus-{short}-s{seed}"] = lines
+            lines = []
+            if seed != SEEDS[0]:  # seed 42's rare runs exist from the core grid
+                lines += [(f"lm-{short}-s{seed}-{name}", f"{rare_base} {branch(a, alpha, extra)}")
+                          for name, a, alpha, extra in RARE_ARMS]
+            if short == "cd" and seed == SEEDS[0]:
+                base2 = f"--stage branch --init {workspace}/lm-runs/{init} {common}"
+                lines += [(f"lm-{short}-s{seed}-{name}", f"{base2} --condition isolated {extra}")
+                          for name, extra in RARE2]  # fmt: skip
+            if lines:
+                out[f"focus-{short}-s{seed}"] = lines
     return out
 
 
