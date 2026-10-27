@@ -588,3 +588,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** E1 paired against the same clean run for both targets; E1's Blue Note rival cells act as the isolation control (≤ 0.5 ranks). E2 computed from local metrics with per-pair cross-checks (within-run vs between-run differentials reconciled). Ruff/pytest not affected (no source changes); docs and plans committed.
 
 **Limits:** Eight observations with correlated features (rank, share, items) — the two-condition account is suggestive, not causal; the cleanest next test is a buried-and-learnable push on Instruments or Video Games (prediction: it should now persist). E1 is one seed, one attack.
+
+## 27 October 2026 — Cross-domain test closes the two-condition account
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** submit the ins cross-domain test of the persistence account (user's go) and report.
+
+**Assistance:**
+- Identified Instruments' only learnable tail candidate from the category stats: Drum & Percussion Accessories (149 items, about Verve's 131); Video Games has none (largest tail category, 36 items). Added the 2-run test to `focus_plans.py` (`rare4`: clean tracks Drum & Perc Acc + Keyboards & MIDI as reference) and submitted job 1024984.
+- Result: the candidate is anchored (clean rank 12.3 of 30) and the account holds negatively — the push does not land (+1.30 in the attacked period, the only failure to promote in ten pushed-category runs) and sits at clean by block 4 (−0.01). Side-observation: the unpushed popular category (Keyboards & MIDI, source of the bandwagon filler) sits −0.42 to −0.80 against clean in every block — a missed attack still promotes popularity. Video Games' tail is below the landing floor throughout.
+- Recorded in the lattice section of `docs/PESO-REPLICATION.md`: the two-condition account covers ten pushed-category observations without a miss, and its persistent quadrant is empty outside CDs.
+
+**Validation:** Paired against the run's own clean tracking the same two categories; the filler side-effect was checked at all four blocks before being claimed. One SSH session expired during polling and was re-authenticated by the user; no cluster state beyond the two run outputs.
+
+**Limits:** One seed, one attack; the persistent quadrant is empty outside CDs, so the account's cross-domain confirmation is necessarily negative (anchored candidates wash) rather than a positive replication. The filler side-effect is a single run and unreplicated.

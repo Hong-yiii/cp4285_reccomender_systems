@@ -40,6 +40,13 @@ RARE2 = [("iso-clean-rare2", "--push 57 --rival 44"),
 # run scores both and the existing bw3-rare Blue Note runs stay the reference.
 RARE3 = [("iso-clean-rare3", "--push 37 --rival 5"),
          ("iso-bw3-rare3", "--push 37 --rival 5 --attack bandwagon --alpha 0.03")]  # fmt: skip
+# Cross-domain test of the two-condition account: Drum & Percussion Accessories (ins, cat 0,
+# 149 items ~ Verve's 131) is Instruments' only learnable candidate; its clean baseline rank
+# is unknown — buried (>=20/30) and persistent confirms the account cross-domain, buried and
+# washing falsifies it, mid-pack means Instruments has no testable category. Keyboards & MIDI
+# (cat 11, the domain's standard target) rides along as the tracked reference.
+RARE4 = [("iso-clean-rare4", "--push 0 --rival 11"),
+         ("iso-bw3-rare4", "--push 0 --rival 11 --attack bandwagon --alpha 0.03")]  # fmt: skip
 # Deferred until the runner grows a "corrupt blocks 1-2 then stop" placement:
 # STOP_ARM = ("iso-slow12-stop", "slow", 0.01, "--attack-blocks 1,2")
 
@@ -67,6 +74,10 @@ def plans(workspace):
                 base2 = f"--stage branch --init {workspace}/lm-runs/{init} {common}"
                 lines += [(f"lm-{short}-s{seed}-{name}", f"{base2} --condition isolated {extra}")
                           for name, extra in RARE2 + RARE3]  # fmt: skip
+            if short == "ins" and seed == SEEDS[0]:
+                base2 = f"--stage branch --init {workspace}/lm-runs/{init} {common}"
+                lines += [(f"lm-{short}-s{seed}-{name}", f"{base2} --condition isolated {extra}")
+                          for name, extra in RARE4]  # fmt: skip
             if lines:
                 out[f"focus-{short}-s{seed}"] = lines
     return out
