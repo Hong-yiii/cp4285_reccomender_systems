@@ -546,65 +546,10 @@ The contrasts above score one metric at a time. `replication/peso/grid_lattice.p
 
 **Rare-target replication (wave 1, 27 October 2026).** The 18 rare-target arms (seeds 43–44, three domains, isolated layout, jobs 1023419–24) confirm the ease but localise the persistence. Rare-category pushes land hard on CDs & Vinyl — spikes −4.3 to −7.4 ranks — and wash out far more slowly than standard-target pushes there (block-4 residue −2.71 against +0.03 standard, 3/3 seeds, both attacks; the category is still promoted in 6/6 cd pairs). On Instruments and Video Games a rare target behaves like a standard one: residues within ±0.2 across all 12 arms. Finding 7's one-seed reading ("niche categories are easier and stick more") is therefore a CDs effect in this harness, not a general frequency law — plausibly tied to its larger category space (59 against 30 and 43), though n = 1 domain keeps that a hypothesis. Old-user retention stays near zero everywhere (worst −0.39 pp NDCG@10 on one seed, mixed signs across the rest).
 
-**Discriminator: label semantics, not tail geometry (27 October 2026, jobs 1024243).** Three further CDs runs, one seed, one clean run tracking both targets (`--push` + `--rival`): Verve Music Group (jazz label, 0.29% test share, clean rank 24.7) and Reggae (non-label genre, 0.17%, clean rank 34.0 — buried deeper than Blue Note). Under the same bandwagon-3% attack, Verve spikes −10.4 ranks and still holds −2.91 at block 4 — the Blue Note pattern — while Reggae's push washes out entirely and over-corrects to +1.46 below its own clean baseline. The unpushed target never moves more than 0.10 ranks in either run, so the two pushes are cleanly isolated. Persistence follows what the category *is* — a record label whose items co-purchase with popular music, making the poisoned association consistent with genuine structure — not where it sits in the tail. Caveat: one seed and two categories leave item-count (Verve 131 items against Reggae's 57) not fully separated from label identity.
+**Discriminator: share and size matched, and the first hypothesis falls (27 October 2026, job 1024243).** Three further CDs runs, one seed, one clean run tracking both targets (`--push` + `--rival`): Verve Music Group (jazz label, 0.29% test share, 131 items, clean rank 24.7) and Reggae (non-label genre, 0.17%, 57 items, clean rank 34.0). Under the same bandwagon-3% attack, Verve spikes -10.4 ranks and still holds -2.91 at block 4 - the Blue Note pattern - while Reggae's push barely lands (-2.2), washes out entirely and over-corrects to +1.46 below its own clean baseline. The unpushed target never moves more than 0.10 ranks in either run, so the two pushes are cleanly isolated.
 
-## Reproduce in Colab (trained weights)
+**Matched control: label semantics is refuted (27 October 2026, job 1024787).** New Age - a genre, not a label - is nearly identical to Blue Note on every measured dimension: 0.521% share against 0.546%, 245 items against 210, clean rank 24.3 against 24.9. Pushed with the same bandwagon-3% corruption, it spikes -11.5 ranks and still holds -3.32 at block 4 - persistence exactly like the label's. Blue Note, tracked unpushed in the same runs, moves at most 0.5 ranks. So "the lie sticks because the target is a record label" is wrong.
 
-[`notebooks/03_peso_colab.ipynb`](../notebooks/03_peso_colab.ipynb) re-evaluates our trained **seed-43** weights with upstream's unchanged `continual_test.py` and prints recorded, reproduced and paper numbers side by side. It does not retrain.
+**What the eight pushed-category observations instead support is a two-condition account.** A push persists when the target is buried deep enough that clean training provides no anchor (baseline rank of about 24 of 59 or lower here: Blue Note 24.9, Verve 24.7, New Age 24.3) and has enough presence for the poisoned association to be learnable (at least about 130 items / 0.3% share). Every observation fits: the three no-anchor-and-learnable categories persist (-2.7 to -3.3); Soundtracks (rank 15.5, 1.4% share) is anchored and washes; Instruments' and Video Games' rare targets (ranks 12.0 and 8.3) are anchored and wash; Reggae has no anchor but sits below the learnability floor (57 items, 0.17%), so the push barely lands (-2.2) and then reverses (+1.46). Eight observations with correlated features make this suggestive, not causal - but it is falsifiable: push a buried-and-learnable category on Instruments or Video Games and it should persist there too.
 
-**Requirements:**
-- an A100 or L4 runtime;
-- a Hugging Face token stored as the Colab secret `HF_TOKEN`, from an account that has accepted Meta's Llama 3.2 licence. It is needed only for the gated base model.
-
-**What it does:** clones this repository first (settings `REPO` and `BRANCH`; the recorded numbers it compares against are read from `replication/peso/results/`), then clones PESO at `edbec5f`, installs the pinned torch 2.5.1 and transformers 4.52.4, downloads the pinned base model, and downloads our weights from the GitHub release of `REPO`. Every release file is checked against its SHA-256. By default it evaluates blocks 1–3 (the paper's average, about 30–60 minutes); `FULL = True` evaluates all five blocks. A closing side note plots the seed-42 J-lens probe from the committed report, with no GPU needed, and lists its implications.
-
-**The weights:**
-- **Where:** GitHub release `llama-peso-weights-seed43-v1`, named *Llama-3.2-1B-PESO-replication*: 13 assets, 9.71 GB, login-free once published.
-- **Testing first:** until the notebook is verified, `REPO`, `BRANCH`, the Colab badge and the release point at a personal fork ([`randomwish/cp4285_reccomender_systems`](https://github.com/randomwish/cp4285_reccomender_systems/releases/tag/llama-peso-weights-seed43-v1), branch `feat/peso-replication`). The team repository holds the same release as a draft. Before merging, set `REPO = "Hong-yiii/cp4285_reccomender_systems"`, `BRANCH = "main"` and the badge, and publish the team release.
-- **What's in it:** each method's LoRA adapters, with every block's snapshot, and its trained embedding/output-layer copies. The block-0 state is stored once and rebuilt for the other methods.
-- **How it's made:** [`export_bundle.py`](../replication/peso/export_bundle.py) strips the frozen base weights; [`release_bundle.py`](../replication/peso/release_bundle.py) flattens and deduplicates; `modal_bundle.py --target github` builds it on Modal.
-- **Licence:** as Llama 3.2 derivatives, the release ships Meta's `LICENSE.txt`, a `NOTICE.txt` with the required attribution, "Built with Llama", and a name beginning with "Llama".
-- **Earlier copy:** a private Hugging Face repo holds the same weights in the unflattened layout (`modal_bundle.py --repo`; its location is in the ignored `local/WORKSPACE.md`).
-
-**Testing:** [`modal_colab_test.py`](../replication/peso/modal_colab_test.py) runs the notebook file top to bottom in a clean container on a Colab-like A100-40GB, with only a Hugging Face token. That is the "another user" test.
-
-**Fresh-user test, 20 October 2026.** The notebook ran top to bottom with no cell errors. It used a clean Python 3.12 container on an A100-40GB, cloned the fork, and downloaded the base model and the public release. Blocks 1–3, reproduced against recorded:
-
-| Method | NDCG@10 reproduced | Recorded | Hit@10 reproduced | Recorded |
-| --- | --- | --- | --- | --- |
-| Pretrain | 0.0111 | 0.0128 | 0.0200 | 0.0223 |
-| Single evolving LoRA | 0.0148 | 0.0152 | 0.0270 | 0.0260 |
-| PESO | 0.0144 | 0.0149 | 0.0259 | 0.0264 |
-
-- **The comparison holds.** The paired PESO − single LoRA NDCG@10 is −0.0004 both times, and single LoRA and PESO land within about 3%.
-- **Pretrain does not match.** It is 13% lower on average and 24% lower on block 2, where about 8 of 1,821 users change.
-- **The weights are not the cause.** On the seed-42 checkpoints, every one of the 145 frozen tensors the release leaves out equals Meta's base model. The frozen embedding and output originals also match on all 128,256 original token rows; their 1,024 added item-code rows are never used at inference, which runs on the trained copies the release ships.
-- **What differs is the environment.** The test used Python 3.12, numpy 2 and the A100-40GB; the recorded run used Python 3.10, numpy 1.26.4 and the A100-80GB. Upstream's evaluation path has no version-sensitive randomness, so we attribute the gap to numerics in beam search but have not isolated it.
-- **Read reproduced numbers with this spread in mind:** larger than the 1–4 users seen between GPU types on block 1.
-
-## Directions after replication
-
-Each experiment changes one variable against the replicated configuration. "Authors" means stated in the paper's conclusion (PDF p. 10: "drift-aware and more personalized regularization" and "integrating our approach with other parameter-efficient tuning methods"); "ours" means it follows from the findings above.
-
-| # | Direction | Source | Single variable |
-| --- | --- | --- | --- |
-| A1 | Drift-aware regularization | Authors | Fixed λ vs λ scaled by measured drift between consecutive blocks |
-| A2 | Personalized regularization | Authors | Uniform vs group-weighted penalty (dormant/new users) |
-| A3 | Other parameter-efficient methods | Authors (prompt tuning vs LoRA discussed in App. E, PDF p. 27) | Adapter type or LoRA rank, λ fixed |
-| O1 | Seed variance | Ours, finding 2 | Seeds 42/43/44 with the same configuration |
-| O2 | Penalty scope | Ours, finding 3 | Penalty on LoRA only vs LoRA plus item-token embeddings/output layer; rollback of each component localizes the change |
-| O3 | Retention matrix | Ours, finding 7 | Measurement only: R[i][j], backward transfer and flips |
-| O4 | Scale | Ours | Backbone size (Llama-3.2-1B → 3B) or base precision (bf16 vs 4-bit), λ fixed |
-| O5 | Cross-domain shift | Ours; the team question | Our Electronics → Movies & TV stream; needs our own block builder and tokenizer |
-| O6 | Future-item tokenizer | Ours, finding 6 | Tokenizer built from block-0 items only vs from all items |
-| O7 | Internal vs output forgetting | Ours; Jacobian lens, Gurnee et al. 2026 | Per state, the mid-layer J-lens readout of the target item's first code token vs its output rank. Drift split into unembedding change (ΔW_U·J, unpenalized) and residual-pathway change (W_U·ΔJ). Exploratory; a null result is valid |
-| O8 | A penalty that acts | Ours, finding 10 | Released penalty vs the same KL scaled by each matrix's entry count n (in effect a proximal L2 term whose size no longer depends on matrix size), then a small λ sweep |
-
-**Status, 20 October 2026:**
-- **Done:** O1 (three seeds), and O3 and O7 for seed 42 (results above).
-- **Priorities changed:** finding 10 shows the released penalty is too small to act. A1, A2 and O2 reweight or extend that same penalty, so they would inherit the problem.
-
-Recommended next step: **O8**, using the existing block-0 checkpoints, so only the incremental blocks are retrained.
-- **Single variable:** the penalty's normalization (released vs scaled by n), with the seed and everything else fixed.
-- **Then:** O2, penalty scope, at the working strength. Roughly 98% of trainable parameters sit outside the penalty (finding 3).
-- **Not yet run:** O2, O4–O6 and A1–A3. O8 has one setting (λ = 400, seed 42; results above).
+**The third mechanism, and what the average hides (zero GPU).** The runner logs a segment split (`push_trigger`/`push_other`) for every newer-vintage run. For the segment attack, the trigger group is 36% of users and *naturally ranks the pushed category about one rank worse* than other users (+0.97) — the attacker did not choose a friendly segment. The attack still manufactures a ~2-rank group advantage in its period (trigger −2.04 against other −0.07, both 9/9), and at block 4 the group is still −0.62 against clean (9/9 promoted) while other users sit +0.24 (4/9). The all-shoppers average is noise (−0.07): this persistence hides inside a group, and only the matched cut reveals it. Note the difference from the rare-target pushes — this lie *contradicts* the group's natural lean, yet the shelf layout keeps it voting; under the rewriting layout the group advantage washes out (−0.16, 4/9).

@@ -573,3 +573,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Both runs' metrics present and paired against the same clean run; the unpushed-target deltas (≤ 0.10 ranks) serve as the isolation check. No cluster writes beyond the run outputs; the analysis ran on the cluster login node over the metrics files.
 
 **Limits:** One seed, one attack (bandwagon 3%), two categories; clone confirmation and a second label pair would strengthen the claim. The rival cells were scored at the same states as the push cells, so the deltas share the clean baseline by construction.
+
+## 27 October 2026 — E1 + E2: matched control refutes label semantics; two-condition account
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** run E1 (matched control) and E2 (segment-cut analysis) for the cohesive persistence story.
+
+**Assistance:**
+- E1 (2 runs, job 1024787): New Age as the matched control for Blue Note — test share 0.521% vs 0.546%, 245 vs 210 items, clean rank 24.3 vs 24.9, genre vs label. New Age spikes −11.5 and holds −3.32 at block 4; Blue Note, tracked unpushed in the same runs, moves ≤ 0.5 ranks. Label semantics refuted; the item-count confound from the Verve/Reggae pair is dead.
+- E2 (zero GPU): computed the clean natural differential for the segment attack from the logged `push_trigger`/`push_other` cells — the trigger group (36% of users) naturally ranks the push target ~1 rank WORSE (+0.97), so the attack manufactured a group-specific preference against the group's lean; it persists at block 4 under isolated adapters (trigger −0.62, 9/9; other +0.24, 4/9) and washes under shared (−0.16, 4/9). The all-shoppers average is noise (−0.07).
+- Synthesis across all eight pushed-category observations: persistence = no clean anchor (baseline rank ≳ 24 of 59) AND learnable presence (≥ ~130 items / ~0.3% share). All eight fit; written into the lattice section of `docs/PESO-REPLICATION.md` as a falsifiable account.
+
+**Validation:** E1 paired against the same clean run for both targets; E1's Blue Note rival cells act as the isolation control (≤ 0.5 ranks). E2 computed from local metrics with per-pair cross-checks (within-run vs between-run differentials reconciled). Ruff/pytest not affected (no source changes); docs and plans committed.
+
+**Limits:** Eight observations with correlated features (rank, share, items) — the two-condition account is suggestive, not causal; the cleanest next test is a buried-and-learnable push on Instruments or Video Games (prediction: it should now persist). E1 is one seed, one attack.
