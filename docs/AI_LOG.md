@@ -528,3 +528,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Reproducibility check — a second full pass over the same metrics produces an identical JSON (`results/grid/lattice.json` == fresh run). Family means reproduce the doc's published numbers (relabel spike −7.56 pooled against −7.44/−7.68; rare-target residue −0.87/−0.89; drop-after-block-1 ≈ clean). `uv run ruff check` on the three scripts and `uv run pytest -q` (67 tests) pass. Cluster access was read-only: two `metrics.json` rsync/scp reads, two grep/sed reads of the cluster-side runner source, one stdout-only drift computation, one 2 KB script staged in the node's `/tmp`.
 
 **Limits:** Correlations are descriptive (9 domain–seed pairs; fewer within a family; drift n = 3 domains). Clean pairing is vintage-based (rival_name → clean-watch); the doc's earlier drop-arm numbers averaged |Δ| over blocks 0–3, so the lattice's signed push-rank view is a refinement, not a contradiction. The wave-1 runs still need the user's go and the cluster runner's flag check.
+
+## 27 October 2026 — Wave 1 launched: rare-target replication (18 runs)
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** launch the focused wave 1 on the cluster (user's go).
+
+**Assistance:**
+- Checked the cluster runner before submitting: the grid's low-and-slow used `--placement all`, and `--placement` accepts block|all|init only — so "attack blocks 1–2 then stop" has no existing flag. Deferred that arm rather than hot-patching the runner; the dose-matched arms had already been cut after the metric lattice answered the dose question.
+- Reduced `replication/peso/slurm/focus_plans.py` to the rare-target replication (18 runs, ~3.5 GPU-h): clean-rare, bandwagon-3%-rare and clone-3%-rare for seeds 43–44 across the three domains, isolated layout. Dropped the plan-file init lines (all nine inits exist; a fresh-workspace init would train at the wrong push-share). Verified attack names against the cluster's own plan files.
+- Copied the six `focus-*.tsv` plans to `$W/plans/` (new files, no overwrites) and submitted six `adapter_grid.sbatch` jobs: **1023419–1023424** (SRC=$W/cp4285-main/src). The cluster sbatch script is byte-identical to the repo's (md5 match).
+
+**Validation:** Plans generated create-only and inspected line-by-line before copying; sbatch scripts hash-compared; two jobs reached RUNNING within a minute, four queued. Results land in `$W/lm-runs/lm-*-iso-*-rare` and pair against each run's own `clean-rare`.
+
+**Limits:** The rare sweep stays seed-42-plus-two-seeds by design; frequency-dependent conclusions will rest on 3 domains × 3 seeds for the attacked arms. The low-and-slow-that-stop arm needs a placement change with tests before it can run.
