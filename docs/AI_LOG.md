@@ -543,3 +543,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Plans generated create-only and inspected line-by-line before copying; sbatch scripts hash-compared; two jobs reached RUNNING within a minute, four queued. Results land in `$W/lm-runs/lm-*-iso-*-rare` and pair against each run's own `clean-rare`.
 
 **Limits:** The rare sweep stays seed-42-plus-two-seeds by design; frequency-dependent conclusions will rest on 3 domains × 3 seeds for the attacked arms. The low-and-slow-that-stop arm needs a placement change with tests before it can run.
+
+## 27 October 2026 — Wave 1 results: rare-target persistence is a CDs effect
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** check the wave-1 results once the rare-target runs finished.
+
+**Assistance:**
+- All 18 new rare-target runs (plus seed 42's 9) completed; the queue is empty. Copied the new metrics locally and re-ran the lattice (now 204 attacked runs paired, 0 unmatched); refreshed `replication/peso/results/grid/lattice.json`.
+- Result: the seed-42 "rare targets are easier and stick more" reading localises to CDs & Vinyl. There, rare pushes spike −4.3 to −7.4 ranks and keep a −2.71 residue at block 4 against +0.03 for standard targets (3/3 seeds, both attacks; 6/6 cd pairs still promoted). On Instruments and Video Games, rare targets behave like standard ones (all 12 residues within ±0.2). Retention stays near zero everywhere (worst −0.39 pp NDCG@10, one seed, mixed signs otherwise). Finding 7's one-seed claim is now domain-scoped; the 59-category space is the plausible mechanism but stays a hypothesis at n = 1 domain.
+- Added the result as a "Rare-target replication" paragraph in the lattice section of `docs/PESO-REPLICATION.md`; updated `CONTEXT.md`.
+
+**Validation:** Rare runs paired against their own `clean-rare` at the same push target (0 unmatched). Numbers cross-checked per domain and per seed before writing. No new cluster writes; metrics copied read-only.
+
+**Limits:** n = 3 seeds in 1 domain for the strong effect; the mechanism (category-space size) is untested — a fourth domain or a matched-rarity sweep would settle it. The low-and-slow-that-stop arm is still deferred on the missing placement flag.
