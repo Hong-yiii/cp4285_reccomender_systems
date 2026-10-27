@@ -558,3 +558,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Rare runs paired against their own `clean-rare` at the same push target (0 unmatched). Numbers cross-checked per domain and per seed before writing. No new cluster writes; metrics copied read-only.
 
 **Limits:** n = 3 seeds in 1 domain for the strong effect; the mechanism (category-space size) is untested — a fourth domain or a matched-rarity sweep would settle it. The low-and-slow-that-stop arm is still deferred on the missing placement flag.
+
+## 27 October 2026 — Discriminator result: label semantics, not tail geometry
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** run the prepped rare-target discriminator on the cluster (user's go).
+
+**Assistance:**
+- Verified candidates against the data before choosing: Alligator Records has 1 test target (degenerate), Rhino 0.92% (too frequent); selected Verve Music Group (jazz label, 0.29% share, 131 items) and Reggae (non-label genre, 0.17%, 57 items). Combined design using the runner's rival tracking: one clean run scores both targets, each attack run pushes one while tracking the other — 3 runs instead of 6 (`focus-cd-s42.tsv`, job 1024243).
+- Read the results from the runs' push/rival cells: Verve spikes −10.4 ranks from its clean baseline of 24.7 and still holds −2.91 at block 4 (the Blue Note pattern); Reggae, buried deeper (34.0), spikes only −2.2, washes out, and over-corrects to +1.46 below its own clean baseline. The unpushed target moves ≤ 0.10 ranks throughout, so the pushes are cleanly isolated.
+- Conclusion recorded in `docs/PESO-REPLICATION.md`: persistence follows label semantics — record-label categories co-purchase with popular music, so the poisoned association is consistent with genuine structure — not buried-tail geometry. Caveat noted: item-count is not fully separated from label identity at one seed and two categories.
+
+**Validation:** Both runs' metrics present and paired against the same clean run; the unpushed-target deltas (≤ 0.10 ranks) serve as the isolation check. No cluster writes beyond the run outputs; the analysis ran on the cluster login node over the metrics files.
+
+**Limits:** One seed, one attack (bandwagon 3%), two categories; clone confirmation and a second label pair would strengthen the claim. The rival cells were scored at the same states as the push cells, so the deltas share the clean baseline by construction.
