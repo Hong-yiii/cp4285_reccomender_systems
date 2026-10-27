@@ -603,3 +603,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Paired against the run's own clean tracking the same two categories; the filler side-effect was checked at all four blocks before being claimed. One SSH session expired during polling and was re-authenticated by the user; no cluster state beyond the two run outputs.
 
 **Limits:** One seed, one attack; the persistent quadrant is empty outside CDs, so the account's cross-domain confirmation is necessarily negative (anchored candidates wash) rather than a positive replication. The filler side-effect is a single run and unreplicated.
+
+## 27 October 2026 — Artifact updated with the persistence story
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** fold the persistence findings into the layperson artifact.
+
+**Assistance:**
+- Added Finding 07 ("Some lies have something to hold onto") to `reports/corrupted-stream-grid.html`: prose plus a five-bar chart of block-4 residue for the pushed CDs categories (New Age +3.3, Verve +2.9, Blue Note +2.7, Reggae −1.5, Soundtracks washed), the two-condition account in plain words, the ins/vg boundary, and the trigger's group-hidden persistence.
+- Added a fifth conclusion card ("A lie needs something to hold onto") with a grok-it box; retitled the conclusions to "Five things the 328 runs said"; updated run counts (303 → 328) and dates throughout; extended the caveats (discriminators are one seed each; the hold-onto account is tested in one catalogue and checked in the negative on the others).
+- Rendered the PDF (10 A4 pages), updated the gist (revision b802807) and verified the htmlpreview render shows the new section.
+
+**Validation:** Headless-Chrome screenshots of the new section and conclusions at desktop width; PDF page-checked (10 pages, no broken cards); the gist's raw HTML grep-confirms the new content and a preview screenshot matches the local render. Repo files committed.
+
+**Limits:** The artifact is a communication piece; the persistence account's limits (one seed, one shop for the strong effect, correlated features) live in the caveats list rather than the body.
