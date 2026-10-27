@@ -480,6 +480,70 @@ Each seed is queued as four short jobs, because every stage fits the `gpu` parti
 
 Upstream `--debug` trains on 100 examples per block. On one H100 NVL, pretraining took 186 s, single LoRA 403 s and PESO 423 s. On block 1 (1,772 users, 10 beams, batch 1), upstream `continual_test.py` and our evaluator returned identical metrics: Hit@1 0.5085, Hit@5 0.8550, Hit@10 0.9577, NDCG@5 0.6929, NDCG@10 0.7265. `category_report.py` reproduces the same five values from the dump. Even 100 examples per block bring the model close to the popularity baseline on those users (Hit@1 0.5446, NDCG@10 0.7444). Evaluation took 0.087 s per test user. The first smoke run, before the decoding change, trained normally and then failed on the first test user (finding 11).
 
+## Corrupted-stream grid — 24–26 October 2026 (seeds 42–44)
+
+How far can a corrupted training stream move a category the recommender promotes, what does it cost on everything else, and does the adapter layout decide what survives? This adversarial extension reuses PESO's released blocks with PR 14 level-2 categories (30 for Instruments, 43 for Video Games, 59 for CDs & Vinyl), the targets and the evaluator above, with edited training events. It is **not** part of the PESO replication and says nothing about PESO's penalty. 303 grid runs were scored on the cluster; every number below compares an attacked run with the clean run of the same domain, seed and condition.
+
+### Design
+
+- **Grid:** Instruments, Video Games and CDs & Vinyl × seeds 42–44. Each branch run continues from an init adapter on blocks 1–4; the `poisonbase` branches start from the poisoned init instead.
+- **Target:** one category per run, the one whose blocks 1–4 test share is nearest 1.3% (`--push-share 0.013`); the rare sweep uses 0.5%. The measured quantity is the mean rank of that category among the domain's categories over users whose own target is not that category (lower = promoted), plus its hit@1/5/10. Clean runs sit at mean rank 8–10 on Instruments, 8–11 on Video Games and 12–16 on CDs & Vinyl, with hit@5 about 4%.
+- **Corruptions:** bandwagon shilling (`bw1/3/5` at α = 1/3/5%), clone shilling, real-history hijack, demotion of a rival category, relabelling 10% of a block's other listings, vandalism (random edits), and a segment trigger that fires only for users whose history contains a trigger category. `-drop`, `-drop2` and `-drop3` remove the attacked adapter after block 1, 2 or 3; `poisonbase` starts from an adapter poisoned at init, then trains on clean data.
+- **`condition` is adapter topology, not users.** In `shared`, one LoRA is updated on every block: block 1's corrupted update is written into the same weights that later clean blocks keep updating, so it is overwritten. In `isolated`, `add_stream` runs before each block, which freezes every adapter so far and stacks a new trainable one; `set_active` sums them at scoring. Block 1's poisoned adapter is never updated again, so it keeps voting, diluted by later adapters. A `shared` run therefore has one adapter; an `isolated` run has the init adapter plus four block adapters, summed.
+- **Unit of comparison.** An attacked run is differenced against the clean run of the same domain, seed and condition — never against the other condition directly, because the clean baselines already differ (final push rank 10.41 shared against 11.02 isolated). The shared-vs-isolated number is then a paired difference of those two differences over the nine domain–seed pairs. It is not two adapters competing inside one model.
+- **Signs:** Δrank < 0 means the pushed category moved up; Δhit@5 > 0 means it entered more top-5 lists; ΔNDCG and Δblock-0 < 0 are collateral cost. Block 0 holds the pretraining users, so Δblock-0 is retention.
+
+### Results
+
+**1. Every attack lands in the block it touches, then fades.** Mean rank change against clean, by block (negative = promoted; 9 pairs each):
+
+| Branch | Block 1 | Block 2 | Block 3 | Block 4 |
+| --- | --- | --- | --- | --- |
+| shared, bandwagon 3% | −2.53 | +0.22 | +0.11 | +0.10 |
+| isolated, bandwagon 3% | −2.14 | −0.59 | −0.13 | −0.13 |
+| shared, clone 3% | −2.31 | +0.16 | +0.20 | +0.01 |
+| isolated, clone 3% | −2.23 | −0.88 | −0.36 | −0.26 |
+| shared, low-and-slow 1% | −1.65 | −0.62 | −0.93 | +0.02 |
+| isolated, low-and-slow 1% | −1.45 | −1.18 | −0.88 | −0.51 |
+| shared, relabel | −7.44 | −0.99 | −0.56 | −0.09 |
+| isolated, relabel | −7.68 | −1.94 | −1.55 | −1.18 |
+| shared, history hijack | −4.69 | −0.63 | −0.18 | −0.12 |
+| isolated, history hijack | −4.80 | −1.84 | −1.14 | −0.80 |
+
+The block-1 hits are consistent in all nine domain–seed pairs for bandwagon, clone, low-and-slow, relabel and hijack. At that block the same attacks put the category in 7.4% (bandwagon), 5.8% (clone), 5.5% (low-and-slow), 31.2% (hijack) and 88.6% (relabel) of users' top-5 lists, against 4.1% for clean. By block 4, 83–94% of each one-off isolated effect is gone (low-and-slow keeps about a third), and the shared layout removes 97–100% or reverses it. **Corruption is loud when fresh and quiet once the model keeps learning.**
+
+**2. Low and slow is the only attack that keeps its seat.** A 1% injection in every block starts smaller (−1.45) but still moves the category −0.51 by block 4 — about a third of its initial effect, against 6% for the one-shot 3% bandwagon. It is also the only attack whose top-5 gain persists to block 4: +1.10 pp (8/9), against +0.19 pp for that bandwagon. Block 4 receives its own 1% dose, so this measures sustained pressure rather than survival, and it holds only under `isolated`: the `shared` layout ends at +0.02 ranks (4/9). Tripling a one-shot dose buys nothing: α = 1/3/5% gives −0.15/−0.20/−0.17 (bandwagon) and −0.11/−0.18/−0.19 (clone) on the final block. **Sustained pressure beats volume.**
+
+**3. Relabelling is the sharpest lever — for one block.** Relabelling 10% of a block's other listings puts the category in the top 5 for 88.6% of users in that block (mean rank 3.7 against 11.4 clean); history hijack does it for 31.2%. By block 4 both are back at baseline (3.8% and 3.7% against 4.1% clean), though their mean-rank residues remain the largest (−1.18 and −0.80, 9/9, every domain). The tampered block is also where the cost is concentrated: relabelling costs 0.85 pp NDCG@10 there, and 0.18 pp of block-0 retention over the run; hijack costs 0.04 pp of block-0 retention.
+
+**4. The adapter layout decides what survives.** Same attack, domain and seed; only `--condition` changes. The initial hit is nearly identical (bandwagon −2.53 shared against −2.14 isolated; relabel −7.44 against −7.68), so the layout does not change how hard the first block lands. It changes the residue: shared reverses to +0.10 by block 4, isolated keeps −0.13; relabel ends at −0.09 shared against −1.18 isolated. Paired over nine domain–seed pairs, isolated minus shared is −0.23 ranks (bandwagon), −0.27 (clone) and −1.09 (relabel, 9/9). **Continual fine-tuning overwrites the poison; a bank of frozen block adapters keeps it voting.**
+
+**5. A poisoned starting point heals.** `init-poison` starts with the category 0.87 ranks promoted (10.44 against 11.31). After four blocks of clean training, `poisonbase` sits 0.22 (isolated) and 0.50 (shared) ranks behind clean. No promotion survives.
+
+**6. Hidden triggers flip a segment, not a crowd.** The trigger attack's overall effect is noise (−0.07). Among users whose history carries the trigger, clean runs leave them 0.67 ranks worse than other users; the attack leaves them 0.19 better — a +0.86 rank swing (8/9; shared +0.46, 9/9). The trigger changes who gets promoted, not how many.
+
+**7. Niche categories are easier; demotion and vandalism fail.** At a 0.5% target share (seed 42), bandwagon moves −0.87 and clone −0.89, against −0.21 and −0.43 at 1.3%. Demotion moves the rival category −0.02 ranks (5/9), and vandalism moves the pushed category −0.11 (5/9): neither does anything reliable.
+
+**8. The cost is small.** Mean final-block NDCG@10 changes stay within ±0.16 pp for the representative attacks, though the tampered block itself is worse (relabelling −0.85 pp); the largest four-block average is relabelling's −0.3 pp, and block-0 retention stays within 0.22 pp. Even the strongest attack is a targeted nudge, not a collapse. Dropping the attacked adapter right after block 1 leaves the category at clean (−0.10 ranks). Dropping it after block 2, after block 3 or at the end leaves it 1.16, 1.45 and 1.85 ranks below clean, in all three domains: the adapters trained on top learned to cancel it, and deleting it leaves their counter-push behind. Rollback over-corrects.
+
+### Caveats
+
+- Nine domain–seed pairs for the core grid; dose only on Instruments (3 seeds); rare targets only seed 42 (3 domains). Seed standard deviations are 0.1–0.7 ranks for most branches and about 1.2 for the drop variants, so effects below about 0.3 ranks are inside noise.
+- The rank is over the domain's 30, 43 or 59 categories, not 53k items. A 1–2 rank move from a baseline of 8.5–11 rarely crosses into the top 5; the large relabel and hijack effects do, which is why their top-5 spikes are so visible.
+- `shared` and `isolated` are training and serving layouts for the *same* data and attack, not two attacks. They also differ in capacity (one adapter against five summed), so the contrast measures persistence in this harness, not a clean causal effect of "sharing" alone. Every comparison uses the matching clean run.
+- These runs use the adapter-blocks harness on category data, not PESO's penalty or the upstream item pipeline. They do not speak to the PESO null result.
+
+### Metric-to-metric lattice — 27 October 2026 (zero GPU, post-hoc)
+
+The contrasts above score one metric at a time. `replication/peso/grid_lattice.py` instead pairs every attacked branch with the clean run of the same domain, seed, condition and push target — 192 attacked runs, with the 54 `-drop*` arms as intervention records and newer-vintage branches paired with `clean-watch` — and relates the metrics across runs. Full per-run records and every relation: [`../replication/peso/results/grid/lattice.json`](../replication/peso/results/grid/lattice.json). Per-domain natural drift (JS between consecutive blocks' training-category mixes, 0.001–0.016) comes from `grid_drift.py` ([`natural-drift.json`](../replication/peso/results/grid/natural-drift.json)).
+
+- **Dose predicts the immediate hit within a kind, not across kinds.** Within bandwagon, more pushed-category lessons → bigger block-1 promotion (ρ = −0.57, 33 runs); clone −0.49. Across kinds at α = 3% the per-lesson efficiency spans ~2×: history hijack ≈ 0.024 ranks per pushed lesson and bandwagon ≈ 0.023, against relabelling ≈ 0.012 (636 pushed lessons) — relabel's headline spike is its dose, and the shill kinds saturate as it grows (1% → 5% moves bandwagon's spike only −1.3 → −2.9).
+- **Bigger spikes leave bigger residues only where memory persists.** Isolated: spike → block-4 residue ρ = +0.66 (63/81 pairs); shared: +0.27 (29/69). The frozen-adapter bank converts immediate damage into lasting damage; the rewritten adapter does not.
+- **The segment trigger's residue is real, stealthy and group-targeted.** The runner logs `push_trigger`/`push_other` cells for every newer-vintage run (membership: trigger category in the user's history). At block 4 under isolated, the trigger group is still promoted −0.62 ranks (9/9 pairs) while other users sit +0.25 against clean — a −0.86 differential (8/9). Relabel's residue also concentrates there (−1.37 vs −1.09, both 9/9). The all-shoppers average hides the segment effect.
+- **Stealth and persistence line up only weakly** (AUC → residue ρ = +0.19 over 156 runs): clone (AUC 0.70) keeps −0.12 at block 4 against bandwagon's −0.01 at AUC 1.0, but the segment attack (AUC 0.89) is the strongest carrier.
+- **Natural drift does not explain the washout** (drift → decay ρ = −0.22, drift → residue +0.15; n = 3 domains): at these JS levels, "kept learning on clean data" is not a drift-speed effect.
+- **Counter-adaptation is measurable two ways.** Scoring-time deletion (the `rollback` cells, isolated attacked runs): the bigger the original spike, the further below clean the category lands once A1 is removed (ρ = −0.68 over 90 runs) — later adapters had learned to cancel it, and deletion unmasks the counter-push. Delete-and-retrain (the `-drop*` arms): mean |rank Δ| over blocks 0–3 grows with the deletion delay (ins-s42: 0.07 → 0.42 → 1.13), consistent with finding 8 — but the signed direction is domain-dependent (cd-s42's deletions leave the category still promoted by 1.0–2.6 ranks; ins-s44's over-correct by 0.3–1.8), so "below clean" is a magnitude statement, not a universal one.
+
 ## Reproduce in Colab (trained weights)
 
 [`notebooks/03_peso_colab.ipynb`](../notebooks/03_peso_colab.ipynb) re-evaluates our trained **seed-43** weights with upstream's unchanged `continual_test.py` and prints recorded, reproduced and paper numbers side by side. It does not retrain.

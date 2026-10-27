@@ -438,3 +438,93 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** The suite (67 tests) and Ruff pass for the files this work added. The reports hold aggregates only. Scoring observed labels only leaves each level's update gain unchanged.
 
 **Limits:** Product results rest on two training seeds. The ladder cannot separate product identity from the block-to-block shift as the cause of forgetting, since both change at the same rung.
+
+## 26 October 2026 — Corrupted-stream grid analysis and write-up
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** analyse the finished corrupted-stream grid, turn it into presentable narratives, and explain what the shared-vs-isolated comparison actually tests.
+
+**Assistance:**
+- Read the grid's 303 `metrics.json` files and computed block-by-block promotion, dose, rare-target, trigger, demotion, vandalism and rollback contrasts, each against the clean run of the same domain, seed and condition. Confirmed in `adapter_blocks.py` and `category_lm.py` that `condition` is adapter topology — `shared` updates one adapter across blocks; `isolated` calls `add_stream`, which freezes the adapters so far and sums them at scoring — so the shared-vs-isolated number is a paired difference of attacked-minus-clean effects, not two adapters inside one model.
+- Added the corrupted-stream section to `docs/PESO-REPLICATION.md` with the design, the block-1-to-block-4 table, side-effect numbers and caveats; added a status bullet to `CONTEXT.md`. Cluster operations and job ids went to ignored `local/WORKSPACE.md`.
+
+**Validation:** Every quoted number was recomputed from the run metrics, with sign counts over the nine domain–seed pairs. The section states the comparison unit and that the rank is over 30 categories.
+
+**Limits:** Nine pairs for the core grid; dose only on Instruments; rare targets only seed 42. Effects below about 0.3 ranks are inside seed noise. The grid uses the adapter-blocks harness on category data, so it says nothing about PESO's penalty or the replication's null result.
+
+## 26 October 2026 — Layperson write-up and shareable artifact
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** turn the corrupted-stream analysis into a layperson write-up and upload an artifact.
+
+**Assistance:**
+- Wrote a self-contained HTML feature in ignored `reports/corrupted-stream-grid.html` and rendered `reports/corrupted-stream-grid.pdf` (8 A4 pages) with headless Chrome. It uses a shop-assistant analogy, six findings and inline CSS charts; no external assets or fonts.
+- Corrected the sharp-attack framing while writing it. At block 1, relabelling reaches 88.6% top-5 (mean rank 3.7 against 11.4 clean) and history hijack 31.2%; both return to about 4% by block 4. The earlier "buys rank, not top-5" sentence described the block-4 residue and was misleading. `docs/PESO-REPLICATION.md` now separates the immediate spike from the residue and records the −0.85 pp NDCG@10 cost in the tampered block.
+- Added a "The six bars, decoded" table beneath the top-five chart. It gives the exact mechanics and dose for each label: clean control; bandwagon bots (about half target-category items, the rest from the 50 most popular items; 3% of training examples); cloned real histories with about half replaced by target items (3%); the bandwagon recipe at 1% every period; target items inserted into real histories before the last two events (3%); and 10% of other listings relabelled in training only. The table stacks on narrow screens; print lets it flow across pages with a repeated header.
+- Added a "Four things the 303 runs said" conclusions section with a green "Grok it" intuition box on each card (the lie fades; the drip beats the splash; forgetting is the defence; a nudge, not a break-in), each tied to the measured numbers.
+- Uploaded the HTML and PDF to a secret GitHub gist; the rendered HTML is served through the statically CDN and htmlpreview. The gist URL and local paths are in ignored `local/WORKSPACE.md` and the chat. No repository or cluster state changed.
+
+**Validation:** Every quoted number was read from the 303 grid metrics. The HTML was checked with headless-Chrome screenshots at desktop and phone widths, and the PDF page-checked (8 pages). The artifact is a communication piece, not a new result.
+
+**Limits:** Layperson rounding; the page repeats the technical section's caveats. The gist is unlisted, not access-controlled, and the statically link is a third-party render of the raw gist file.
+
+## 26 October 2026 — Corrections to the corrupted-stream section
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** update the docs after a three-seed recomputation of the corrupted-stream grid from its `metrics.json` files.
+
+**Assistance:** In `docs/PESO-REPLICATION.md`, gave each domain's category count (30, 43, 59) and clean baseline range, stated that low-and-slow's block-4 value includes that block's own dose and holds only under isolated adapters, and replaced the rollback sentence with the measured timing (−0.10, 1.16, 1.45 and 1.85 ranks below clean for drops after blocks 1, 2, 3 and at the end). Matched `CONTEXT.md`.
+
+**Validation:** the section's block-by-block table for bandwagon, clone, low-and-slow, relabel and history hijack matches the recomputation within 0.01 ranks.
+
+**Limits:** documentation only; no runs or cluster state changed.
+
+## 27 October 2026 — Focused follow-up prep (metric lattice + wave-1 plans)
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** evaluate the proposed follow-up experiments (A–I), then prep wave 0/1 with a tighter focus, centred on metric-to-metric analysis of the existing 303 runs.
+
+**Assistance:**
+- Assessed the A–I list: the dose-matching arithmetic in proposal B is internally inconsistent (hijack 218 vs 262 lessons; bandwagon 135 vs 263); "the original task is untouched" overstated finding 8; and the reported trigger block-4 segment residue (0.62 ranks, 9/9 pairs) should be re-derived from existing metrics before any new runs.
+- Added `replication/peso/grid_lattice.py`: a read-only metric-to-metric pass over the run folders. Each attacked run is paired against the clean run of the same domain, seed, condition and push target; the pass then relates dose (pushed lessons) -> spike -> decay slope -> residue (own-block and same-users) -> late NDCG cost -> retention cost -> separability (AUC/JS). `--inspect` prints one run's key tree so the cluster schema can be confirmed before the full pass; unknown keys are skipped loudly, never guessed.
+- Added `replication/peso/slurm/focus_plans.py`: create-only plan TSVs for a narrowed wave 1 — dose-matched real-vs-fake (bandwagon 3% at target-share 0.8; hijack at 1.85%) and the rare-target replication for seeds 43–44, isolated layout only. 36 new runs, about 7 GPU-hours. Attack names and the hijack dose are placeholders pending the wave-0 inspect; regenerate before submitting.
+- Deferred C (dose until it breaks) and the wider A/D/E/I set until the lattice shows which relation deserves an intervention.
+
+**Validation:** Smoke-tested both scripts against a synthetic 10-run fixture in `/tmp` (paired pass, `--inspect`, create-only refusals on second invocation). `uv run ruff check` passes on the new files; `uv run pytest -q` (67 tests) passes. No cluster contact: the SSH session remains closed after the failed-password incident, so nothing has run against the real metrics and the schema assumptions are deliberately unverified (`--inspect` is the check).
+
+**Limits:** The lattice's report/stealth key names are guesses to be confirmed by `--inspect`; correlations over 9 domain–seed pairs (fewer within a family) are descriptive, not inferential; wave-1 doses must be recomputed from real injection reports before submission.
+
+## 27 October 2026 — Follow-up refocused on continual learning / forgetting
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** reconsider whether the prepped wave-1 runs help focus the investigation on continual learning and category forgetting.
+
+**Assistance:**
+- Judged the earlier wave-1 set against the project question: the dose-matched real-vs-fake arms (B) measure attack potency, not forgetting, and were cut; the dose escalation (C) stays deferred. Two arms remain because they measure forgetting directly: the rare-target replication (frequency-dependent forgetting, tying to the ladder's finding that forgetting appears at fine granularity) and low-and-slow that stops after block 2 (the forgetting curve of a sustained update against the one-off arms).
+- Extended `replication/peso/grid_lattice.py` with the continual-learning payload: drop/rollback runs now become intervention records (rebound after deleting the attacked adapter, against clean and against the intact run — the counter-adaptation measurement), an optional `grid_aggregate.py` DRIFT_JSON adds natural drift as a covariate for the washout relations, and the summary prints rare-vs-common and intervention tables. The trigger segment split is flagged as needing the per-user dumps, not metrics.json.
+- `replication/peso/slurm/focus_plans.py` regenerated for the refocused arms: 27 isolated-layout runs, about 5 GPU-hours.
+
+**Validation:** Smoke-tested on the synthetic fixture including an intervention run and a drift JSON: relations, rare/intervention tables and create-only refusals all behave. `uv run ruff check` passes on both files; `uv run pytest -q` (67 tests) passes. Still no cluster contact.
+
+**Limits:** Same as the earlier entry, plus: the drift relation has n = domains (3) and is descriptive; the drop-timing parser guesses from branch names and config keys until `--inspect` confirms the schema.
+
+## 27 October 2026 — Wave 0 run: the metric-to-metric lattice over the 303 grid runs
+
+**Tool:** OpenCode (GLM 5.3 Flash test).
+
+**Request:** run the prepped wave 0 (user's go) and feed the results back into the focused investigation.
+
+**Assistance:**
+- Copied the 312 run folders' `metrics.json` files (7.1 MB, metrics only) from the cluster to a local temp dir over the reopened SSH session; no cluster state changed. Debugged the schema against the real files: attack type lives in a per-run `attack` dict (`kind`: shill / real-history / relabel / demotion / vandalism) while `config.attack` is 'none' for most kinds; `slow1` keeps per-block reports; isolated attacked runs carry a `rollback` dict (scoring-time deletion of the block-1 adapter); newer-vintage branches pair with `clean-watch`; rare branches need their own clean at the same push target.
+- Extended `replication/peso/grid_lattice.py` with what the schema revealed: kind-specific doses, the runner's own `push_trigger`/`push_other` segment split (no dumps needed), the rollback counterfactual, condition-split residue relations and an optional drift covariate. Added dependency-free `replication/peso/grid_drift.py` (mirrors the cluster's `load`/`training_examples`/`js`) and ran it on the login node for the drift covariate.
+- Ran the full pass: 192 attacked runs paired, 54 interventions, 0 unmatched. Results committed under `replication/peso/results/grid/` and summarised in the new "Metric-to-metric lattice" subsection of `docs/PESO-REPLICATION.md`. Headlines: spike → residue is strong only under isolated adapters (ρ +0.66 vs shared +0.27); the segment trigger's block-4 residue is group-targeted (−0.62 ranks, 9/9) and hidden by the all-shoppers average; stealth and persistence line up only weakly; natural drift does not explain the washout; scoring-time deletion unmasks the counter-push (ρ −0.68); the delete arms' over-correction is magnitude-true but direction-mixed by domain.
+- The dose question the earlier proposal B targeted is answered at the metric level: within-bandwagon dose → spike is real (ρ −0.57), but per-lesson efficiency differs by kind (~0.024 ranks/lesson for hijack and bandwagon against ~0.012 for relabel), so B as designed is unnecessary; the rare-target replication and low-and-slow-that-stop arms remain the wave-1 candidates.
+
+**Validation:** Reproducibility check — a second full pass over the same metrics produces an identical JSON (`results/grid/lattice.json` == fresh run). Family means reproduce the doc's published numbers (relabel spike −7.56 pooled against −7.44/−7.68; rare-target residue −0.87/−0.89; drop-after-block-1 ≈ clean). `uv run ruff check` on the three scripts and `uv run pytest -q` (67 tests) pass. Cluster access was read-only: two `metrics.json` rsync/scp reads, two grep/sed reads of the cluster-side runner source, one stdout-only drift computation, one 2 KB script staged in the node's `/tmp`.
+
+**Limits:** Correlations are descriptive (9 domain–seed pairs; fewer within a family; drift n = 3 domains). Clean pairing is vintage-based (rival_name → clean-watch); the doc's earlier drop-arm numbers averaged |Δ| over blocks 0–3, so the lattice's signed push-rank view is a refinement, not a contradiction. The wave-1 runs still need the user's go and the cluster runner's flag check.
