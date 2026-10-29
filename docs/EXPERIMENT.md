@@ -79,7 +79,7 @@ The meeting's “200%” could mean `B/A = 2`, equivalent to a B share of two-th
 
 Use fresh, unused A data for the A update stream where available. Reusing stored initial A examples is already replay; a separate replay condition must specify what extra memory/selection policy it adds.
 
-A proposed corrupted-stream variant (24 October 2026, agent proposal): shill profiles as B, a language model with adapters as the neural learner and adapter isolation as the mitigation. It keeps this design's conditions and outcomes; see [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md#proposed-variant-corrupted-streams-and-adapter-isolation-24-october-2026).
+A proposed corrupted-stream variant (24 October 2026, agent proposal): shill profiles as B, a language model with adapters as the neural learner and adapter isolation as the mitigation. It keeps this design's conditions and outcomes; see [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md#proposed-variant-corrupted-streams-and-adapter-isolation-24-october-2026). Extended on 26 October into a seven-corruption attack catalogue — including corruptions of real activity that no shopper-based detector sees, a poisoned starting state no rollback reaches, and a rollback-timing sweep that measures the defender's own undo as a weapon; see [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md#attack-catalogue-and-rollback-timing-26-october-2026).
 
 ## Scope and interpretation
 

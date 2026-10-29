@@ -172,6 +172,12 @@ def main():
     asum.add_argument("init", help="The init run's metrics.json")
     asum.add_argument("branches", nargs="+", help="Branch runs' metrics.json files")
     asum.add_argument("--json", help="Also save the summary here (create-only)")
+    rp = commands.add_parser(
+        "robustness-plan", help="Run matrix for the corrupted-stream attack catalogue"
+    )
+    from .experiment.robustness import add_arguments as robustness_arguments
+
+    robustness_arguments(rp)
     bs = commands.add_parser("blocks-summary", help="Seeds and arms of `cp4285 blocks`")
     bs.add_argument("runs", nargs="+", help="metrics.json files")
     bs.add_argument("--json", help="Also save the summary here (create-only)")
@@ -260,6 +266,10 @@ def main():
             if args.json:
                 save_json(args.json, summary)
             print(adapter_markdown(summary))
+        elif args.command == "robustness-plan":
+            from .experiment.robustness import plan
+
+            plan(args)
         elif args.command == "blocks-summary":
             from .experiment.blocks import markdown, summarize
 

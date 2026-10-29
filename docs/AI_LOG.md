@@ -320,3 +320,37 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Limits:** Video Games and CDs & Vinyl test sets are smaller (866–1,949 users per block). Video Games labels rely on a classifier with 0.81 holdout accuracy for 4% of items. Yelp is excluded because its tags have no hierarchy.
 
 **Result, 25 October:** all 114 runs completed (22.6 GPU-hours; one 3-hour timeout resumed by its follow-up job). Added `grid_aggregate.py` and `grid_checks.py` to the PESO branch checkout and wrote the results into `docs/CONTINUED-TRAINING.md`. The pilot's five predictions hold across the three domains, with seed counts reported for each; the rare-target arm has one seed, and Video Games' rare category was already in every clean top 10.
+
+## 26 October 2026 — Attack catalogue and rollback timing
+
+**Tool:** OpenCode (GLM 5.3 Flash).
+
+**Request:** build on the md files' attack and defence suggestions — the seven corruption ideas and the rollback-as-weapon reading — treating the learner abstractly as a language model with a LoRA adapter rather than extending PESO itself.
+
+**Assistance:**
+- Added `experiment/corruption.py`: one interface for the shill corruption (delegating to `shilling.py`) plus four corruptions of real activity — `real-history` (real shoppers' training events gain target items; accounts and every user's validation/test events untouched), `demotion` (shills copied from a rival category's customers, buying the promoted category), `vandalism` (uniform-noise profiles, no target) and `relabel` (a fraction of a block's items re-listed under the promoted category; the remapped map builds training rows only, evaluation keeps the true map). Every report records the category-mix shift and, where profiles exist, a separability AUC.
+- Extended `experiment/adapter_blocks.py`: `--corruption`, `--placement` (one block, every block, or block 0 of the init stage — a poisoned base refuses rollback), `--rollback-block N` (delayed rollback; the summary's new `drop_effect` compares the dropped cell with the clean state at the same block, turning the late-rollback over-correction into a timing sweep), `--rival`/`--rival-share` and `--trigger`/`--trigger-share` (share rules resolve per domain, so no watched category is picked by hand; a trigger's measurement is split into `push_trigger`/`push_other`).
+- Added `experiment/robustness.py` (`cp4285 robustness-plan`): the run matrix as JSON lines with ready `adapter-blocks` argv, stage A (rollback timing, low-and-slow, hijacked accounts) and stage B (demotion, hidden trigger, relabel, vandalism, poisoned starting data); it launches nothing.
+- Wrote the catalogue, its modelling choices and the rollback-timing reading into `docs/CONTINUED-TRAINING.md`, with pointers in `docs/EXPERIMENT.md` and `docs/IMPLEMENTATION.md`.
+
+**Validation:** 17 new tests: corruption shares and accounting, untouched evaluation events, demotion donors, relabel's true-map separation, delayed-rollback and placement validation, poisoned-init branches, rival/trigger cells and the planner's argv parseability and uniqueness. The suite (95 tests) and Ruff pass.
+
+**Limits:** The catalogue's 63 seed-42 runs (three domains, stages A and B) completed on the SoC cluster on 26 October (~13 GPU-hours; run folders in that checkout's `lm-runs/`). One seed per cell: the headline comparisons — corrupting real accounts pushes 2–3× harder than fake ones at the same dose, a 10% relabel is the strongest and behaviourally undetectable attack, sustained 1% persists where a single block heals, the hidden trigger concentrates in its segment while the aggregate hides it, demotion promotes without burying the rival, vandalism at 3% harms nothing measurably, and the rollback-timing over-correction (+0.85 to +2.11 ranks as the undo is delayed) holds on Instruments and Video Games but not on CDs & Vinyl — all need seeds 43–44 before any claim. The modelling choices (training-map versus evaluation-map split for relabel, validation/test events untouched under real-history) are agent proposals, open to team revision. A first submission attempt failed because the planner omitted `--init` on branch lines; fixed in `experiment/robustness.py` with a regression test, and the jobs were resubmitted.
+
+## 26 October 2026 — Three-seed check of the attack catalogue
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** write up what changed in the corrupted-stream study, its results and the reasoning between steps as an artifact; then update the docs and redo the write-up with more illustrations.
+
+**Assistance:**
+- Copied the 312 `metrics.json` files (303 grid runs, 7 pilot and 2 smoke runs) read-only from the SoC cluster's `lm-runs/` into a session scratch folder; no checkpoints, dumps or cluster state were touched.
+- Recomputed every catalogue contrast for seeds 42–44: block-by-block push, top-5 share, rollback timing, a with/without-A1 decomposition of the rollback over-correction, the trigger split, the rival rank, the poisoned base, costs and noise floors.
+- Replaced the seed-42 results in `docs/CONTINUED-TRAINING.md` with the three-seed results and listed which seed-42 readings changed. Updated `CONTEXT.md` and `reference.html` section 23.
+- Corrected the PESO branch checkout's `docs/PESO-REPLICATION.md` (category counts per domain, clean baselines, the low-and-slow reading, rollback numbers).
+- Published a private illustrated write-up as a claude.ai artifact.
+
+**Validation:** the recomputed bandwagon, clone, low-and-slow, relabel and real-history tables match `docs/PESO-REPLICATION.md` within 0.01 ranks. The suite (95 tests) and Ruff pass on the working tree.
+
+**Limits:** the decomposition compares separate drop runs with the attacked run, so it carries run-to-run noise (at most 0.20 ranks for identical clean configurations). Reasons given for the mechanisms are interpretations of these measurements.
+

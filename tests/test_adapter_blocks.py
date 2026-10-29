@@ -157,3 +157,161 @@ def test_summary_compares_only_runs_pushing_the_same_category(tmp_path):
              write("attacked7", "clone", 7, 6.0)]  # fmt: skip
     row = adapter_blocks.summarize(init, paths)["branches"]["attacked7"]
     assert row["push_vs_clean"]["state1_block1"]["mean_rank"] == pytest.approx(-3.0)
+
+
+def test_delayed_rollback_sweep(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    with pytest.raises(ValueError):  # a delayed rollback still needs isolated adapters
+        adapter_blocks.run(parse(data, tmp_path / "bad", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--attack", "bandwagon", "--push", "1",
+                                 "--rollback-block", "2"))  # fmt: skip
+    with pytest.raises(ValueError):  # and cannot precede the attacked block
+        adapter_blocks.run(parse(data, tmp_path / "early", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--condition", "isolated", "--attack",
+                                 "bandwagon", "--push", "1", "--rollback-block", "0"))  # fmt: skip
+    with pytest.raises(ValueError):  # and takes one timing, not two
+        adapter_blocks.run(parse(data, tmp_path / "both", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--condition", "isolated", "--attack",
+                                 "bandwagon", "--push", "1", "--rollback-after",
+                                 "--rollback-block", "2"))  # fmt: skip
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "late", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--condition", "isolated", "--attack", "bandwagon", "--push", "1", "--alpha", "0.2",
+        "--rollback-block", "2",
+    ))  # fmt: skip
+    assert run["learner"]["adapters"] == ["a0", "s2", "s3", "s4"]  # s1 dropped after block 2
+    assert "dropped2_block2" in run["cells"] and "rollback" not in run
+    adapter_blocks.run(parse(data, tmp_path / "iso-clean", "--stage", "branch", "--init",
+                             str(tmp_path / "init"), "--condition", "isolated", "--push", "1"))
+    row = adapter_blocks.summarize(
+        tmp_path / "init/metrics.json",
+        [tmp_path / n / "metrics.json" for n in ("late", "iso-clean")])["branches"]["late"]
+    assert row["condition"] == "isolated+drop2" and row["drop_at"] == 2
+    assert set(row["drop_effect"]) == {"mean_rank", "hit@10"}  # vs the clean state at block 2
+
+
+def test_low_and_slow_poisons_every_block(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    with pytest.raises(ValueError):  # a rollback needs one attacked block, not all of them
+        adapter_blocks.run(parse(data, tmp_path / "nope", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--condition", "isolated", "--attack",
+                                 "bandwagon", "--push", "1", "--placement", "all",
+                                 "--rollback-after"))  # fmt: skip
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "slow", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--attack", "bandwagon", "--alpha", "0.1", "--placement", "all", "--push", "1",
+    ))  # fmt: skip
+    assert set(run["attacks"]) == {f"block{b}" for b in range(1, 5)} and "attack" not in run
+    assert all(report["block"] == b and report["shill_users"] > 0
+               for b, report in zip(range(1, 5), run["attacks"].values()))  # fmt: skip
+
+
+def test_poisoned_starting_data(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    with pytest.raises(ValueError):  # placement init without a corruption does nothing
+        adapter_blocks.run(parse(data, tmp_path / "x", "--stage", "init", "--placement", "init"))
+    poisoned = adapter_blocks.run(parse(
+        data, tmp_path / "poisoned-init", "--stage", "init", "--push", "1", "--attack",
+        "bandwagon", "--alpha", "0.3", "--placement", "init",
+    ))  # fmt: skip
+    assert poisoned["attack"]["block"] == 0 and poisoned["attack"]["shill_users"] > 0
+    with pytest.raises(ValueError):  # the base weights cannot be rolled back
+        adapter_blocks.run(parse(data, tmp_path / "nope", "--stage", "branch", "--init",
+                                 str(tmp_path / "poisoned-init"), "--condition", "isolated",
+                                 "--attack", "bandwagon", "--push", "1", "--rollback-after"))
+    branch = adapter_blocks.run(parse(
+        data, tmp_path / "from-poisoned", "--stage", "branch", "--init",
+        str(tmp_path / "poisoned-init"), "--condition", "isolated", "--push", "1",
+    ))  # fmt: skip
+    assert "attack" not in branch  # the corruption entered through Theta_0, not the stream
+    assert branch["learner"]["adapters"] == ["a0", "s1", "s2", "s3", "s4"]
+
+
+def test_relabel_keeps_the_true_map_for_evaluation(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    index_text = (data / "Toy.index.cat2.json").read_text()
+    with pytest.raises(ValueError):  # relabel needs its fraction
+        adapter_blocks.run(parse(data, tmp_path / "nope", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--corruption", "relabel",
+                                 "--push", "1"))  # fmt: skip
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "relabeled", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--corruption", "relabel", "--relabel-frac", "0.3", "--push", "1",
+    ))  # fmt: skip
+    report = run["attack"]
+    assert report["kind"] == "relabel" and report["items_relabeled"] > 0
+    assert report["separability_auc"] is None  # no profiles exist to separate
+    assert (data / "Toy.index.cat2.json").read_text() == index_text  # the true map on disk
+
+
+def test_demotion_and_rival_tracking(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init"))
+    adapter_blocks.run(parse(data, tmp_path / "iso-clean", "--stage", "branch", "--init",
+                             str(tmp_path / "init"), "--condition", "isolated",
+                             "--push", "1", "--rival", "0"))  # fmt: skip
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "demote", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--condition", "isolated", "--corruption", "demotion", "--alpha", "0.2",
+        "--push", "1", "--rival", "0",
+    ))  # fmt: skip
+    assert run["attack"]["kind"] == "demotion" and run["attack"]["rival_category"] == 0
+    assert "rival" in run["cells"]["state1_block1"]
+    row = adapter_blocks.summarize(
+        tmp_path / "init/metrics.json",
+        [tmp_path / n / "metrics.json" for n in ("iso-clean", "demote")])["branches"]["demote"]
+    assert "state4_block0" in row["rival_vs_clean"] and "shill_users" in row["shills"]
+    with pytest.raises(ValueError):  # demotion needs its rival
+        adapter_blocks.run(parse(data, tmp_path / "nope", "--stage", "branch", "--init",
+                                 str(tmp_path / "init"), "--corruption", "demotion",
+                                 "--alpha", "0.2", "--push", "1"))  # fmt: skip
+    resolved = adapter_blocks.run(parse(
+        data, tmp_path / "demote-rule", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--corruption", "demotion", "--alpha", "0.2", "--push", "1", "--rival-share", "0.3",
+    ))  # fmt: skip
+    assert resolved["config"]["rival"] is not None and resolved["config"]["rival"] != 1
+
+
+def test_trigger_splits_the_push_measurement(tmp_path):
+    from test_category_lm import ByteTokenizer, tiny_model
+
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init"))
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "trig", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--attack", "segment", "--segment", "0", "--push", "1", "--trigger", "0",
+        "--alpha", "0.2",
+    ))  # fmt: skip
+    cell = run["cells"]["state1_block1"]
+    groups = [k for k in ("push_trigger", "push_other") if k in cell]
+    assert groups and sum(cell[k]["users"] for k in groups) == cell["push"]["users"]
+    rule_run = adapter_blocks.run(parse(
+        data, tmp_path / "trig-rule", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--attack", "segment", "--push", "1", "--trigger-share", "0.3", "--alpha", "0.2",
+    ))  # fmt: skip
+    config = rule_run["config"]  # a hidden-trigger run's segment is its resolved trigger
+    assert config["segment"] == config["trigger"] is not None
+    learner = CategoryLMLearner(tiny_model(), ByteTokenizer(), NAMES, learning_rate=1e-2,
+                                continuation_learning_rate=1e-2, rank=4)  # fmt: skip
+    rows = [{"user": "u0", "history": [0], "target": 1},
+            {"user": "u1", "history": [1], "target": 2},
+            {"user": "u2", "history": [2], "target": 0}]  # fmt: skip
+    cell = adapter_blocks.evaluate(learner, rows, push=2, trigger=0)
+    assert cell["push_trigger"]["users"] == 1 and cell["push_other"]["users"] == 1
+    cell = adapter_blocks.evaluate(learner, rows, push=2, rival=0)
+    assert cell["rival"]["users"] == 2
+
+
+def test_vandalism_needs_no_target(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init"))
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "vandal", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--corruption", "vandalism", "--alpha", "0.2",
+    ))  # fmt: skip
+    assert run["attack"]["kind"] == "vandalism" and run["attack"]["shill_users"] > 0
+    assert "push" not in run["cells"]["state1_block1"]  # nothing was promoted
