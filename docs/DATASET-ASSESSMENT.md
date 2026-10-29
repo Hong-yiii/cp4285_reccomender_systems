@@ -4,6 +4,8 @@
 
 ## Recommendation
 
+Update, 22 October 2026: [ITEM-CATEGORIES.md](ITEM-CATEGORIES.md) adds tooling to group items by metadata subcategory and measure each group's density. It may support choosing a denser subset; no subset has been chosen.
+
 Prefer Amazon Reviews 2023 Electronics and Movies_and_TV as the provisional primary pair for the proposed category-mixture experiment. They offer a common collection/schema and event type while varying product domain. Verify usable chronological sequences and user overlap before locking them. Electronics versus Clothing is also possible but has no demonstrated advantage for this project merely because a related paper uses an Amazon pair.
 
 DIGINETICA/YOOCHOOSE are suitable session recommendation resources. Treat their mixture as a separate cross-dataset/retailer stress test, with collection differences as part of the treatment. For a simpler chronological continual-learning pilot, use one of them over successive time windows; this is closer to ADER's use of the data. It answers a different question from changing category mixture.
