@@ -44,11 +44,13 @@ def pair(attacked_rows, clean_rows, push):
     users = sorted(set(attacked) & set(clean))
     if not users:
         raise ValueError("No genuine user is present in both runs")
+    if any("push_rank" not in attacked[u] or "push_rank" not in clean[u] for u in users):
+        raise ValueError("Dumps lack push_rank; re-run with the current adapter-blocks")
     return {
         "users": users,
-        "deltas": [attacked[u]["rank"] - clean[u]["rank"] for u in users],
-        "attacked_rank": [attacked[u]["rank"] for u in users],
-        "clean_rank": [clean[u]["rank"] for u in users],
+        "deltas": [attacked[u]["push_rank"] - clean[u]["push_rank"] for u in users],
+        "attacked_rank": [attacked[u]["push_rank"] for u in users],
+        "clean_rank": [clean[u]["push_rank"] for u in users],
         "attacked_top": [attacked[u].get("top") for u in users],
         "clean_top": [clean[u].get("top") for u in users],
     }

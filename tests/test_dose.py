@@ -82,7 +82,7 @@ def write_run(root, name, config, ranks):
     with (run / "dumps/state1_block1.jsonl").open("w") as f:
         for user, rank in ranks.items():
             f.write(json.dumps({"user": user, "target": 0, "rank": rank,
-                                "top": list(range(10))}) + "\n")  # fmt: skip
+                                "push_rank": rank, "top": list(range(10))}) + "\n")  # fmt: skip
     return run
 
 
@@ -107,3 +107,9 @@ def test_summary_needs_matching_clean_reference(tmp_path):
                          {"u0": 1})  # fmt: skip
     with pytest.raises(ValueError):
         dose.summary([attacked], [])
+
+
+def test_pair_requires_the_pushed_rank():
+    with pytest.raises(ValueError):
+        dose.pair([{"user": "u", "target": 0, "rank": 1}],
+                  [{"user": "u", "target": 0, "rank": 2}], 1)  # fmt: skip

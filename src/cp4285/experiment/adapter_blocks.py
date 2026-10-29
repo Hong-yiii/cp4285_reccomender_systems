@@ -293,11 +293,16 @@ def evaluate(learner, rows, push=None, dumps=None, clock=None, rival=None, trigg
         watch("rival", rival, targets != rival)
     if dumps is not None:
         top = torch.topk(scores, k=min(10, scores.shape[1]), dim=1).indices
+        push_rank = (ranks_of(scores, torch.full_like(targets, push)).tolist()
+                     if push is not None else None)  # fmt: skip
         dumps.parent.mkdir(parents=True, exist_ok=True)
         with dumps.open("x") as f:
-            for r, rank, top_row in zip(rows, ranks.tolist(), top.tolist()):
-                f.write(json.dumps({"user": r["user"], "target": r["target"], "rank": rank,
-                                    "top": top_row}) + "\n")  # fmt: skip
+            for i, (r, rank, top_row) in enumerate(zip(rows, ranks.tolist(), top.tolist())):
+                row = {"user": r["user"], "target": r["target"], "rank": rank,
+                       "top": top_row}  # fmt: skip
+                if push_rank is not None:
+                    row["push_rank"] = push_rank[i]
+                f.write(json.dumps(row) + "\n")
     return cell
 
 
