@@ -77,6 +77,7 @@ def test_init_then_clean_and_attacked_branches(tmp_path):
     dumped = [json.loads(x) for x in (tmp_path / "attacked/dumps/state1_block1.jsonl").open()]
     assert len(dumped) == 8 and not any(r["user"].startswith("inj-") for r in dumped)
     assert all(len(r["top"]) == len(NAMES) for r in dumped)  # top-K set for churn
+    assert all("push_rank" in r for r in dumped)  # the watched category, not the target
     with pytest.raises(FileExistsError):
         adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init"))
     adapter_blocks.run(parse(

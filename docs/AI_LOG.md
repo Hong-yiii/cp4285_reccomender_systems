@@ -939,3 +939,15 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 
 **Limits:** this is a source-hash match, not a VCS revision recorded inside the run artifacts. The 29 October account-strata and dose tooling (`e3a19a3`) is a later commit on top of the tag, so it is not part of the tagged catalogue.
 >>>>>>> origin/main
+
+## 29 October 2026 — Dose dumps carried the wrong rank
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** launch the #18/#19 matrices and check the first results.
+
+**Assistance:** The first dose preview was flat because `--dumps` stored the user's target rank, while `dose-summary` needs the pushed category's rank. Added `push_rank` to every dump row and made `dose.py` require it. Cancelled the two running dose jobs (1035991, 1035992) and scheduled a full dose re-run; the completed strata matrix is unaffected.
+
+**Validation:** the dump now carries `target`, `rank`, `push_rank` and `top`; 137 tests and Ruff pass.
+
+**Limits:** the first dose runs (seed 42 and the partial seeds 43–44) are kept aside as bad-dump evidence and must not be summarised.
