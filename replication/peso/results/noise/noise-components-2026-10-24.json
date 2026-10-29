@@ -1,0 +1,886 @@
+{
+  "z_80_power_5pct_two_sided": 2.8015852181129683,
+  "items": {
+    "table2_one_seed": {
+      "peso-lora": {
+        "ndcg@10": {
+          "deterministic_estimates": [
+            9.367079449902751e-05
+          ],
+          "users_bc": 6.543239166898235e-08,
+          "users_b": null,
+          "sampled_estimates": [
+            -0.0004236053599272483,
+            0.0007341099365176383,
+            -0.00016628417487346043,
+            0.00045431677165535026,
+            -0.00033366065453973155,
+            -0.0010360279247346382
+          ],
+          "eval_per_user": 2.478925926404363e-07,
+          "eval_across_draws": 4.0759678675081865e-07,
+          "seeds_sampled": {
+            "values": [
+              7.604880206692662e-05,
+              -0.0003707312118203237,
+              -6.75374288383127e-05
+            ],
+            "variance": 5.202597609226785e-08,
+            "ci95": [
+              1.4103463325223901e-08,
+              2.054916291511131e-06
+            ]
+          },
+          "v_seed": -1.958666165481684e-07,
+          "design": {
+            "B = 0": {
+              "mde": {
+                "1 seed(s), sampled": 0.0015681996427787637,
+                "1 seed(s), deterministic": 0.0007166386627448087,
+                "3 seed(s), sampled": 0.0009054004859013942,
+                "3 seed(s), deterministic": 0.0004137515248474087,
+                "10 seed(s), deterministic": 0.000226621043361085
+              },
+              "seeds_for_effect_sampled": 2,
+              "seeds_for_effect_deterministic": 1,
+              "mde_floor_any_seeds": 0.0
+            },
+            "B = users_bc": {
+              "mde": {
+                "1 seed(s), sampled": 0.0015681996427787637,
+                "1 seed(s), deterministic": 0.0007166386627448087,
+                "3 seed(s), sampled": 0.0010780216549298035,
+                "3 seed(s), deterministic": 0.0007166386627448087,
+                "10 seed(s), deterministic": 0.0007166386627448087
+              },
+              "seeds_for_effect_sampled": 3,
+              "seeds_for_effect_deterministic": 1,
+              "mde_floor_any_seeds": 0.0007166386627448087
+            }
+          },
+          "effect_of_interest": 0.0012
+        },
+        "hit@10": {
+          "deterministic_estimates": [
+            0.000145623998835008
+          ],
+          "users_bc": 3.14743418000941e-07,
+          "users_b": null,
+          "sampled_estimates": [
+            -0.0011185446605917336,
+            0.0018932304494563706,
+            -0.0009485952082267244,
+            -6.571102813541755e-05,
+            -0.0013450649540109017,
+            -0.0013470582732388406
+          ],
+          "eval_per_user": 7.800908581619523e-07,
+          "eval_across_draws": 1.586172012076501e-06,
+          "seeds_sampled": {
+            "values": [
+              0.00012338365767541304,
+              0.000390424666416693,
+              0.0001506857543179229
+            ],
+            "variance": 2.1588508467489853e-08,
+            "ci95": [
+              5.85232148028415e-09,
+              8.527005371431003e-07
+            ]
+          },
+          "v_seed": -7.585023496944625e-07,
+          "design": {
+            "B = 0": {
+              "mde": {
+                "1 seed(s), sampled": 0.0029314198884918697,
+                "1 seed(s), deterministic": 0.001571745283138254,
+                "3 seed(s), sampled": 0.0016924560617286037,
+                "3 seed(s), deterministic": 0.0009074475623173954,
+                "10 seed(s), deterministic": 0.0004970294996343124
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.0
+            },
+            "B = users_bc": {
+              "mde": {
+                "1 seed(s), sampled": 0.0029314198884918697,
+                "1 seed(s), deterministic": 0.001571745283138254,
+                "3 seed(s), sampled": 0.0021239890954506953,
+                "3 seed(s), deterministic": 0.001571745283138254,
+                "10 seed(s), deterministic": 0.001571745283138254
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.001571745283138254
+            }
+          },
+          "effect_of_interest": null
+        }
+      },
+      "lora-pretrain": {
+        "ndcg@10": {
+          "deterministic_estimates": [
+            0.0025490251953053135
+          ],
+          "users_bc": 1.100735548156715e-06,
+          "users_b": null,
+          "sampled_estimates": [
+            0.0033974274593457643,
+            0.0024357432200679805,
+            0.0014220135823399525,
+            0.002387716275025333,
+            0.0025927812754631416,
+            0.003268490372504561
+          ],
+          "eval_per_user": 8.37369039888332e-07,
+          "eval_across_draws": 5.08197643167761e-07,
+          "seeds_sampled": {
+            "values": [
+              0.0013510818441496812,
+              0.0024535219449836037,
+              -0.0008447669735229575
+            ],
+            "variance": 2.819305999324036e-06,
+            "ci95": [
+              7.642716533281866e-07,
+              0.00011135663881618277
+            ]
+          },
+          "v_seed": 1.981936959435704e-06,
+          "design": {
+            "B = 0": {
+              "mde": {
+                "1 seed(s), sampled": 0.004704082665411316,
+                "1 seed(s), deterministic": 0.0039441076095451996,
+                "3 seed(s), sampled": 0.0027159033931654754,
+                "3 seed(s), deterministic": 0.0022771315900837726,
+                "10 seed(s), deterministic": 0.0012472363382964894
+              },
+              "seeds_for_effect_sampled": 23,
+              "seeds_for_effect_deterministic": 16,
+              "mde_floor_any_seeds": 0.0
+            },
+            "B = users_bc": {
+              "mde": {
+                "1 seed(s), sampled": 0.005546885131299197,
+                "1 seed(s), deterministic": 0.004918894771437708,
+                "3 seed(s), sampled": 0.004001958542740369,
+                "3 seed(s), deterministic": 0.003718180901376683,
+                "10 seed(s), deterministic": 0.0031929828406009495
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.002939309602067274
+            }
+          },
+          "effect_of_interest": 0.001
+        },
+        "hit@10": {
+          "deterministic_estimates": [
+            0.004146369896371883
+          ],
+          "users_bc": 3.433897512118805e-06,
+          "users_b": null,
+          "sampled_estimates": [
+            0.00686272678400916,
+            0.003951111666592303,
+            0.0027344921257397284,
+            0.004091673909944397,
+            0.005619788470398645,
+            0.006510711049085374
+          ],
+          "eval_per_user": 2.624495780153977e-06,
+          "eval_across_draws": 2.6370215150682604e-06,
+          "seeds_sampled": {
+            "values": [
+              0.001957839689105951,
+              0.0037265580209422753,
+              -0.000897086122655479
+            ],
+            "variance": 5.442841849110224e-06,
+            "ci95": [
+              1.4754729496623219e-06,
+              0.0002149807697604626
+            ]
+          },
+          "v_seed": 2.818346068956247e-06,
+          "design": {
+            "B = 0": {
+              "mde": {
+                "1 seed(s), sampled": 0.006895766841652659,
+                "1 seed(s), deterministic": 0.005191555508005384,
+                "3 seed(s), sampled": 0.003981272842297059,
+                "3 seed(s), deterministic": 0.002997345970059793,
+                "10 seed(s), deterministic": 0.0016417140004489526
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.0
+            },
+            "B = users_bc": {
+              "mde": {
+                "1 seed(s), sampled": 0.008347003035787719,
+                "1 seed(s), deterministic": 0.007005220049200035,
+                "3 seed(s), sampled": 0.006418124255181609,
+                "3 seed(s), deterministic": 0.005858828242436544,
+                "10 seed(s), deterministic": 0.005400401330197817
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.005191555508005384
+            }
+          },
+          "effect_of_interest": null
+        }
+      }
+    },
+    "evaluation_draws": [
+      "table2-sampling-beam10",
+      "table2-sampling-s1-beam10",
+      "table2-sampling-s2-beam10",
+      "table2-sampling-s3-beam10",
+      "table2-sampling-s4-beam10",
+      "table2-sampling-s5-beam10"
+    ],
+    "mcnemar_hit@10": {
+      "deterministic": {
+        "block1": {
+          "users": 1772,
+          "lost": 2,
+          "gained": 2,
+          "net": 0,
+          "mcnemar_p": 1.0
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 1,
+          "gained": 1,
+          "net": 0,
+          "mcnemar_p": 1.0
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 2,
+          "gained": 3,
+          "net": 1,
+          "mcnemar_p": 1.0
+        }
+      },
+      "draw table2-sampling-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 7,
+          "gained": 3,
+          "net": -4,
+          "mcnemar_p": 0.34375
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 4,
+          "gained": 2,
+          "net": -2,
+          "mcnemar_p": 0.6875
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 4,
+          "gained": 4,
+          "net": 0,
+          "mcnemar_p": 1.0
+        }
+      },
+      "draw table2-sampling-s1-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 2,
+          "gained": 7,
+          "net": 5,
+          "mcnemar_p": 0.1796875
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 5,
+          "gained": 11,
+          "net": 6,
+          "mcnemar_p": 0.210113525390625
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 4,
+          "gained": 3,
+          "net": -1,
+          "mcnemar_p": 1.0
+        }
+      },
+      "draw table2-sampling-s2-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 3,
+          "gained": 3,
+          "net": 0,
+          "mcnemar_p": 1.0
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 3,
+          "gained": 1,
+          "net": -2,
+          "mcnemar_p": 0.625
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 9,
+          "gained": 5,
+          "net": -4,
+          "mcnemar_p": 0.4239501953125
+        }
+      },
+      "draw table2-sampling-s3-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 4,
+          "gained": 5,
+          "net": 1,
+          "mcnemar_p": 1.0
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 5,
+          "gained": 6,
+          "net": 1,
+          "mcnemar_p": 1.0
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 10,
+          "gained": 7,
+          "net": -3,
+          "mcnemar_p": 0.629058837890625
+        }
+      },
+      "draw table2-sampling-s4-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 8,
+          "gained": 2,
+          "net": -6,
+          "mcnemar_p": 0.109375
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 3,
+          "gained": 5,
+          "net": 2,
+          "mcnemar_p": 0.7265625
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 6,
+          "gained": 2,
+          "net": -4,
+          "mcnemar_p": 0.2890625
+        }
+      },
+      "draw table2-sampling-s5-beam10": {
+        "block1": {
+          "users": 1772,
+          "lost": 1,
+          "gained": 2,
+          "net": 1,
+          "mcnemar_p": 1.0
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 7,
+          "gained": 1,
+          "net": -6,
+          "mcnemar_p": 0.0703125
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 7,
+          "gained": 4,
+          "net": -3,
+          "mcnemar_p": 0.548828125
+        }
+      },
+      "same weights, two draws (single LoRA)": {
+        "block1": {
+          "users": 1772,
+          "lost": 23,
+          "gained": 14,
+          "net": -9,
+          "mcnemar_p": 0.18774155899882317
+        },
+        "block2": {
+          "users": 1821,
+          "lost": 26,
+          "gained": 15,
+          "net": -11,
+          "mcnemar_p": 0.11727520595741225
+        },
+        "block3": {
+          "users": 2289,
+          "lost": 18,
+          "gained": 15,
+          "net": -3,
+          "mcnemar_p": 0.7283324808813632
+        }
+      }
+    },
+    "matrix_seeds": {
+      "peso-lora": {
+        "ndcg@10": {
+          "deterministic_estimates": [
+            -8.34238111074132e-05,
+            9.908158179833731e-05
+          ],
+          "users_bc": 3.794598326480883e-08,
+          "users_b": -9.159412056605928e-10,
+          "seeds": {
+            "values": [
+              -8.34238111074132e-05,
+              9.908158179833731e-05
+            ],
+            "variance": 1.6654109219841184e-08,
+            "ci95": [
+              3.314985371661513e-09,
+              1.6958184437917896e-05
+            ]
+          },
+          "v_seed": 1.6654109219841184e-08,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.0005457412015297247,
+                "1 seed(s), deterministic": 0.0005457412015297247,
+                "3 seed(s), sampled": 0.0003150838296110564,
+                "3 seed(s), deterministic": 0.0003150838296110564,
+                "10 seed(s), deterministic": 0.0001725785209830898
+              },
+              "seeds_for_effect_sampled": 1,
+              "seeds_for_effect_deterministic": 1,
+              "mde_floor_any_seeds": 0.0
+            }
+          },
+          "effect_of_interest": 0.0012
+        },
+        "hit@10": {
+          "deterministic_estimates": [
+            0.0003711609683696065,
+            -3.7425607608338136e-05
+          ],
+          "users_bc": 2.0857180966241067e-07,
+          "users_b": 1.8410526603881045e-11,
+          "seeds": {
+            "values": [
+              0.0003711609683696065,
+              -3.7425607608338136e-05
+            ],
+            "variance": 8.347149503469036e-08,
+            "ci95": [
+              1.661492556209823e-08,
+              8.499554010493786e-05
+            ]
+          },
+          "v_seed": 8.347149503469036e-08,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.0012794745210498763,
+                "1 seed(s), deterministic": 0.0012794745210498763,
+                "3 seed(s), sampled": 0.0007387701613795119,
+                "3 seed(s), deterministic": 0.0007387701613795119,
+                "10 seed(s), deterministic": 0.0004047660519483137
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 1.2020898849915371e-05
+            }
+          },
+          "effect_of_interest": null
+        }
+      },
+      "lora-pretrain": {
+        "ndcg@10": {
+          "deterministic_estimates": [
+            0.001743846749368606,
+            0.002137506231850233
+          ],
+          "users_bc": 1.247482098834059e-06,
+          "users_b": 5.087877576948265e-07,
+          "seeds": {
+            "values": [
+              0.001743846749368606,
+              0.002137506231850233
+            ],
+            "variance": 7.748389407385116e-08,
+            "ci95": [
+              1.5423099008392128e-08,
+              7.88986159107819e-05
+            ]
+          },
+          "v_seed": 7.748389407385116e-08,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.0031291112099926894,
+                "1 seed(s), deterministic": 0.0031291112099926894,
+                "3 seed(s), sampled": 0.002434348975627336,
+                "3 seed(s), deterministic": 0.002434348975627336,
+                "10 seed(s), deterministic": 0.0021385056055246723
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.0019983528017984806
+            }
+          },
+          "effect_of_interest": 0.001
+        },
+        "hit@10": {
+          "deterministic_estimates": [
+            0.002189421738008034,
+            0.004335491253641513
+          ],
+          "users_bc": 3.937221884421826e-06,
+          "users_b": 1.698462966753149e-06,
+          "seeds": {
+            "values": [
+              0.002189421738008034,
+              0.004335491253641513
+            ],
+            "variance": 2.3028071829656567e-06,
+            "ci95": [
+              4.583716862018397e-07,
+              0.0023448524576246384
+            ]
+          },
+          "v_seed": 2.3028071829656567e-06,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.005604059973785423,
+                "1 seed(s), deterministic": 0.005604059973785423,
+                "3 seed(s), sampled": 0.004399528433380344,
+                "3 seed(s), deterministic": 0.004399528433380344,
+                "10 seed(s), deterministic": 0.0038908196080441053
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.0036511685197058792
+            }
+          },
+          "effect_of_interest": null
+        }
+      },
+      "lora-forgetting": {
+        "ndcg@10": {
+          "deterministic_estimates": [
+            -0.004373684934011922,
+            -0.004924631975957827
+          ],
+          "users_bc": 8.474978222013921e-07,
+          "users_b": 4.051402202340761e-07,
+          "seeds": {
+            "values": [
+              -0.004373684934011922,
+              -0.004924631975957827
+            ],
+            "variance": 1.5177132151447168e-07,
+            "ci95": [
+              3.020994422558541e-08,
+              0.00015454240323839374
+            ]
+          },
+          "v_seed": 1.5177132151447168e-07,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.0025791294038069305,
+                "1 seed(s), deterministic": 0.0025791294038069305,
+                "3 seed(s), sampled": 0.0020826027153469464,
+                "3 seed(s), deterministic": 0.0020826027153469464,
+                "10 seed(s), deterministic": 0.0018780569815387974
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.0017832265319260383
+            }
+          },
+          "effect_of_interest": null
+        },
+        "hit@10": {
+          "deterministic_estimates": [
+            -0.008332213498261532,
+            -0.008774372725509103
+          ],
+          "users_bc": 2.8246883195468173e-06,
+          "users_b": 1.1708458217580868e-06,
+          "seeds": {
+            "values": [
+              -0.008332213498261532,
+              -0.008774372725509103
+            ],
+            "variance": 9.775239112008445e-08,
+            "ci95": [
+              1.9457525006618446e-08,
+              9.953718064289767e-05
+            ]
+          },
+          "v_seed": 9.775239112008445e-08,
+          "design": {
+            "B measured": {
+              "mde": {
+                "1 seed(s), sampled": 0.00470857079241075,
+                "1 seed(s), deterministic": 0.00470857079241075,
+                "3 seed(s), sampled": 0.003676515333484154,
+                "3 seed(s), deterministic": 0.003676515333484154,
+                "10 seed(s), deterministic": 0.0032385041498991904
+              },
+              "seeds_for_effect_sampled": null,
+              "seeds_for_effect_deterministic": null,
+              "mde_floor_any_seeds": 0.003031472916330336
+            }
+          },
+          "effect_of_interest": null
+        }
+      }
+    }
+  },
+  "categories": {
+    "runs": [
+      "cat-seed42",
+      "cat-seed43",
+      "cat-seed44"
+    ],
+    "peso-lora": {
+      "hit@1": {
+        "deterministic_estimates": [
+          0.0009557420760800442,
+          0.0003711609683696065,
+          0.00033373536076126834
+        ],
+        "users_bc": 5.066029879195956e-07,
+        "users_b": -9.481364735768402e-11,
+        "seeds": {
+          "values": [
+            0.0009557420760800442,
+            0.0003711609683696065,
+            0.00033373536076126834
+          ],
+          "variance": 1.216713502497447e-07,
+          "ci95": [
+            3.2983281715550126e-08,
+            4.805761633283727e-06
+          ]
+        },
+        "v_seed": 1.216713502497447e-07,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.001994057653440043,
+              "1 seed(s), deterministic": 0.001994057653440043,
+              "3 seed(s), sampled": 0.0011512697229932422,
+              "3 seed(s), deterministic": 0.0011512697229932422,
+              "10 seed(s), deterministic": 0.0006305763970561228
+            },
+            "seeds_for_effect_sampled": 1,
+            "seeds_for_effect_deterministic": 1,
+            "mde_floor_any_seeds": 0.0
+          }
+        },
+        "effect_of_interest": 0.003
+      },
+      "ndcg@10": {
+        "deterministic_estimates": [
+          0.00020172436091799134,
+          6.292297201545676e-05,
+          -2.8689737185306288e-08
+        ],
+        "users_bc": 8.505992156728397e-08,
+        "users_b": 2.4739022585698246e-10,
+        "seeds": {
+          "values": [
+            0.00020172436091799134,
+            6.292297201545676e-05,
+            -2.8689737185306288e-08
+          ],
+          "variance": 1.0655505121226997e-08,
+          "ci95": [
+            2.888547932718077e-09,
+            4.208699713592471e-07
+          ]
+        },
+        "v_seed": 1.0655505121226997e-08,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.000817083284980655,
+              "1 seed(s), deterministic": 0.000817083284980655,
+              "3 seed(s), sampled": 0.0004731132939917555,
+              "3 seed(s), deterministic": 0.0004731132939917555,
+              "10 seed(s), deterministic": 0.0002617442873811427
+            },
+            "seeds_for_effect_sampled": null,
+            "seeds_for_effect_deterministic": null,
+            "mde_floor_any_seeds": 4.406513508665228e-05
+          }
+        },
+        "effect_of_interest": null
+      }
+    },
+    "lora-pretrain": {
+      "hit@1": {
+        "deterministic_estimates": [
+          -0.004288925458951916,
+          -0.001351136704837185,
+          -0.0008646038059287892
+        ],
+        "users_bc": 4.7277184899608624e-06,
+        "users_b": 2.2061821003018317e-06,
+        "seeds": {
+          "values": [
+            -0.004288925458951916,
+            -0.001351136704837185,
+            -0.0008646038059287892
+          ],
+          "variance": 3.4322159681477054e-06,
+          "ci95": [
+            9.304223710319425e-07,
+            0.00013556528947045702
+          ]
+        },
+        "v_seed": 3.4322159681477054e-06,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.006652451302613692,
+              "1 seed(s), deterministic": 0.006652451302613692,
+              "3 seed(s), sampled": 0.00512793734648192,
+              "3 seed(s), deterministic": 0.00512793734648192,
+              "10 seed(s), deterministic": 0.004473249715025212
+            },
+            "seeds_for_effect_sampled": null,
+            "seeds_for_effect_deterministic": null,
+            "mde_floor_any_seeds": 0.0041612567785877805
+          }
+        },
+        "effect_of_interest": 0.003
+      },
+      "ndcg@10": {
+        "deterministic_estimates": [
+          -0.001534803703677744,
+          6.516281406997088e-05,
+          -4.95038099731268e-05
+        ],
+        "users_bc": 8.89484165400213e-07,
+        "users_b": 4.219717350935499e-07,
+        "seeds": {
+          "values": [
+            -0.001534803703677744,
+            6.516281406997088e-05,
+            -4.95038099731268e-05
+          ],
+          "variance": 7.965261778036895e-07,
+          "ci95": [
+            2.1592632334878348e-07,
+            3.1461103516463484e-05
+          ]
+        },
+        "v_seed": 7.965261778036895e-07,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.0030925464547660077,
+              "1 seed(s), deterministic": 0.0030925464547660077,
+              "3 seed(s), sampled": 0.002322918736917959,
+              "3 seed(s), deterministic": 0.002322918736917959,
+              "10 seed(s), deterministic": 0.001984235171931008
+            },
+            "seeds_for_effect_sampled": null,
+            "seeds_for_effect_deterministic": null,
+            "mde_floor_any_seeds": 0.0018198915901898897
+          }
+        },
+        "effect_of_interest": null
+      }
+    },
+    "lora-forgetting": {
+      "hit@1": {
+        "deterministic_estimates": [
+          -0.0007640158764834335,
+          0.001135715219973517,
+          -0.001749848859504079
+        ],
+        "users_bc": 4.516722965220362e-06,
+        "users_b": 2.6300631741580454e-06,
+        "seeds": {
+          "values": [
+            -0.0007640158764834335,
+            0.001135715219973517,
+            -0.001749848859504079
+          ],
+          "variance": 2.151220827671383e-06,
+          "ci95": [
+            5.831637640726603e-07,
+            8.496868405851926e-05
+          ]
+        },
+        "v_seed": 2.151220827671383e-06,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.006125987520892163,
+              "1 seed(s), deterministic": 0.006125987520892163,
+              "3 seed(s), sampled": 0.005125551098875136,
+              "3 seed(s), deterministic": 0.005125551098875136,
+              "10 seed(s), deterministic": 0.004725623440727041
+            },
+            "seeds_for_effect_sampled": null,
+            "seeds_for_effect_deterministic": null,
+            "mde_floor_any_seeds": 0.0045434622863744474
+          }
+        },
+        "effect_of_interest": null
+      },
+      "ndcg@10": {
+        "deterministic_estimates": [
+          -0.0002485419610341494,
+          -0.0005422695789181931,
+          -0.0014426839523713814
+        ],
+        "users_bc": 8.497536140700074e-07,
+        "users_b": 4.959653615033703e-07,
+        "seeds": {
+          "values": [
+            -0.0002485419610341494,
+            -0.0005422695789181931,
+            -0.0014426839523713814
+          ],
+          "variance": 3.871661754839637e-07,
+          "ci95": [
+            1.0495495456003199e-07,
+            1.5292247090435584e-05
+          ]
+        },
+        "v_seed": 3.871661754839637e-07,
+        "design": {
+          "B measured": {
+            "mde": {
+              "1 seed(s), sampled": 0.00263279190659354,
+              "1 seed(s), deterministic": 0.00263279190659354,
+              "3 seed(s), sampled": 0.0022148843591416004,
+              "3 seed(s), deterministic": 0.0022148843591416004,
+              "10 seed(s), deterministic": 0.0020485737842950826
+            },
+            "seeds_for_effect_sampled": null,
+            "seeds_for_effect_deterministic": null,
+            "mde_floor_any_seeds": 0.001973011017415494
+          }
+        },
+        "effect_of_interest": null
+      }
+    }
+  }
+}

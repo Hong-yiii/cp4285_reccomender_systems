@@ -1,0 +1,62 @@
+{
+  "source": "/workspace/peso-runs/runs/seed42/ckpt/Instruments_cl_ori/lama3-1b_edim32_beta0.0/data_v2/QUICK_ws20.msl-1.temp0.8.sflora_kldiv_latest_cl_2.0.blocks5",
+  "weight": 2.0,
+  "blocks": {
+    "block1": {
+      "modules": 112,
+      "dtype": "torch.bfloat16",
+      "penalty_float32": 7.312341381293663e-07,
+      "gradient_norm_float32": 1.4144716260489076e-06,
+      "penalty_bfloat16": 0.0004749298095703125,
+      "penalty_small_change_approx": 7.286139399756816e-07,
+      "adapter_change_relative": 0.038413021713495255,
+      "entries_per_matrix": [
+        4096,
+        16384,
+        65536
+      ]
+    },
+    "block2": {
+      "modules": 112,
+      "dtype": "torch.bfloat16",
+      "penalty_float32": 7.107756800905918e-07,
+      "gradient_norm_float32": 1.4019412901689066e-06,
+      "penalty_bfloat16": 0.0004673004150390625,
+      "penalty_small_change_approx": 7.190985704040389e-07,
+      "adapter_change_relative": 0.03820224106311798,
+      "entries_per_matrix": [
+        4096,
+        16384,
+        65536
+      ]
+    },
+    "block3": {
+      "modules": 112,
+      "dtype": "torch.bfloat16",
+      "penalty_float32": 1.3159609579815879e-06,
+      "gradient_norm_float32": 1.8688263025978813e-06,
+      "penalty_bfloat16": 0.00055694580078125,
+      "penalty_small_change_approx": 1.313813911250707e-06,
+      "adapter_change_relative": 0.05226051062345505,
+      "entries_per_matrix": [
+        4096,
+        16384,
+        65536
+      ]
+    },
+    "block4": {
+      "modules": 112,
+      "dtype": "torch.bfloat16",
+      "penalty_float32": 1.062162482412532e-06,
+      "gradient_norm_float32": 1.6717581274861004e-06,
+      "penalty_bfloat16": 0.000514984130859375,
+      "penalty_small_change_approx": 1.052345914282731e-06,
+      "adapter_change_relative": 0.04674680531024933,
+      "entries_per_matrix": [
+        4096,
+        16384,
+        65536
+      ]
+    }
+  }
+}

@@ -70,3 +70,18 @@ Interpretation for the project: original SASRec studies next-item recommendation
 ## SASRec implementation selection — 28 September 2026
 
 Hongyi requested the original [kang205/SASRec](https://github.com/kang205/SASRec) model. The implementation source is pinned to commit `e3738967fddab206d6eeb4fda433e7a7034dd8b1`; `model.py`, `modules.py`, `sampler.py`, `main.py` and the Apache-2.0 license were inspected. Our native PyTorch port replaces the generic encoder while retaining the original block equations and sequence-wise initial supervision. See [SASREC.md](SASREC.md) for immutable source links, attribution, verification and deviations from the legacy TensorFlow runtime and benchmark protocol.
+
+## LLM recommenders and continual learning — 19 October 2026
+
+Added for the [PESO replication](PESO-REPLICATION.md). "Checked" means the primary page was read in this session; the rest are leads to verify before citing.
+
+| Source | What it supports | Status |
+| --- | --- | --- |
+| [Yoo et al. (ICLR 2026)](https://arxiv.org/abs/2510.25093), *Continual Low-Rank Adapters for LLM-based Generative Recommender Systems* (PESO); [code](https://github.com/hsyoo32/peso) at `edbec5f` | Replication target: chronological blocks, single evolving LoRA, KL proximal penalty, Table 2/3 | Checked; code has no licence file, so it is read and run, never copied |
+| [Li et al. (2026)](https://arxiv.org/html/2608.10257v2), *GenRec: An LLM-Backed Recommendation Ranker at Netflix* | Verbalized histories, one-pass catalogue scoring, a language-loss term to keep language ability | Checked; proprietary data, no forgetting measurement |
+| [Ramasesh, Lewkowycz and Dyer (ICLR 2022)](https://research.google/pubs/effect-of-scale-on-catastrophic-forgetting-in-neural-networks/), *Effect of Scale on Catastrophic Forgetting* | Larger pretrained models forgot less in their (mostly vision) experiments | Checked abstract; [a 2025 follow-up](https://arxiv.org/html/2506.16884v2) says scale alone is unresolved |
+| [Biderman et al. (TMLR 2024)](https://arxiv.org/abs/2405.09673), *LoRA Learns Less and Forgets Less* | Learning-versus-forgetting trade-off plots; low-rank updates forget less outside the target domain | Checked abstract |
+| [Kalajdzievski (2024)](https://arxiv.org/abs/2401.05605), *Scaling Laws for Forgetting When Fine-Tuning LLMs* | Forgetting fitted as a power law in tuned parameters and update steps | Checked abstract |
+| [Zhai et al. (ICML 2024)](https://proceedings.mlr.press/v235/zhai24a.html), *Actions Speak Louder than Words* (HSTU) | Recommendation quality following a power law in training compute | Checked abstract |
+| [Gurnee et al. (2026)](https://transformer-circuits.pub/2026/workspace), *Verbalizable Representations Form a Global Workspace in Language Models* ([arXiv 2607.15495](https://arxiv.org/abs/2607.15495)) | Jacobian lens: per layer, the Jacobian of the final residual at later positions with respect to the layer-ℓ residual, averaged over positions and prompts; rows of W_U J_ℓ are per-token readout vectors, with the logit lens as J = I | Checked on the Transformer Circuits page (method section); shown on Claude models, with open-model readouts on Neuronpedia; no code release found |
+| Toneva et al. (ICLR 2019), *An Empirical Study of Example Forgetting*; Yan et al. (CVPR 2021), *Positive-Congruent Training*; Kornblith et al. (ICML 2019), *Similarity of Neural Network Representations Revisited* | Per-example forgetting events; negative flips between model versions; CKA representation similarity | Not yet checked this session |

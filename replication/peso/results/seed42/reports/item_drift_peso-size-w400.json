@@ -1,0 +1,74 @@
+{
+  "source": "/workspace/peso-runs/runs/seed42/ckpt/Instruments_cl_ori/lama3-1b_edim32_beta0.0/data_v2/QUICK_ws20.msl-1.temp0.8.sflora_kldiv_latest_size_cl_400.blocks5",
+  "calibration": "/workspace/peso-runs/runs/seed42/reports/penalty_calibration.json",
+  "blocks": {
+    "block1": {
+      "drift_norm": {
+        "lm_head.modules_to_save.default.weight": 1.688726782798767,
+        "model.embed_tokens.modules_to_save.default.weight": 1.0629944801330566
+      },
+      "drift_relative": {
+        "lm_head.modules_to_save.default.weight": 0.0034761792632324383,
+        "model.embed_tokens.modules_to_save.default.weight": 0.003144491590529134
+      },
+      "rows_changed": {
+        "lm_head.modules_to_save.default.weight": 129280,
+        "model.embed_tokens.modules_to_save.default.weight": 1067
+      },
+      "task_grad_norm_item_layers": 5.274315118789673,
+      "matched_weight": 2.643192443487634
+    },
+    "block2": {
+      "drift_norm": {
+        "lm_head.modules_to_save.default.weight": 1.822975516319275,
+        "model.embed_tokens.modules_to_save.default.weight": 1.0623835325241089
+      },
+      "drift_relative": {
+        "lm_head.modules_to_save.default.weight": 0.003750140576685409,
+        "model.embed_tokens.modules_to_save.default.weight": 0.0031426837516243928
+      },
+      "rows_changed": {
+        "lm_head.modules_to_save.default.weight": 129280,
+        "model.embed_tokens.modules_to_save.default.weight": 1067
+      },
+      "task_grad_norm_item_layers": 4.707879543304443,
+      "matched_weight": 2.2312730253175506
+    },
+    "block3": {
+      "drift_norm": {
+        "lm_head.modules_to_save.default.weight": 2.656269073486328,
+        "model.embed_tokens.modules_to_save.default.weight": 1.4101208448410034
+      },
+      "drift_relative": {
+        "lm_head.modules_to_save.default.weight": 0.005459870335283438,
+        "model.embed_tokens.modules_to_save.default.weight": 0.0041713397573063925
+      },
+      "rows_changed": {
+        "lm_head.modules_to_save.default.weight": 129280,
+        "model.embed_tokens.modules_to_save.default.weight": 1066
+      },
+      "task_grad_norm_item_layers": 6.112147092819214,
+      "matched_weight": 2.032397115708055
+    },
+    "block4": {
+      "drift_norm": {
+        "lm_head.modules_to_save.default.weight": 2.7208316326141357,
+        "model.embed_tokens.modules_to_save.default.weight": 1.314638614654541
+      },
+      "drift_relative": {
+        "lm_head.modules_to_save.default.weight": 0.00558422669125142,
+        "model.embed_tokens.modules_to_save.default.weight": 0.0038888864627401785
+      },
+      "rows_changed": {
+        "lm_head.modules_to_save.default.weight": 129280,
+        "model.embed_tokens.modules_to_save.default.weight": 1066
+      },
+      "task_grad_norm_item_layers": 7.939791917800903,
+      "matched_weight": 2.6275150122111386
+    }
+  },
+  "matched_weight_range": [
+    2.032397115708055,
+    2.643192443487634
+  ]
+}

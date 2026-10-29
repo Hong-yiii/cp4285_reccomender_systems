@@ -19,6 +19,9 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md) and [item subcategories](docs/ITEM-CATEGORIES.md)
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
+- [PESO replication](docs/PESO-REPLICATION.md): exploratory LLM continual-recommendation workstream on PESO's released Instruments data, with retention/flip analysis; not comparable with the SASRec or classical numbers
+- [Progress updates](docs/updates/README.md): dated team shares in the meeting-notes format; latest [21 Oct, a PESO penalty that acts](docs/updates/2026-10-21-peso-penalty.md)
+- [General-audience talk](docs/TALK-GENERAL-AUDIENCE.md): a 12-minute, ten-slide script explaining the continual-recommendation approach and the PESO findings to non-specialists, with likely questions
 - [Sources and course slides](docs/SOURCES.md) · [AI assistance log](docs/AI_LOG.md)
 
 The September notes recorded the **29 September 2026 design critique** as their next milestone; this is historical, not a current deadline. The official template's weekday/date conflict remains unresolved; verify Canvas rather than assuming a submission deadline.
@@ -44,7 +47,10 @@ The demo generates synthetic data locally; it does not download Amazon. Use a fr
 | `src/cp4285/cli.py` | `cp4285` command |
 | `src/cp4285/experiment/` | Data, splits, shared `Recommender` ABC, protocol-specific runners/evaluators and artifacts |
 | `src/cp4285/models/` | SASRec network/learner and existing classical kernels; incremental QR-SVD implements the ABC |
+| `replication/peso/` | Our Modal and Runpod runners, retention-matrix evaluator, transfer/flip, J-lens and penalty-size reports, weight-release scripts and user-group labeller for the PESO replication; upstream code is cloned at run time, never vendored |
 | `notebooks/01_shared_lifecycle.ipynb` | Thin synthetic lifecycle walkthrough; no notebook-local algorithm |
+| `notebooks/02_peso_replication.ipynb` | PESO replication tables, transfer matrix, flip counter, penalty size and J-lens probe from the committed files in `replication/peso/results/`; no training |
+| `notebooks/03_peso_colab.ipynb` | Colab: re-evaluate the trained seed-43 weights (GitHub release `llama-peso-weights-seed43-v1`) with upstream's evaluator; needs a GPU and a Hugging Face token for Meta's base model |
 | `tests/` | Data isolation, evaluation and checkpoint lifecycle checks |
 | `configs/pilot.toml` | Reviewable pilot settings; paths relative to the repo root |
 | `docs/` | Research context, requirements, protocol, provenance and AI log |

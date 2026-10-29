@@ -16,6 +16,9 @@ This checkout is the canonical **group-project** home, not the whole course work
 - `docs/ADAPTERS.md`: sourced survey of adapters and parameter-efficient updates for sparse, continually updated recommenders; its closing experiment is an agent proposal.
 - `docs/PACKAGES-AND-BUILDING.md`, `notebooks/01_shared_lifecycle.ipynb`: ABC development guide and runnable walkthrough; `boilerplate-v1` is the separate lightweight reference tag.
 - `src/cp4285/experiment/`, `src/cp4285/models/`, `tests/`: protocol ownership, concrete learners and lifecycle tests. Keep native learning units and distinct classical/neural evaluations explicit; batch refits are not continuation.
+- `docs/updates/`: dated progress shares in the meeting-notes format (`[Owner] Task: description` next steps). `notebooks/02_peso_replication.ipynb` reads only committed results.
+- `docs/PESO-REPLICATION.md`, `replication/peso/`, `src/cp4285/experiment/flips.py`: LLM continual-recommendation replication on Modal and Runpod, plus the flip/retention, J-lens and penalty-size analyses. Upstream PESO has no licence: clone it into ignored `local/peso/` or the run image, never into the repo. GPU runs bill the user's Modal and Runpod accounts.
+- `notebooks/03_peso_colab.ipynb`: Colab re-evaluation of trained weights downloaded from a GitHub release (Llama 3.2 licence, notice and "Built with Llama" ship with it). `REPO`/`BRANCH` choose the clone and release; publishing a release is outward-facing and needs the user's go.
 - `docs/AI_LOG.md`: collective AI-use documentation.
 
 ## Working rules

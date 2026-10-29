@@ -1,0 +1,199 @@
+{
+  "source": "Instruments_cl_ori",
+  "dataset": "Instruments_cl_cat",
+  "index_file": ".index.cat2.json",
+  "level": 2,
+  "join": {
+    "items": 53509,
+    "single_match": 52228,
+    "several_matches": 1281,
+    "conflicting_labels_resolved_by_confidence": 1,
+    "label_source": {
+      "observed": 50023,
+      "predicted": 3486
+    }
+  },
+  "events_by_label_source": {
+    "observed": 198047,
+    "predicted": 6656
+  },
+  "categories": {
+    "<cat_0>": {
+      "subcategory": "Instrument Accessories > Drum & Percussion Accessories",
+      "items": 150
+    },
+    "<cat_1>": {
+      "subcategory": "Musical Instruments > 20% back on select brands",
+      "items": 2
+    },
+    "<cat_2>": {
+      "subcategory": "Musical Instruments > 20% off select Musical Instruments",
+      "items": 1
+    },
+    "<cat_3>": {
+      "subcategory": "Musical Instruments > Acoustic Guitars: Beginners",
+      "items": 1
+    },
+    "<cat_4>": {
+      "subcategory": "Musical Instruments > Amplifiers & Effects",
+      "items": 3114
+    },
+    "<cat_5>": {
+      "subcategory": "Musical Instruments > Band & Orchestra",
+      "items": 701
+    },
+    "<cat_6>": {
+      "subcategory": "Musical Instruments > Bass Guitars",
+      "items": 329
+    },
+    "<cat_7>": {
+      "subcategory": "Musical Instruments > Drums & Percussion",
+      "items": 2872
+    },
+    "<cat_8>": {
+      "subcategory": "Musical Instruments > Electronic Music, DJ & Karaoke",
+      "items": 1584
+    },
+    "<cat_9>": {
+      "subcategory": "Musical Instruments > Guitars",
+      "items": 2887
+    },
+    "<cat_10>": {
+      "subcategory": "Musical Instruments > Instrument Accessories",
+      "items": 25949
+    },
+    "<cat_11>": {
+      "subcategory": "Musical Instruments > Keyboards & MIDI",
+      "items": 853
+    },
+    "<cat_12>": {
+      "subcategory": "Musical Instruments > Live Sound & Stage",
+      "items": 5569
+    },
+    "<cat_13>": {
+      "subcategory": "Musical Instruments > Microphones & Accessories",
+      "items": 4754
+    },
+    "<cat_14>": {
+      "subcategory": "Musical Instruments > Musical Instruments Beginner Store",
+      "items": 3
+    },
+    "<cat_15>": {
+      "subcategory": "Musical Instruments > Musical Instruments Low Return Rate Alert",
+      "items": 10
+    },
+    "<cat_16>": {
+      "subcategory": "Musical Instruments > Musical Instruments Outlet",
+      "items": 5
+    },
+    "<cat_17>": {
+      "subcategory": "Musical Instruments > Musical Instruments Savings",
+      "items": 4
+    },
+    "<cat_18>": {
+      "subcategory": "Musical Instruments > Musican's Lifestyle Store",
+      "items": 2
+    },
+    "<cat_19>": {
+      "subcategory": "Musical Instruments > Presidents Day Savings",
+      "items": 4
+    },
+    "<cat_20>": {
+      "subcategory": "Musical Instruments > Prime Card Bonus",
+      "items": 24
+    },
+    "<cat_21>": {
+      "subcategory": "Musical Instruments > Pro & DJ Headphones",
+      "items": 3
+    },
+    "<cat_22>": {
+      "subcategory": "Musical Instruments > Promark Drum Accessories",
+      "items": 1
+    },
+    "<cat_23>": {
+      "subcategory": "Musical Instruments > Stringed Instruments",
+      "items": 123
+    },
+    "<cat_24>": {
+      "subcategory": "Musical Instruments > Studio Recording Equipment",
+      "items": 2643
+    },
+    "<cat_25>": {
+      "subcategory": "Musical Instruments > Ukuleles, Mandolins & Banjos",
+      "items": 948
+    },
+    "<cat_26>": {
+      "subcategory": "Musical Instruments > V4 Customers Keep It - 30%",
+      "items": 2
+    },
+    "<cat_27>": {
+      "subcategory": "Musical Instruments > V4 Customers Keep It - 50%",
+      "items": 1
+    },
+    "<cat_28>": {
+      "subcategory": "Musical Instruments > Vintage Musical Instruments",
+      "items": 7
+    },
+    "<cat_29>": {
+      "subcategory": "Musical Instruments > Wind & Woodwind Instruments",
+      "items": 963
+    }
+  },
+  "blocks": {
+    "block_0": {
+      "users": 17046,
+      "events": 141788,
+      "items": 40471,
+      "categories": 30,
+      "item_density": 0.0002055289752788975,
+      "category_density": 0.27726543861707537,
+      "test_users": 17046,
+      "most_common_test_category": "<cat_10>",
+      "most_common_test_category_share": 0.5312683327466854
+    },
+    "block_1": {
+      "users": 1772,
+      "events": 13197,
+      "items": 8346,
+      "categories": 17,
+      "item_density": 0.0008923456661900998,
+      "category_density": 0.4380892311777984,
+      "test_users": 1772,
+      "most_common_test_category": "<cat_10>",
+      "most_common_test_category_share": 0.5445823927765236
+    },
+    "block_2": {
+      "users": 1821,
+      "events": 13334,
+      "items": 8325,
+      "categories": 17,
+      "item_density": 0.000879561604438046,
+      "category_density": 0.4307264915851019,
+      "test_users": 1821,
+      "most_common_test_category": "<cat_10>",
+      "most_common_test_category_share": 0.5496979681493684
+    },
+    "block_3": {
+      "users": 2289,
+      "events": 18811,
+      "items": 9617,
+      "categories": 20,
+      "item_density": 0.0008545283483680989,
+      "category_density": 0.41089995631280035,
+      "test_users": 2289,
+      "most_common_test_category": "<cat_10>",
+      "most_common_test_category_share": 0.4927916120576671
+    },
+    "block_4": {
+      "users": 2238,
+      "events": 17573,
+      "items": 9131,
+      "categories": 18,
+      "item_density": 0.0008599386802503017,
+      "category_density": 0.43622778274252805,
+      "test_users": 2238,
+      "most_common_test_category": "<cat_10>",
+      "most_common_test_category_share": 0.4718498659517426
+    }
+  }
+}
