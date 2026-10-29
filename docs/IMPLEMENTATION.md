@@ -124,6 +124,8 @@ uv run cp4285 blocks --data <dir>/Instruments_cl_ori \
 
 `cp4285 adapter-blocks` runs the proposed variant in [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md#proposed-variant-corrupted-streams-and-adapter-isolation-24-october-2026): a frozen language model with LoRA adapters recommends the next category on any of PESO's released domains (Instruments, Video Games, CDs & Vinyl), and a block's update stream can carry shill profiles. The cluster grid runs from `replication/peso/slurm/grid_plans.py` and `adapter_grid.sbatch` in the PESO branch checkout. It needs the optional extra (`uv sync --locked --extra llm`, which adds `transformers` and `peft`) and a local model directory.
 
+**Code revision:** the 26 October catalogue results come from tag `attack-catalogue-2026-10-26` (commit `d38d27c`), verified against the cluster checkout's source hashes on 29 October. The account-strata and dose tooling is a later commit (`e3a19a3`).
+
 ```sh
 uv run --extra meta cp4285 block-categories --data <dir>/Video_Games_cl_0.6_0_5_3_0 \
     --output runs/categories/Video_Games_cl_0.6_0_5_3_0-cat2

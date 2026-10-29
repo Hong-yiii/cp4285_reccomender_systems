@@ -328,6 +328,8 @@ Noise: re-running the same clean configuration changes the pushed-category rank 
 
 Limits: one model size (Llama-3.2-1B, LoRA rank 8) and one attacked block; dose only on Instruments; rare targets only at seed 42. The two conditions also differ in capacity (one adapter against five summed), so their contrast measures persistence in this harness. The modelling choices listed above remain agent proposals for team review.
 
+**Provenance.** The catalogue code is commit `d38d27c` and tag **`attack-catalogue-2026-10-26`**. On 29 October 2026 the five source files were hashed in the NUS SoC cluster checkout `/mnt/scratch/w/wyenzhe/peso/cp4285-main/src` and all five SHA-256 values matched the tagged files (`corruption.py`, `robustness.py`, `adapter_blocks.py`, `shilling.py`, `cli.py`). The run `metrics.json` files record the CLI config, the learner description and the Torch version, but no VCS revision, so this is a source-hash match rather than a revision recorded by the artifacts themselves. The 29 October account-strata and dose tooling (`e3a19a3`) is built on top of the tag; it does not change the catalogue code.
+
 ## Account strata and critical mass (agent proposal, 29 October 2026)
 
 Implementation of issues #18 and #19. No run has been launched and no result is claimed; the run matrices and costs are proposals for team approval.
