@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#metrics-checkpoint"><strong>Latest · 22 · Shared metrics</strong></a>
+          <a href="#attack-catalogue-checkpoint"><strong>Latest · 23 · Attack catalogue</strong></a>
+          <a href="#metrics-checkpoint">22 · Shared metrics</a>
           <a href="#item-categories-checkpoint">21 · Item subcategories</a>
           <a href="#abc-integration">20 · Shared learner ABC</a>
           <a href="#slides-checkpoint">19 · Team deck</a>
@@ -732,6 +733,9 @@
             <a href="#item-categories-checkpoint">section 21: item subcategories</a>.
             Branch <code>standard-metrics</code> adds
             <a href="#metrics-checkpoint">section 22: shared ranking metrics</a>.
+            The working tree (26 October 2026) adds
+            <a href="#attack-catalogue-checkpoint">section 23: the corrupted-stream attack
+            catalogue and rollback timing</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3594,6 +3598,59 @@ scores = branch.score(fixed_queries)</pre>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <!-- APPENDED METRICS CHECKPOINT 2026-10-22 END -->
+        <!-- APPENDED ATTACK-CATALOGUE CHECKPOINT 2026-10-26 BEGIN -->
+        <section id="attack-catalogue-checkpoint">
+          <span class="section-num">23 / ATTACK CATALOGUE · 26 OCTOBER 2026</span>
+          <h2>Seven corruptions for the corrupted stream, and a rollback stopwatch.</h2>
+          <p>
+            <span class="label fact">FACT</span>
+            <a href="src/cp4285/experiment/corruption.py">corruption.py</a> puts the shill stream and
+            four corruptions of real activity behind one interface: edited real histories (accounts
+            and every user's validation and test events untouched), shills copied from a rival's
+            customers, uniform-noise vandalism, and relabelling — a share of items re-listed under the
+            promoted category, so the training-time category map changes while evaluation keeps the
+            true map. Every report records the category-mix shift and, where profiles exist, a
+            profile-separability AUC.
+          </p>
+          <p>
+            <span class="label fact">FACT</span>
+            <code>cp4285 adapter-blocks</code> gains <code>--corruption</code>,
+            <code>--placement</code> (one block, every update block, or block 0 of the init stage —
+            a poisoned base refuses rollback), <code>--rollback-block N</code> (delay the adapter
+            deletion; the summary's <code>drop_effect</code> compares the dropped cell with the clean
+            state at the same block) and <code>--rival</code>/<code>--trigger</code> measurement rules
+            resolved from test-target shares, so no watched category is picked by hand.
+            <code>cp4285 robustness-plan</code> prints the two-stage run matrix; it launches nothing.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> The grid's late-rollback over-correction reads
+            as a weapon: boost a rival's category, wait for the defender's undo, and the undo buries
+            that rival below its natural level — 1.9–2.4 ranks below clean for a rollback at the end
+            against 0.07–0.58 for an immediate drop. The sweep over drop timings measures how long a
+            defender can wait before the undo does more harm than the attack.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The catalogue ran for seeds 42–44 in three domains on
+            the SoC cluster's H100 NVL nodes on 26 October (189 runs; 303 with the October grid).
+            At 3% of a block's examples, inserting target items into real histories moves the pushed
+            category about twice as far as fake shills (4.7 against 2.1–2.5 ranks). Re-listing 10% of
+            items moves it 7.6 ranks and into about 90% of top-5 lists. Every one-off effect fades by
+            block 4; only isolated adapters keep a residue. The hidden trigger moves only its segment,
+            and demotion, vandalism and a poisoned base leave nothing lasting. Accuracy on the original
+            task stays within run noise.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The rollback undo over-corrects more the later it
+            comes, in all three domains: −0.10, 1.16, 1.45 and 1.85 ranks below clean for drops after
+            blocks 1, 2, 3 and at the end. With and without the poisoned adapter, the same states show
+            its own push holding near 2 ranks while the adapters trained after it build a counter-push
+            of up to 1.85 ranks. The first seed-42 reading's CDs &amp; Vinyl exception and Video Games
+            retention cost did not replicate. See
+            <a href="docs/CONTINUED-TRAINING.md#attack-catalogue-and-rollback-timing-26-october-2026">CONTINUED-TRAINING.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED ATTACK-CATALOGUE CHECKPOINT 2026-10-26 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />
