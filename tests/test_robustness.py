@@ -86,6 +86,7 @@ def test_dose_stage_emits_one_branch_per_dose():
     for r in runs:
         parsed = parser.parse_args(r["argv"])
         assert parsed.alpha in (0.01, 0.02) if "hijack" in r["branch"] else parsed.alpha == 0.03
+        assert parsed.dumps if r["branch"] != "init" else not parsed.dumps
     with pytest.raises(ValueError):
         robustness.plan(plan_args(stage="dose", domains="ins", seeds="42", doses="1.0",
                                   dose_corruption="real-history",
