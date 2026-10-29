@@ -372,3 +372,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 114 tests pass with the `llm` and `meta` extras; Ruff is clean. New tests cover stratum determinism, training-only features, budget arithmetic, the value invariant, selected real-history, per-half evaluation cells, planner parsing and the dose curve/threshold.
 
 **Limits:** No run has been launched. The run matrices (22 and 37 runs, about 5.3 and 7.4 GPU-hours) need approval. The primary metric, k grid, matched-event interpretation and threshold constants remain proposals for team confirmation.
+
+## 29 October 2026 — Catalogue provenance and tag
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** close the provenance part of #16 once the user opened the cluster SSH session.
+
+**Assistance:**
+- Hashed the five catalogue sources in the NUS SoC checkout `/mnt/scratch/w/wyenzhe/peso/cp4285-main/src` and compared them with commit `d38d27c`; all five SHA-256 values matched.
+- Created and pushed annotated tag `attack-catalogue-2026-10-26` on `d38d27c`.
+- Added the provenance paragraph to `docs/CONTINUED-TRAINING.md`, the tag to `CONTEXT.md`, the code-revision line to `docs/IMPLEMENTATION.md`, and updated the reference's status notice.
+
+**Validation:** the five cluster hashes equal the tagged files; `uv run pytest -q` (114 tests) and Ruff pass.
+
+**Limits:** this is a source-hash match, not a VCS revision recorded inside the run artifacts. The 29 October account-strata and dose tooling (`e3a19a3`) is a later commit on top of the tag, so it is not part of the tagged catalogue.
