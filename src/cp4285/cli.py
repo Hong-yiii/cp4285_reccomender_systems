@@ -178,6 +178,16 @@ def main():
     from .experiment.robustness import add_arguments as robustness_arguments
 
     robustness_arguments(rp)
+    ds = commands.add_parser(
+        "dose-summary", help="Critical-mass dose curve from paired attacked and clean runs"
+    )
+    ds.add_argument("runs", nargs="+", help="Attacked run folders or metrics.json files")
+    ds.add_argument("--clean", nargs="+", required=True, help="Clean reference runs")
+    ds.add_argument("--cell", default="state1_block1", help="Scored cell to compare")
+    ds.add_argument("--json", help="Also save the summary here (create-only)")
+    ds.add_argument("--bootstrap", type=int, default=2000, help="Bootstrap draws per run")
+    ds.add_argument("--step", type=float, default=1.0, help="Rank-change threshold")
+    ds.add_argument("--top5", type=float, default=0.5, help="Secondary top-5 threshold")
     bs = commands.add_parser("blocks-summary", help="Seeds and arms of `cp4285 blocks`")
     bs.add_argument("runs", nargs="+", help="metrics.json files")
     bs.add_argument("--json", help="Also save the summary here (create-only)")
@@ -270,6 +280,16 @@ def main():
             from .experiment.robustness import plan
 
             plan(args)
+        elif args.command == "dose-summary":
+            from .experiment.dose import markdown as dose_markdown
+            from .experiment.dose import save as save_dose
+            from .experiment.dose import summary as dose_summary
+
+            result = dose_summary(args.runs, args.clean, cell=args.cell,
+                                  draws=args.bootstrap, step=args.step, top5=args.top5)  # fmt: skip
+            if args.json:
+                save_dose(result, args.json)
+            print(dose_markdown(result))
         elif args.command == "blocks-summary":
             from .experiment.blocks import markdown, summarize
 

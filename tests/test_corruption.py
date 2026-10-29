@@ -110,6 +110,49 @@ def test_argument_checks():
         apply_users(empty, CATEGORY, 3, "vandalism", 0.1, 1)
 
 
+def test_selected_real_history_uses_exact_accounts():
+    users = block()
+    selection = {"metric": "activity", "side": "top", "budget": "accounts", "share": 0.25,
+                 "accounts": None, "value_k": 1}  # fmt: skip
+    corrupted, report = apply_users(users, CATEGORY, 3, "real-history", 0.2, 1,
+                                    selection=selection)  # fmt: skip
+    assert report["selection"]["accounts_selected"] == report["users_corrupted"] == 10
+    assert report["selection"]["share_of_users_touched"] == 0.25
+    assert report["separability_auc_same_stratum"] is not None
+    for u, d in users.items():
+        assert corrupted[u]["current_block"][-2:] == d["current_block"][-2:]
+        assert corrupted[u]["previous_block"] == d["previous_block"]
+
+
+def test_value_budget_trades_accounts_for_insertions():
+    users = block()
+    common = {"metric": "reach", "budget": "value", "share": 0.2, "accounts": None,
+              "value_k": 2}  # fmt: skip
+    _, top_report = apply_users(users, CATEGORY, 3, "real-history", 0.2, 1,
+                                selection={**common, "side": "top"})  # fmt: skip
+    _, bottom_report = apply_users(users, CATEGORY, 3, "real-history", 0.2, 1,
+                                   selection={**common, "side": "bottom"})  # fmt: skip
+    assert top_report["users_corrupted"] * 2 == bottom_report["users_corrupted"]
+    assert top_report["selection"]["mean_insertions"] == pytest.approx(
+        2 * bottom_report["selection"]["mean_insertions"]
+    )
+    assert top_report["inserted_examples"] == bottom_report["inserted_examples"]
+
+
+def test_selection_is_only_for_real_history():
+    users = block()
+    selection = {"metric": "activity", "side": "top", "budget": "accounts",
+                 "share": 0.1, "accounts": None, "value_k": 1}  # fmt: skip
+    with pytest.raises(ValueError):
+        apply_users(users, CATEGORY, 3, "shill", 0.1, 1, selection=selection)
+    with pytest.raises(ValueError):
+        apply_users(users, CATEGORY, 3, "real-history", 0.1, 1,
+                    selection={**selection, "metric": "nonsense"})  # fmt: skip
+    with pytest.raises(ValueError):
+        apply_users(users, CATEGORY, 3, "real-history", 0.1, 1,
+                    selection={**selection, "accounts": 3})  # fmt: skip
+
+
 def test_training_mix_counts_match_the_report():
     users = block()
     cases = (("shill", {"attack": "bandwagon"}, "shill_examples"),

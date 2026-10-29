@@ -46,3 +46,47 @@ def test_stage_a_excludes_the_stealth_attacks():
 def test_unknown_domain_key_is_rejected():
     with pytest.raises(ValueError):
         robustness.plan(plan_args(domains="xx"))
+
+
+def test_strata_stage_emits_matched_pairs(capsys):
+    runs = robustness.plan(plan_args(
+        stage="strata", domains="ins", seeds="42", strata_metrics="activity,reach",
+        strata_share=0.1, strata_accounts=None, strata_budgets="accounts,value",
+        strata_k="2", strata_condition="isolated",
+    ))  # fmt: skip
+    branches = {r["branch"] for r in runs}
+    assert "init" in branches and "iso-clean-strata" in branches
+    assert "iso-hijack-activity-top-accounts" in branches
+    assert "iso-hijack-reach-bottom-valuek2" in branches
+    assert len(runs) == 1 + 1 + 2 * 2 * (1 + 1)  # init, clean, 2 metrics x 2 sides x 2 budgets
+    parser = argparse.ArgumentParser()
+    adapter_blocks.add_arguments(parser)
+    for r in runs:
+        parser.parse_args(r["argv"])
+    arms = [r for r in runs if "hijack" in r["branch"]]
+    assert all("--user-stratum" in r["argv"] and "--eval-strata" in r["argv"] for r in arms)
+    assert {r["argv"][r["argv"].index("--alpha") + 1] for r in arms} == {"0.03"}
+    with pytest.raises(ValueError):  # exactly one account rule
+        robustness.plan(plan_args(stage="strata", strata_metrics="reach",
+                                  strata_share=0.1, strata_accounts=4,
+                                  strata_budgets="accounts", strata_k="2",
+                                  strata_condition="isolated"))  # fmt: skip
+
+
+def test_dose_stage_emits_one_branch_per_dose():
+    runs = robustness.plan(plan_args(
+        stage="dose", domains="ins", seeds="42", doses="0.01,0.02",
+        dose_corruption="real-history", dose_condition="isolated",
+    ))  # fmt: skip
+    branches = {r["branch"] for r in runs}
+    assert branches == {"init", "iso-clean-dose", "iso-hijack-100bp", "iso-hijack-200bp"}
+    assert len(runs) == 4
+    parser = argparse.ArgumentParser()
+    adapter_blocks.add_arguments(parser)
+    for r in runs:
+        parsed = parser.parse_args(r["argv"])
+        assert parsed.alpha in (0.01, 0.02) if "hijack" in r["branch"] else parsed.alpha == 0.03
+    with pytest.raises(ValueError):
+        robustness.plan(plan_args(stage="dose", domains="ins", seeds="42", doses="1.0",
+                                  dose_corruption="real-history",
+                                  dose_condition="isolated"))  # fmt: skip

@@ -23,9 +23,11 @@ signal. `alpha` always means the corrupted share of the block's training example
 same denominator the shill corruption uses.
 """
 
+import math
 import random
 from collections import Counter
 
+from . import user_strata
 from .shilling import PREFIX, features, inject, js, separability, training_examples
 
 KINDS = ("shill", "real-history", "demotion", "vandalism", "relabel")
@@ -68,7 +70,59 @@ def shill(users, category, target, alpha, seed, *, attack, segment=None, target_
     return poisoned, report
 
 
-def real_history(users, category, target, alpha, seed, *, target_share=0.5):
+def _insertion_target(alpha, real):
+    """Inserted examples at the loop's stopping point, alpha of the corrupted total."""
+    target = 0
+    while target < alpha * (real + target):
+        target += 1
+    return target
+
+
+def _selected_accounts(users, selection, alpha):
+    """Pick accounts by stratum and allocate the shared event budget to them."""
+    metric = selection.get("metric")
+    side = selection.get("side", "top")
+    budget = selection.get("budget", "accounts")
+    value_k = selection.get("value_k", 1)
+    max_insertions = selection.get("max_insertions", 10)
+    if metric not in user_strata.METRICS:
+        raise ValueError(f"Unknown stratum metric {metric}; choose from {user_strata.METRICS}")
+    if side not in user_strata.SIDES:
+        raise ValueError(f"Unknown side {side}; choose from {user_strata.SIDES}")
+    if budget not in user_strata.BUDGETS:
+        raise ValueError(f"Unknown budget {budget}; choose from {user_strata.BUDGETS}")
+    if value_k < 1:
+        raise ValueError("value_k must be at least 1")
+    share, accounts = selection.get("share"), selection.get("accounts")
+    if (share is None) == (accounts is None):
+        raise ValueError("Give exactly one of selection share and accounts")
+    scores = user_strata.values(users, metric)
+    if not scores:
+        raise ValueError("No user in this block has a trainable history")
+    base = accounts if accounts is not None else max(1, math.floor(share * len(scores)))
+    n = max(1, math.ceil(base / value_k)) if budget == "value" and side == "top" else base
+    real = len(training_examples(users))
+    events = _insertion_target(alpha, real)
+    n = min(n, events)  # every selected account receives at least one insertion
+    chosen, order = user_strata.select(scores, side, accounts=n)
+    alloc = user_strata.allocate(chosen, users, events, budget=budget,
+                                 max_insertions=max_insertions)  # fmt: skip
+    info = {
+        "metric": metric, "side": side, "budget": budget, "value_k": value_k,
+        "population": len(scores), "stratum_users": len(chosen),
+        "accounts_selected": len(chosen), "events_target": events,
+        "mean_insertions": events / len(chosen),
+        "max_insertions": max_insertions,
+        "stratum_boundary": scores[chosen[-1]],
+        "spearman_activity_reach": user_strata.spearman(
+            user_strata.activity(users), user_strata.reach(users)
+        ),
+    }
+    return chosen, order, alloc, scores, info
+
+
+def real_history(users, category, target, alpha, seed, *, target_share=0.5, selection=None,
+                 max_insertions=10):  # fmt: skip
     """Corrupt real shoppers' training events instead of adding accounts.
 
     Each insertion puts one target item into a user's block before its last two events,
@@ -76,6 +130,11 @@ def real_history(users, category, target, alpha, seed, *, target_share=0.5):
     by one example, so the loop stops once the inserted examples reach `alpha` of the
     corrupted total, as the shill loop does. Separability here asks whether edited
     profiles stand out from untouched ones; there are no new accounts to find.
+
+    With ``selection`` the accounts come from a deterministic activity or reach stratum
+    instead of a uniform draw. The event budget is still set by ``alpha``; the budget
+    controls how that fixed total is spread over the selected accounts. The legacy
+    uniform path is kept byte-for-byte when ``selection`` is None.
     """
     rng = random.Random(seed)
     counts = Counter(item for _, item in training_examples(users))
@@ -87,19 +146,47 @@ def real_history(users, category, target, alpha, seed, *, target_share=0.5):
     if not eligible:
         raise ValueError("No user in this block has a trainable history")
     touched, inserted = {}, 0
-    while inserted < alpha * (real + inserted):
-        user = rng.choice(eligible)
-        block = list((touched.get(user) or users[user])["current_block"])
-        block.insert(rng.randrange(len(block) - 2), rng.choice(pushed))
-        touched[user] = {**users[user], "current_block": block}
-        inserted += 1
+    if selection is None:
+        while inserted < alpha * (real + inserted):
+            user = rng.choice(eligible)
+            block = list((touched.get(user) or users[user])["current_block"])
+            block.insert(rng.randrange(len(block) - 2), rng.choice(pushed))
+            touched[user] = {**users[user], "current_block": block}
+            inserted += 1
+        selection_info = None
+    else:
+        selection = {**selection, "max_insertions": max_insertions}
+        chosen, order, alloc, scores, selection_info = _selected_accounts(users, selection, alpha)
+        for user in chosen:
+            for _ in range(alloc[user]):
+                block = list((touched.get(user) or users[user])["current_block"])
+                block.insert(rng.randrange(len(block) - 2), rng.choice(pushed))
+                touched[user] = {**users[user], "current_block": block}
+                inserted += 1
+        selection_info["share_of_users_touched"] = len(touched) / len(scores)
+        selection_info["capacity_shortfall"] = 0
     corrupted = {**users, **touched}
     report = {
         "kind": "real-history", "target_category": target, "alpha_requested": alpha,
         "alpha": inserted / (real + inserted), "users_corrupted": len(touched),
         "inserted_examples": inserted, "real_examples": real, "target_items": pushed,
     }  # fmt: skip
-    return corrupted, _realism(users, corrupted, category, counts, seed, report)
+    if selection_info is not None:
+        report["selection"] = selection_info
+    report = _realism(users, corrupted, category, counts, seed, report)
+    if selection_info is not None:
+        # Compare edited profiles with untouched users on the same side of the stratum,
+        # so the AUC is not just activity or reach showing through.
+        ranked = order
+        half = max(len(ranked) // 2, len(chosen))
+        pool = ranked[:half] if selection["side"] == "top" else ranked[-half:]
+        pool = [u for u in pool if u not in touched]
+        sample = random.Random(seed).sample(pool, min(len(touched), len(pool)))
+        report["separability_auc_same_stratum"] = separability(
+            features({u: users[u] for u in sample}, category, counts),
+            features({u: corrupted[u] for u in touched}, category, counts), seed,
+        )  # fmt: skip
+    return corrupted, report
 
 
 def demotion(users, category, target, alpha, seed, *, rival, target_share=0.5):
@@ -201,14 +288,17 @@ def relabel_map(users, category, target, frac, seed):
 
 
 def apply_users(users, category, target, kind, alpha, seed, *, attack="bandwagon", segment=None,
-                target_share=0.5, rival=None, head=50):  # fmt: skip
+                target_share=0.5, rival=None, head=50, selection=None, max_insertions=10):
     """Dispatch one user-level corruption by name; relabel uses relabel_map instead."""
     _check_alpha(alpha)
+    if selection is not None and kind != "real-history":
+        raise ValueError("User-stratum selection is only defined for --corruption real-history")
     if kind == "shill":
         return shill(users, category, target, alpha, seed, attack=attack, segment=segment,
                      target_share=target_share, head=head)  # fmt: skip
     if kind == "real-history":
-        return real_history(users, category, target, alpha, seed)
+        return real_history(users, category, target, alpha, seed, selection=selection,
+                            max_insertions=max_insertions)  # fmt: skip
     if kind == "demotion":
         if rival is None:
             raise ValueError("The demotion corruption needs a rival category")

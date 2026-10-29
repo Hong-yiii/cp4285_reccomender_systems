@@ -76,6 +76,7 @@ def test_init_then_clean_and_attacked_branches(tmp_path):
     assert cell["users"] == 8 and 1 <= cell["push"]["mean_rank"] <= 3
     dumped = [json.loads(x) for x in (tmp_path / "attacked/dumps/state1_block1.jsonl").open()]
     assert len(dumped) == 8 and not any(r["user"].startswith("inj-") for r in dumped)
+    assert all(len(r["top"]) == len(NAMES) for r in dumped)  # top-K set for churn
     with pytest.raises(FileExistsError):
         adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init"))
     adapter_blocks.run(parse(
@@ -315,3 +316,27 @@ def test_vandalism_needs_no_target(tmp_path):
     ))  # fmt: skip
     assert run["attack"]["kind"] == "vandalism" and run["attack"]["shill_users"] > 0
     assert "push" not in run["cells"]["state1_block1"]  # nothing was promoted
+
+
+def test_stratified_real_history_partitions_the_push(tmp_path):
+    data = toy_data(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "strata", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--corruption", "real-history", "--user-stratum", "activity", "--user-side", "top",
+        "--user-share", "0.5", "--alpha", "0.2", "--eval-strata", "--push", "1",
+    ))  # fmt: skip
+    report = run["attack"]
+    assert report["selection"]["accounts_selected"] == report["users_corrupted"]
+    assert report["selection"]["share_of_users_touched"] == 0.5
+    assert "separability_auc_same_stratum" in report
+    cell = run["cells"]["state1_block1"]
+    assert cell["push_activity_top"]["users"] + cell["push_activity_bottom"]["users"] == cell["push"]["users"]
+    assert cell["push_reach_top"]["users"] + cell["push_reach_bottom"]["users"] == cell["push"]["users"]
+    assert set(run["strata"]["blocks"]) == {f"block{b}" for b in range(5)}
+    with pytest.raises(ValueError):  # a stratum needs real-history corruption
+        adapter_blocks.run(parse(
+            data, tmp_path / "bad", "--stage", "branch", "--init", str(tmp_path / "init"),
+            "--attack", "bandwagon", "--user-stratum", "activity", "--user-share", "0.5",
+            "--push", "1",
+        ))  # fmt: skip
