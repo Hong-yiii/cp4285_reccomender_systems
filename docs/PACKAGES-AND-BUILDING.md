@@ -79,7 +79,7 @@ print(branch.describe())
 
 The raw `SASRec(nn.Module)` remains unchanged: its `.train()` toggles PyTorch mode, so use **`SASRecLearner`** for the experiment's training interface. The adapter owns Adam plus Python and CPU/device Torch RNG states. It restores the caller's Torch RNG after each update. Its `fork()` copies optimizer parameter bindings as well as weights and RNG. Scoring restores submodule training modes.
 
-The pilot still selects weights on validation NDCG, verifies a saved/reloaded initial checkpoint and measures a frozen control. Continuation starts with fresh Adam state and the end-of-initial-training sampler state, not a resumed best-epoch optimizer. Forking no longer constructs a throwaway randomly initialized network for reload, so do not expect bitwise continuation parity with old pilot runs. The objective, sampling policy and evaluation are preserved; record the code revision for reproducibility.
+The pilot selects weights on validation Hit@10, with NDCG@10 breaking ties, verifies a saved/reloaded initial checkpoint and measures a frozen control. Continuation starts with fresh Adam state and the end-of-initial-training sampler state, not a resumed best-epoch optimizer. Forking no longer constructs a throwaway randomly initialized network for reload, so do not expect bitwise continuation parity with old pilot runs. The objective, sampling policy and evaluation are preserved; record the code revision for reproducibility.
 
 ## Runnable incremental QR-SVD lifecycle
 

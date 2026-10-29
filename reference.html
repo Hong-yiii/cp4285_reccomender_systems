@@ -670,7 +670,10 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#peso-penalty"><strong>Latest · 23 · A penalty that acts</strong></a>
+          <a href="#attack-catalogue-checkpoint"><strong>Latest · 26 · Attack catalogue</strong></a>
+          <a href="#metrics-checkpoint">25 · Shared metrics</a>
+          <a href="#item-categories-checkpoint">24 · Item subcategories</a>
+          <a href="#peso-penalty">23 · A penalty that acts</a>
           <a href="#peso-analysis">22 · PESO analysis</a>
           <a href="#peso-replication">21 · PESO replication</a>
           <a href="#abc-integration">20 · Shared learner ABC</a>
@@ -739,6 +742,15 @@
             <a href="#abc-integration">section 20</a> and the
             <a href="docs/PACKAGES-AND-BUILDING.md">runnable development guide</a>.
             The lightweight reference is tagged <code>boilerplate-v1</code>.
+            Branch <code>item-categories-main</code> (22 October 2026) adds
+            <a href="#item-categories-checkpoint">section 21: item subcategories</a>.
+            Branch <code>standard-metrics</code> adds
+            <a href="#metrics-checkpoint">section 22: shared ranking metrics</a>.
+            Section 23 (26 October 2026) records the
+            <a href="#attack-catalogue-checkpoint">corrupted-stream attack catalogue and rollback
+            timing</a>; its code is tagged <code>attack-catalogue-2026-10-26</code>. The
+            29 October account-strata and dose tooling is documented in
+            <a href="CONTEXT.md">current context</a> and the runbook; it has no results yet.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3646,6 +3658,114 @@ scores = branch.score(fixed_queries)</pre>
             <a href="docs/TALK-GENERAL-AUDIENCE.md">general-audience talk</a>.</p>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 -->
+        <section id="item-categories-checkpoint">
+          <span class="section-num">24 / ITEM SUBCATEGORIES · 22 OCTOBER 2026</span>
+          <h2>Items grouped by metadata subcategory, with a classifier for missing paths.</h2>
+          <p>
+            <span class="label fact">FACT</span> New <code>cp4285 meta-*</code> commands
+            (<a href="src/cp4285/experiment/metadata.py">metadata.py</a>) download item metadata for
+            all 34 Amazon 2023 files and audit the <code>categories</code> paths. They group items
+            by the first two path levels. Items with no path that deep get a predicted subcategory
+            from a TF-IDF text classifier, kept only above a confidence threshold set for 0.8
+            held-out precision. Every row records <code>observed</code>, <code>predicted</code> or
+            <code>unknown</code>. Six files with no paths learn from a related donor file.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The full run on a Runpod CPU pod labelled all 35.4M
+            items: 89.0% observed, 8.3% predicted, 2.7% unknown. The tables are in the private
+            Hugging Face dataset <code>randomwish/amazon23-item-categories</code>. Product files reach
+            0.90–0.98 held-out accuracy; genre-level Books, CDs and Movies do not, and Movies_and_TV
+            receives no predictions.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Subcategory density is a candidate way to pick
+            a denser experiment domain; the team has not chosen one. See
+            <a href="docs/ITEM-CATEGORIES.md">ITEM-CATEGORIES.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED ITEM-CATEGORIES CHECKPOINT 2026-10-22 END -->
+        <!-- APPENDED METRICS CHECKPOINT 2026-10-22 -->
+        <section id="metrics-checkpoint">
+          <span class="section-num">25 / SHARED METRICS · 22 OCTOBER 2026</span>
+          <h2>One set of ranking metrics for every evaluator.</h2>
+          <p>
+            <span class="label fact">FACT</span>
+            <a href="src/cp4285/experiment/metrics.py">metrics.py</a> turns the 1-based rank of each
+            held-out target into Hit@K, NDCG@K and MRR@K at K = 5, 10 and 20. The classical and
+            neural evaluators both call it. With one target Recall@K equals Hit@K, so
+            <code>recall@K</code> stays only as an alias for older run files.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Hit@10 for the next item and Recall@10 for the next
+            items are the team's reported metrics (issue #8, 28 September). The SASRec pilot now
+            selects its checkpoint on validation Hit@10 with NDCG@10 as tie-break. That selection
+            rule was proposed on PR #9 and still needs team confirmation.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Shared formulas do not make the protocols
+            comparable: candidates, seen-item masking and splits still differ by workstream. With
+            few candidates, such as 30 item categories, Hit@10 saturates; compare Hit@1, Hit@5,
+            NDCG@10 and MRR@10 there, beside a popularity baseline. See
+            <a href="docs/EXPERIMENT.md#ranking-metrics">EXPERIMENT.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED METRICS CHECKPOINT 2026-10-22 END -->
+        <!-- APPENDED ATTACK-CATALOGUE CHECKPOINT 2026-10-26 BEGIN -->
+        <section id="attack-catalogue-checkpoint">
+          <span class="section-num">26 / ATTACK CATALOGUE · 26 OCTOBER 2026</span>
+          <h2>Seven corruptions for the corrupted stream, and a rollback stopwatch.</h2>
+          <p>
+            <span class="label fact">FACT</span>
+            <a href="src/cp4285/experiment/corruption.py">corruption.py</a> puts the shill stream and
+            four corruptions of real activity behind one interface: edited real histories (accounts
+            and every user's validation and test events untouched), shills copied from a rival's
+            customers, uniform-noise vandalism, and relabelling — a share of items re-listed under the
+            promoted category, so the training-time category map changes while evaluation keeps the
+            true map. Every report records the category-mix shift and, where profiles exist, a
+            profile-separability AUC.
+          </p>
+          <p>
+            <span class="label fact">FACT</span>
+            <code>cp4285 adapter-blocks</code> gains <code>--corruption</code>,
+            <code>--placement</code> (one block, every update block, or block 0 of the init stage —
+            a poisoned base refuses rollback), <code>--rollback-block N</code> (delay the adapter
+            deletion; the summary's <code>drop_effect</code> compares the dropped cell with the clean
+            state at the same block) and <code>--rival</code>/<code>--trigger</code> measurement rules
+            resolved from test-target shares, so no watched category is picked by hand.
+            <code>cp4285 robustness-plan</code> prints the two-stage run matrix; it launches nothing.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> The grid's late-rollback over-correction reads
+            as a weapon: boost a rival's category, wait for the defender's undo, and the undo buries
+            that rival below its natural level — 1.9–2.4 ranks below clean for a rollback at the end
+            against 0.07–0.58 for an immediate drop. The sweep over drop timings measures how long a
+            defender can wait before the undo does more harm than the attack.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The catalogue ran for seeds 42–44 in three domains on
+            the SoC cluster's H100 NVL nodes on 26 October (189 runs; 303 with the October grid).
+            At 3% of a block's examples, inserting target items into real histories moves the pushed
+            category about twice as far as fake shills (4.7 against 2.1–2.5 ranks). Re-listing 10% of
+            items moves it 7.6 ranks and into about 90% of top-5 lists. Every one-off effect fades by
+            block 4; only isolated adapters keep a residue. The hidden trigger moves only its segment,
+            and demotion, vandalism and a poisoned base leave nothing lasting. Accuracy on the original
+            task stays within run noise.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The rollback undo over-corrects more the later it
+            comes, in all three domains: −0.10, 1.16, 1.45 and 1.85 ranks below clean for drops after
+            blocks 1, 2, 3 and at the end. With and without the poisoned adapter, the same states show
+            its own push holding near 2 ranks while the adapters trained after it build a counter-push
+            of up to 1.85 ranks. The first seed-42 reading's CDs &amp; Vinyl exception and Video Games
+            retention cost did not replicate. See
+            <a href="docs/CONTINUED-TRAINING.md#attack-catalogue-and-rollback-timing-26-october-2026">CONTINUED-TRAINING.md</a>.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a></p>
+        </section>
+        <!-- APPENDED ATTACK-CATALOGUE CHECKPOINT 2026-10-26 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

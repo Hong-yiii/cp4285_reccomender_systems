@@ -351,6 +351,56 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Limits:**
 - **Not yet run on GPU:** no O2 or λ-sweep results exist yet.
 
+## 22 October 2026 — Item subcategories from metadata
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Use the `categories` field of Amazon 2023 item metadata to group items into subcategories across all categories, fill empty or missing paths with a text classifier, run it online and publish the result.
+
+**Assistance:** Added `src/cp4285/experiment/metadata.py`, the `meta-download`, `meta-audit`, `meta-classify`, `meta-group` and `meta-publish` commands, the optional `meta` extra and `tests/test_metadata.py`. Factored the validated download into `fetch` in `experiment/data.py`; `download --domain all` skips the six categories without 5-core files; DuckDB limits can be raised through the environment. Sampled every metadata file and found six with no paths, so they learn from a donor file. An embedding classifier was tried first on a Runpod GPU; that pod stopped over a billing issue. A hashed TF-IDF linear model replaced it after it scored higher on Video_Games (0.859 against 0.770 held-out accuracy) and ran about 20 times faster on CPU. Ran the full pipeline on a Runpod CPU pod, fixed two DuckDB failures found there, published to the private Hugging Face dataset `randomwish/amazon23-item-categories` and terminated the pods. First developed on `item-categories` (from `classical-study`, PR #13) and ported onto main's `experiment/` layout for a focused PR.
+
+**Validation:** Ruff lint and format and the full test suite passed. The output reconciles to 35,393,189 unique rows; published counts match the local copy.
+
+**Limits:** Predicted labels and donor mappings are model output and assumptions. Genre-level files (Books, CDs, Movies) classify poorly. No subcategory has been chosen as an experiment domain or checked against the cutoff protocol.
+
+## 22 October 2026 — Shared ranking metrics
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Look across the open PRs for a standard metric, then report Hit@5, Hit@10, NDCG@10 and other suitable metrics in every workstream.
+
+**Assistance:** Compared the metric code on main and PRs 9, 12 and 14 and the decision in issue #8. Added `src/cp4285/experiment/metrics.py` (`from_ranks`, `selection_key`) and routed the classical and neural evaluators through it. Renamed the single-target `recall` sums to `hit`, keeping `recall@K` as an alias. Switched the pilot's checkpoint selection to Hit@10 with NDCG@10 as tie-break and updated the docs that named NDCG@10 as primary.
+
+**Validation:** Ruff and the full suite passed (53 tests, 3 new on hand-computed ranks). The synthetic demo ran end to end.
+
+**Limits:** No real-data run used these metrics yet. Selection by Hit@10 is a proposal from PR #9 pending team confirmation. Evaluators still differ in candidates, seen-item masking and splits, so their scores remain incomparable.
+
+## 22 October 2026 — Adapter survey
+
+**Tool:** Claude Code (Claude Opus 5.5), with a research subagent.
+
+**Request:** Look into whether adapters help with sparsity here: LoRA, adapters on SASRec and other suitable approaches.
+
+**Assistance:** Wrote `docs/ADAPTERS.md`, a sourced survey of LoRA and continual LoRA, bottleneck adapters, adapter transfer in sequential recommenders, prompt tuning, LLM recommenders, category-aware models and replay. It ends with a comparison table and one proposed experiment. Parameter counts come from the repo's `SASRec` class; local data figures come from the PESO category statistics.
+
+**Validation:** The parameter counts (2,704,000 total, 98.9% in the item table, 8,000 for rank-8 LoRA), density ratios (481–1,349×) and the 13,038 items first seen after block 0 were recomputed independently. Fu et al.'s Tables 2–4 were checked against the PDF. Every other source was checked online by the subagent.
+
+**Limits:** No adapter or category-channel code was written or run. The recommended experiment is an agent proposal, not a team decision. Paper figures use each paper's own protocol, several with sampled metrics.
+
+## 22 October 2026 — Category-channel SASRec on PESO's blocks
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Run the adapter survey's proposed experiment, SASRec with a category channel, on the cluster's CPU nodes.
+
+**Assistance:** Added `models/category_sasrec.py`, a second SASRec encoder over category sequences whose output joins the item encoder's and predicts the next category, inside the unchanged `SASRecLearner`. Added `experiment/blocks.py` and `cp4285 blocks`: PESO's users, blocks and targets; block-0 training with the pilot's regime; fresh-target continuation after one Adam reset; validation-best epochs; and the full transfer matrix with exposure buckets and a popularity baseline. Documented the study in the runbook.
+
+**Validation:** Six new tests cover the model, the split and an end-to-end run of both arms on toy blocks; the suite (59 tests) and Ruff pass. A one-epoch run on the real blocks took 112 s (SASRec) and 193 s (category arm) on 4 threads.
+
+**Results:** three seeds per arm on the NUS SoC cluster's CPU nodes, with the continuation learning rate ($10^{-4}$) chosen on block-1 validation of the plain arm. The channel leaves top-10 ranking unchanged and lifts rare targets' ranks about threefold, still far outside the top 10 (see `docs/ADAPTERS.md`).
+
+**Limits:** One category level (PR 14's level 2) and one learning-rate sweep on one seed. The category design follows CaFe but is our own, and its ranking rule is one of several reasonable choices.
+
 ## 22 October 2026 — Category targets on the NUS SoC cluster
 
 **Tool:** Claude Code (Claude Opus 5.5).
@@ -374,6 +424,67 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 - Category runs use H100 NVL GPUs and deterministic beam search, where the item replication used A100s and the released beam sampling.
 - 6.5% of item labels come from PR 14's classifier; results are also reported for observed-label targets.
 
+## 22 October 2026 — Item subcategories from metadata
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Use the `categories` field of Amazon 2023 item metadata to group items into subcategories across all categories, fill empty or missing paths with a text classifier, run it online and publish the result.
+
+**Assistance:** Added `src/cp4285/experiment/metadata.py`, the `meta-download`, `meta-audit`, `meta-classify`, `meta-group` and `meta-publish` commands, the optional `meta` extra and `tests/test_metadata.py`. Factored the validated download into `fetch` in `experiment/data.py`; `download --domain all` skips the six categories without 5-core files; DuckDB limits can be raised through the environment. Sampled every metadata file and found six with no paths, so they learn from a donor file. An embedding classifier was tried first on a Runpod GPU; that pod stopped over a billing issue. A hashed TF-IDF linear model replaced it after it scored higher on Video_Games (0.859 against 0.770 held-out accuracy) and ran about 20 times faster on CPU. Ran the full pipeline on a Runpod CPU pod, fixed two DuckDB failures found there, published to the private Hugging Face dataset `randomwish/amazon23-item-categories` and terminated the pods. First developed on `item-categories` (from `classical-study`, PR #13) and ported onto main's `experiment/` layout for a focused PR.
+
+**Validation:** Ruff lint and format and the full test suite passed. The output reconciles to 35,393,189 unique rows; published counts match the local copy.
+
+**Limits:** Predicted labels and donor mappings are model output and assumptions. Genre-level files (Books, CDs, Movies) classify poorly. No subcategory has been chosen as an experiment domain or checked against the cutoff protocol.
+
+## 22 October 2026 — Shared ranking metrics
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Look across the open PRs for a standard metric, then report Hit@5, Hit@10, NDCG@10 and other suitable metrics in every workstream.
+
+**Assistance:** Compared the metric code on main and PRs 9, 12 and 14 and the decision in issue #8. Added `src/cp4285/experiment/metrics.py` (`from_ranks`, `selection_key`) and routed the classical and neural evaluators through it. Renamed the single-target `recall` sums to `hit`, keeping `recall@K` as an alias. Switched the pilot's checkpoint selection to Hit@10 with NDCG@10 as tie-break and updated the docs that named NDCG@10 as primary.
+
+**Validation:** Ruff and the full suite passed (53 tests, 3 new on hand-computed ranks). The synthetic demo ran end to end.
+
+**Limits:** No real-data run used these metrics yet. Selection by Hit@10 is a proposal from PR #9 pending team confirmation. Evaluators still differ in candidates, seen-item masking and splits, so their scores remain incomparable.
+
+## 22 October 2026 — Adapter survey
+
+**Tool:** Claude Code (Claude Opus 5.5), with a research subagent.
+
+**Request:** Look into whether adapters help with sparsity here: LoRA, adapters on SASRec and other suitable approaches.
+
+**Assistance:** Wrote `docs/ADAPTERS.md`, a sourced survey of LoRA and continual LoRA, bottleneck adapters, adapter transfer in sequential recommenders, prompt tuning, LLM recommenders, category-aware models and replay. It ends with a comparison table and one proposed experiment. Parameter counts come from the repo's `SASRec` class; local data figures come from the PESO category statistics.
+
+**Validation:** The parameter counts (2,704,000 total, 98.9% in the item table, 8,000 for rank-8 LoRA), density ratios (481–1,349×) and the 13,038 items first seen after block 0 were recomputed independently. Fu et al.'s Tables 2–4 were checked against the PDF. Every other source was checked online by the subagent.
+
+**Limits:** No adapter or category-channel code was written or run. The recommended experiment is an agent proposal, not a team decision. Paper figures use each paper's own protocol, several with sampled metrics.
+
+## 22 October 2026 — Category-channel SASRec on PESO's blocks
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Run the adapter survey's proposed experiment, SASRec with a category channel, on the cluster's CPU nodes.
+
+**Assistance:** Added `models/category_sasrec.py`, a second SASRec encoder over category sequences whose output joins the item encoder's and predicts the next category, inside the unchanged `SASRecLearner`. Added `experiment/blocks.py` and `cp4285 blocks`: PESO's users, blocks and targets; block-0 training with the pilot's regime; fresh-target continuation after one Adam reset; validation-best epochs; and the full transfer matrix with exposure buckets and a popularity baseline. Documented the study in the runbook.
+
+**Validation:** Six new tests cover the model, the split and an end-to-end run of both arms on toy blocks; the suite (59 tests) and Ruff pass. A one-epoch run on the real blocks took 112 s (SASRec) and 193 s (category arm) on 4 threads.
+
+**Results:** three seeds per arm on the NUS SoC cluster's CPU nodes, with the continuation learning rate ($10^{-4}$) chosen on block-1 validation of the plain arm. The channel leaves top-10 ranking unchanged and lifts rare targets' ranks about threefold, still far outside the top 10 (see `docs/ADAPTERS.md`).
+
+**Limits:** One category level (PR 14's level 2) and one learning-rate sweep on one seed. The category design follows CaFe but is our own, and its ranking rule is one of several reasonable choices.
+
+## 23 October 2026 — Per-user dumps for the PESO-block study
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Experiment 3 of the category study asks whether SASRec and PESO can recommend products they never trained on, which needs SASRec's per-user rankings.
+
+**Assistance:** Added `--dumps` to `cp4285 blocks`. Each cell then writes one row per test user (PESO item IDs, the exact target rank and the top 20 by score) inside the ignored run folder. Reran both arms for three seeds on the cluster's CPU nodes with the flag.
+
+**Validation:** A new test checks that the dumps agree with each cell's metrics; the suite (61 tests) and Ruff pass. All six reruns reproduce the 22 October metrics exactly on the original CPU type. One extra category-arm rerun on a different CPU type drifted to own-state Hit@10 0.0181 from 0.0190, recorded as a hardware sensitivity.
+
+**Limits:** Dumps hold user IDs, so they are never committed; only aggregate reports from the PESO branch are.
 
 ## 23 October 2026 — Decoding check, category results and experiments 1–4
 
@@ -394,6 +505,50 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Limits:**
 - Experiment 2, 3 and 4 results are preliminary. Category seed 44, the prefix run's deterministic item seed and the ladder are still running.
 - Product seed variance rests on three sampled seeds, so its 95% interval is wide.
+
+## 23 October 2026 — Per-user dumps for the PESO-block study
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** Experiment 3 of the category study asks whether SASRec and PESO can recommend products they never trained on, which needs SASRec's per-user rankings.
+
+**Assistance:** Added `--dumps` to `cp4285 blocks`. Each cell then writes one row per test user (PESO item IDs, the exact target rank and the top 20 by score) inside the ignored run folder. Reran both arms for three seeds on the cluster's CPU nodes with the flag.
+
+**Validation:** A new test checks that the dumps agree with each cell's metrics; the suite (61 tests) and Ruff pass. All six reruns reproduce the 22 October metrics exactly on the original CPU type. One extra category-arm rerun on a different CPU type drifted to own-state Hit@10 0.0181 from 0.0190, recorded as a hardware sensitivity.
+
+**Limits:** Dumps hold user IDs, so they are never committed; only aggregate reports from the PESO branch are.
+
+## 24 October 2026 — Corrupted streams and a language model with adapters
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** drop PESO, try a language model with an adapter, and align the study with the course's robustness framing (shill manipulation) while keeping the original continued-training protocol.
+
+**Assistance:**
+- Wrote the variant as a dated agent proposal in `docs/CONTINUED-TRAINING.md`, with a pointer in `docs/EXPERIMENT.md`. B is the protocol's third option, corrupted interactions; the mitigation is adapter isolation.
+- Added `models/category_lm.py` (frozen language model, LoRA adapters, exact category ranking in one packed pass per user), `experiment/shilling.py` (random, average, bandwagon, segment and clone push attacks, with realism checks) and `experiment/adapter_blocks.py` (`cp4285 adapter-blocks`, `cp4285 adapter-summary`). Added the optional `llm` extra (transformers 5.20, peft 0.21).
+- Built a cluster environment with the extra and ran a one-seed pilot: the shared start state and six branches (shared or isolated adapters; clean, bandwagon or clone shills at 3%).
+
+**Validation:** Packed scores match one-sequence-per-candidate scoring to 1e-5 on SmolLM2-135M and on a tiny random Llama in the tests. Tests cover training, adapter freezing and rollback, state round trips, shill shares and sources, injected users' exclusion from evaluation, the runner end to end and the summary; the suite (74 tests) and Ruff pass.
+
+**Limits:** One seed and one pushed category. Shills are synthetic, and bandwagon profiles are trivially detectable (AUC 1.00). The A task is PESO's released Instruments blocks.
+
+## 24 October 2026 — Corrupted-stream grid across three domains
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** run the full grid so the result is not tied to one dataset.
+
+**Assistance:**
+- Added `experiment/block_categories.py` (`cp4285 block-categories`): PR 14's level-N category rule for any PESO-format domain, from its own item paths, with PR 14's text classifier for items without one. Built categories for Instruments (30), Video Games (43) and CDs & Vinyl (59).
+- Added `--push-share` (the pushed category by test-target share, so no target is picked by hand), `--rollback-after` with `CategoryLMLearner.drop` (remove the poisoned adapter right after its block) and top-5 push rates. The summary now matches clean references on condition and pushed category.
+- Wrote `grid_plans.py` and `adapter_grid.sbatch` in the PESO branch checkout (sequential runs per plan, resumable after a timeout) and submitted 12 plans, 114 runs, on the SoC cluster.
+
+**Validation:** On Instruments the new labels agree with PR 14's on every observed item and on 94% of predicted ones. Tests cover the category builder, adapter dropping, immediate rollback, rule-chosen targets and push-matched summaries; the suite (78 tests) and Ruff pass. The three domains' cluster copies match the local ones by checksum.
+
+**Limits:** Video Games and CDs & Vinyl test sets are smaller (866–1,949 users per block). Video Games labels rely on a classifier with 0.81 holdout accuracy for 4% of items. Yelp is excluded because its tags have no hierarchy.
+
+**Result, 25 October:** all 114 runs completed (22.6 GPU-hours; one 3-hour timeout resumed by its follow-up job). Added `grid_aggregate.py` and `grid_checks.py` to the PESO branch checkout and wrote the results into `docs/CONTINUED-TRAINING.md`. The pilot's five predictions hold across the three domains, with seed counts reported for each; the rare-target arm has one seed, and Video Games' rare category was already in every clean top 10.
 
 ## 24 October 2026 — Cluster recovery and final results for experiments 2–4
 
@@ -439,6 +594,71 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 
 **Limits:** Product results rest on two training seeds. The ladder cannot separate product identity from the block-to-block shift as the cause of forgetting, since both change at the same rung.
 
+## 24 October 2026 — Corrupted streams and a language model with adapters
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** drop PESO, try a language model with an adapter, and align the study with the course's robustness framing (shill manipulation) while keeping the original continued-training protocol.
+
+**Assistance:**
+- Wrote the variant as a dated agent proposal in `docs/CONTINUED-TRAINING.md`, with a pointer in `docs/EXPERIMENT.md`. B is the protocol's third option, corrupted interactions; the mitigation is adapter isolation.
+- Added `models/category_lm.py` (frozen language model, LoRA adapters, exact category ranking in one packed pass per user), `experiment/shilling.py` (random, average, bandwagon, segment and clone push attacks, with realism checks) and `experiment/adapter_blocks.py` (`cp4285 adapter-blocks`, `cp4285 adapter-summary`). Added the optional `llm` extra (transformers 5.20, peft 0.21).
+- Built a cluster environment with the extra and ran a one-seed pilot: the shared start state and six branches (shared or isolated adapters; clean, bandwagon or clone shills at 3%).
+
+**Validation:** Packed scores match one-sequence-per-candidate scoring to 1e-5 on SmolLM2-135M and on a tiny random Llama in the tests. Tests cover training, adapter freezing and rollback, state round trips, shill shares and sources, injected users' exclusion from evaluation, the runner end to end and the summary; the suite (74 tests) and Ruff pass.
+
+**Limits:** One seed and one pushed category. Shills are synthetic, and bandwagon profiles are trivially detectable (AUC 1.00). The A task is PESO's released Instruments blocks.
+
+## 24 October 2026 — Corrupted-stream grid across three domains
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** run the full grid so the result is not tied to one dataset.
+
+**Assistance:**
+- Added `experiment/block_categories.py` (`cp4285 block-categories`): PR 14's level-N category rule for any PESO-format domain, from its own item paths, with PR 14's text classifier for items without one. Built categories for Instruments (30), Video Games (43) and CDs & Vinyl (59).
+- Added `--push-share` (the pushed category by test-target share, so no target is picked by hand), `--rollback-after` with `CategoryLMLearner.drop` (remove the poisoned adapter right after its block) and top-5 push rates. The summary now matches clean references on condition and pushed category.
+- Wrote `grid_plans.py` and `adapter_grid.sbatch` in the PESO branch checkout (sequential runs per plan, resumable after a timeout) and submitted 12 plans, 114 runs, on the SoC cluster.
+
+**Validation:** On Instruments the new labels agree with PR 14's on every observed item and on 94% of predicted ones. Tests cover the category builder, adapter dropping, immediate rollback, rule-chosen targets and push-matched summaries; the suite (78 tests) and Ruff pass. The three domains' cluster copies match the local ones by checksum.
+
+**Limits:** Video Games and CDs & Vinyl test sets are smaller (866–1,949 users per block). Video Games labels rely on a classifier with 0.81 holdout accuracy for 4% of items. Yelp is excluded because its tags have no hierarchy.
+
+**Result, 25 October:** all 114 runs completed (22.6 GPU-hours; one 3-hour timeout resumed by its follow-up job). Added `grid_aggregate.py` and `grid_checks.py` to the PESO branch checkout and wrote the results into `docs/CONTINUED-TRAINING.md`. The pilot's five predictions hold across the three domains, with seed counts reported for each; the rare-target arm has one seed, and Video Games' rare category was already in every clean top 10.
+
+## 26 October 2026 — Attack catalogue and rollback timing
+
+**Tool:** OpenCode (GLM 5.3 Flash).
+
+**Request:** build on the md files' attack and defence suggestions — the seven corruption ideas and the rollback-as-weapon reading — treating the learner abstractly as a language model with a LoRA adapter rather than extending PESO itself.
+
+**Assistance:**
+- Added `experiment/corruption.py`: one interface for the shill corruption (delegating to `shilling.py`) plus four corruptions of real activity — `real-history` (real shoppers' training events gain target items; accounts and every user's validation/test events untouched), `demotion` (shills copied from a rival category's customers, buying the promoted category), `vandalism` (uniform-noise profiles, no target) and `relabel` (a fraction of a block's items re-listed under the promoted category; the remapped map builds training rows only, evaluation keeps the true map). Every report records the category-mix shift and, where profiles exist, a separability AUC.
+- Extended `experiment/adapter_blocks.py`: `--corruption`, `--placement` (one block, every block, or block 0 of the init stage — a poisoned base refuses rollback), `--rollback-block N` (delayed rollback; the summary's new `drop_effect` compares the dropped cell with the clean state at the same block, turning the late-rollback over-correction into a timing sweep), `--rival`/`--rival-share` and `--trigger`/`--trigger-share` (share rules resolve per domain, so no watched category is picked by hand; a trigger's measurement is split into `push_trigger`/`push_other`).
+- Added `experiment/robustness.py` (`cp4285 robustness-plan`): the run matrix as JSON lines with ready `adapter-blocks` argv, stage A (rollback timing, low-and-slow, hijacked accounts) and stage B (demotion, hidden trigger, relabel, vandalism, poisoned starting data); it launches nothing.
+- Wrote the catalogue, its modelling choices and the rollback-timing reading into `docs/CONTINUED-TRAINING.md`, with pointers in `docs/EXPERIMENT.md` and `docs/IMPLEMENTATION.md`.
+
+**Validation:** 17 new tests: corruption shares and accounting, untouched evaluation events, demotion donors, relabel's true-map separation, delayed-rollback and placement validation, poisoned-init branches, rival/trigger cells and the planner's argv parseability and uniqueness. The suite (95 tests) and Ruff pass.
+
+**Limits:** The catalogue's 63 seed-42 runs (three domains, stages A and B) completed on the SoC cluster on 26 October (~13 GPU-hours; run folders in that checkout's `lm-runs/`). One seed per cell: the headline comparisons — corrupting real accounts pushes 2–3× harder than fake ones at the same dose, a 10% relabel is the strongest and behaviourally undetectable attack, sustained 1% persists where a single block heals, the hidden trigger concentrates in its segment while the aggregate hides it, demotion promotes without burying the rival, vandalism at 3% harms nothing measurably, and the rollback-timing over-correction (+0.85 to +2.11 ranks as the undo is delayed) holds on Instruments and Video Games but not on CDs & Vinyl — all need seeds 43–44 before any claim. The modelling choices (training-map versus evaluation-map split for relabel, validation/test events untouched under real-history) are agent proposals, open to team revision. A first submission attempt failed because the planner omitted `--init` on branch lines; fixed in `experiment/robustness.py` with a regression test, and the jobs were resubmitted.
+
+## 26 October 2026 — Three-seed check of the attack catalogue
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** write up what changed in the corrupted-stream study, its results and the reasoning between steps as an artifact; then update the docs and redo the write-up with more illustrations.
+
+**Assistance:**
+- Copied the 312 `metrics.json` files (303 grid runs, 7 pilot and 2 smoke runs) read-only from the SoC cluster's `lm-runs/` into a session scratch folder; no checkpoints, dumps or cluster state were touched.
+- Recomputed every catalogue contrast for seeds 42–44: block-by-block push, top-5 share, rollback timing, a with/without-A1 decomposition of the rollback over-correction, the trigger split, the rival rank, the poisoned base, costs and noise floors.
+- Replaced the seed-42 results in `docs/CONTINUED-TRAINING.md` with the three-seed results and listed which seed-42 readings changed. Updated `CONTEXT.md` and `reference.html` section 23.
+- Corrected the PESO branch checkout's `docs/PESO-REPLICATION.md` (category counts per domain, clean baselines, the low-and-slow reading, rollback numbers).
+- Published a private illustrated write-up as a claude.ai artifact.
+
+**Validation:** the recomputed bandwagon, clone, low-and-slow, relabel and real-history tables match `docs/PESO-REPLICATION.md` within 0.01 ranks. The suite (95 tests) and Ruff pass on the working tree.
+
+**Limits:** the decomposition compares separate drop runs with the attacked run, so it carries run-to-run noise (at most 0.20 ranks for identical clean configurations). Reasons given for the mechanisms are interpretations of these measurements.
+
 ## 26 October 2026 — Corrupted-stream grid analysis and write-up
 
 **Tool:** OpenCode (DeepSeek V4.1 Flash).
@@ -481,6 +701,39 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** the section's block-by-block table for bandwagon, clone, low-and-slow, relabel and history hijack matches the recomputation within 0.01 ranks.
 
 **Limits:** documentation only; no runs or cluster state changed.
+
+## 26 October 2026 — Attack catalogue and rollback timing
+
+**Tool:** OpenCode (GLM 5.3 Flash).
+
+**Request:** build on the md files' attack and defence suggestions — the seven corruption ideas and the rollback-as-weapon reading — treating the learner abstractly as a language model with a LoRA adapter rather than extending PESO itself.
+
+**Assistance:**
+- Added `experiment/corruption.py`: one interface for the shill corruption (delegating to `shilling.py`) plus four corruptions of real activity — `real-history` (real shoppers' training events gain target items; accounts and every user's validation/test events untouched), `demotion` (shills copied from a rival category's customers, buying the promoted category), `vandalism` (uniform-noise profiles, no target) and `relabel` (a fraction of a block's items re-listed under the promoted category; the remapped map builds training rows only, evaluation keeps the true map). Every report records the category-mix shift and, where profiles exist, a separability AUC.
+- Extended `experiment/adapter_blocks.py`: `--corruption`, `--placement` (one block, every block, or block 0 of the init stage — a poisoned base refuses rollback), `--rollback-block N` (delayed rollback; the summary's new `drop_effect` compares the dropped cell with the clean state at the same block, turning the late-rollback over-correction into a timing sweep), `--rival`/`--rival-share` and `--trigger`/`--trigger-share` (share rules resolve per domain, so no watched category is picked by hand; a trigger's measurement is split into `push_trigger`/`push_other`).
+- Added `experiment/robustness.py` (`cp4285 robustness-plan`): the run matrix as JSON lines with ready `adapter-blocks` argv, stage A (rollback timing, low-and-slow, hijacked accounts) and stage B (demotion, hidden trigger, relabel, vandalism, poisoned starting data); it launches nothing.
+- Wrote the catalogue, its modelling choices and the rollback-timing reading into `docs/CONTINUED-TRAINING.md`, with pointers in `docs/EXPERIMENT.md` and `docs/IMPLEMENTATION.md`.
+
+**Validation:** 17 new tests: corruption shares and accounting, untouched evaluation events, demotion donors, relabel's true-map separation, delayed-rollback and placement validation, poisoned-init branches, rival/trigger cells and the planner's argv parseability and uniqueness. The suite (95 tests) and Ruff pass.
+
+**Limits:** The catalogue's 63 seed-42 runs (three domains, stages A and B) completed on the SoC cluster on 26 October (~13 GPU-hours; run folders in that checkout's `lm-runs/`). One seed per cell: the headline comparisons — corrupting real accounts pushes 2–3× harder than fake ones at the same dose, a 10% relabel is the strongest and behaviourally undetectable attack, sustained 1% persists where a single block heals, the hidden trigger concentrates in its segment while the aggregate hides it, demotion promotes without burying the rival, vandalism at 3% harms nothing measurably, and the rollback-timing over-correction (+0.85 to +2.11 ranks as the undo is delayed) holds on Instruments and Video Games but not on CDs & Vinyl — all need seeds 43–44 before any claim. The modelling choices (training-map versus evaluation-map split for relabel, validation/test events untouched under real-history) are agent proposals, open to team revision. A first submission attempt failed because the planner omitted `--init` on branch lines; fixed in `experiment/robustness.py` with a regression test, and the jobs were resubmitted.
+
+## 26 October 2026 — Three-seed check of the attack catalogue
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** write up what changed in the corrupted-stream study, its results and the reasoning between steps as an artifact; then update the docs and redo the write-up with more illustrations.
+
+**Assistance:**
+- Copied the 312 `metrics.json` files (303 grid runs, 7 pilot and 2 smoke runs) read-only from the SoC cluster's `lm-runs/` into a session scratch folder; no checkpoints, dumps or cluster state were touched.
+- Recomputed every catalogue contrast for seeds 42–44: block-by-block push, top-5 share, rollback timing, a with/without-A1 decomposition of the rollback over-correction, the trigger split, the rival rank, the poisoned base, costs and noise floors.
+- Replaced the seed-42 results in `docs/CONTINUED-TRAINING.md` with the three-seed results and listed which seed-42 readings changed. Updated `CONTEXT.md` and `reference.html` section 23.
+- Corrected the PESO branch checkout's `docs/PESO-REPLICATION.md` (category counts per domain, clean baselines, the low-and-slow reading, rollback numbers).
+- Published a private illustrated write-up as a claude.ai artifact.
+
+**Validation:** the recomputed bandwagon, clone, low-and-slow, relabel and real-history tables match `docs/PESO-REPLICATION.md` within 0.01 ranks. The suite (95 tests) and Ruff pass on the working tree.
+
+**Limits:** the decomposition compares separate drop runs with the attacked run, so it carries run-to-run noise (at most 0.20 ranks for identical clean configurations). Reasons given for the mechanisms are interpretations of these measurements.
 
 ## 27 October 2026 — Focused follow-up prep (metric lattice + wave-1 plans)
 
@@ -618,3 +871,71 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** Headless-Chrome screenshots of the new section and conclusions at desktop width; PDF page-checked (10 pages, no broken cards); the gist's raw HTML grep-confirms the new content and a preview screenshot matches the local render. Repo files committed.
 
 **Limits:** The artifact is a communication piece; the persistence account's limits (one seed, one shop for the strong effect, correlated features) live in the caveats list rather than the body.
+=======
+
+## 29 October 2026 — Account strata and critical-mass dose sweep (issues #18, #19)
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** implement the account-quality and critical-mass actionables from the late-October feedback (GitHub issues #18 and #19) on top of the landed attack catalogue.
+
+**Assistance:**
+- Added `experiment/user_strata.py`: training-only activity and reach strata, deterministic head/tail selection with user-id tie-breaks, even and capacity-proportional insertion budgets, the value-invariant account scaling, and a Spearman/overlap confound report.
+- Extended `real_history` with selection and per-account allocation while keeping the legacy uniform path unchanged. Reports add the selection block and a same-stratum separability AUC.
+- Added `adapter-blocks` flags `--user-stratum`, `--user-side`, `--user-share`, `--user-accounts`, `--user-budget`, `--value-k`, `--max-insertions` and `--eval-strata`, plus `push_activity_*` and `push_reach_*` cells.
+- Added `robustness-plan --stage strata` and `--stage dose`; the dose plans cover 0.1% to 5% by default. Dumps now carry the top-10 set for churn.
+- Added `experiment/dose.py` and `cp4285 dose-summary`: paired user joining, mean rank change with a paired bootstrap, top-1/5/10 shares, churn, normalised gain, and the pre-registered threshold verdict.
+- Documented the design, first-pass run matrices, costs and open definitions in `CONTINUED-TRAINING.md` and `IMPLEMENTATION.md`.
+
+**Validation:** 114 tests pass with the `llm` and `meta` extras; Ruff is clean. New tests cover stratum determinism, training-only features, budget arithmetic, the value invariant, selected real-history, per-half evaluation cells, planner parsing and the dose curve/threshold.
+
+**Limits:** No run has been launched. The run matrices (22 and 37 runs, about 5.3 and 7.4 GPU-hours) need approval. The primary metric, k grid, matched-event interpretation and threshold constants remain proposals for team confirmation.
+
+## 29 October 2026 — Catalogue provenance and tag
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** close the provenance part of #16 once the user opened the cluster SSH session.
+
+**Assistance:**
+- Hashed the five catalogue sources in the NUS SoC checkout `/mnt/scratch/w/wyenzhe/peso/cp4285-main/src` and compared them with commit `d38d27c`; all five SHA-256 values matched.
+- Created and pushed annotated tag `attack-catalogue-2026-10-26` on `d38d27c`.
+- Added the provenance paragraph to `docs/CONTINUED-TRAINING.md`, the tag to `CONTEXT.md`, the code-revision line to `docs/IMPLEMENTATION.md`, and updated the reference's status notice.
+
+**Validation:** the five cluster hashes equal the tagged files; `uv run pytest -q` (114 tests) and Ruff pass.
+
+**Limits:** this is a source-hash match, not a VCS revision recorded inside the run artifacts. The 29 October account-strata and dose tooling (`e3a19a3`) is a later commit on top of the tag, so it is not part of the tagged catalogue.
+
+## 29 October 2026 — Account strata and critical-mass dose sweep (issues #18, #19)
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** implement the account-quality and critical-mass actionables from the late-October feedback (GitHub issues #18 and #19) on top of the landed attack catalogue.
+
+**Assistance:**
+- Added `experiment/user_strata.py`: training-only activity and reach strata, deterministic head/tail selection with user-id tie-breaks, even and capacity-proportional insertion budgets, the value-invariant account scaling, and a Spearman/overlap confound report.
+- Extended `real_history` with selection and per-account allocation while keeping the legacy uniform path unchanged. Reports add the selection block and a same-stratum separability AUC.
+- Added `adapter-blocks` flags `--user-stratum`, `--user-side`, `--user-share`, `--user-accounts`, `--user-budget`, `--value-k`, `--max-insertions` and `--eval-strata`, plus `push_activity_*` and `push_reach_*` cells.
+- Added `robustness-plan --stage strata` and `--stage dose`; the dose plans cover 0.1% to 5% by default. Dumps now carry the top-10 set for churn.
+- Added `experiment/dose.py` and `cp4285 dose-summary`: paired user joining, mean rank change with a paired bootstrap, top-1/5/10 shares, churn, normalised gain, and the pre-registered threshold verdict.
+- Documented the design, first-pass run matrices, costs and open definitions in `CONTINUED-TRAINING.md` and `IMPLEMENTATION.md`.
+
+**Validation:** 114 tests pass with the `llm` and `meta` extras; Ruff is clean. New tests cover stratum determinism, training-only features, budget arithmetic, the value invariant, selected real-history, per-half evaluation cells, planner parsing and the dose curve/threshold.
+
+**Limits:** No run has been launched. The run matrices (22 and 37 runs, about 5.3 and 7.4 GPU-hours) need approval. The primary metric, k grid, matched-event interpretation and threshold constants remain proposals for team confirmation.
+
+## 29 October 2026 — Catalogue provenance and tag
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** close the provenance part of #16 once the user opened the cluster SSH session.
+
+**Assistance:**
+- Hashed the five catalogue sources in the NUS SoC checkout `/mnt/scratch/w/wyenzhe/peso/cp4285-main/src` and compared them with commit `d38d27c`; all five SHA-256 values matched.
+- Created and pushed annotated tag `attack-catalogue-2026-10-26` on `d38d27c`.
+- Added the provenance paragraph to `docs/CONTINUED-TRAINING.md`, the tag to `CONTEXT.md`, the code-revision line to `docs/IMPLEMENTATION.md`, and updated the reference's status notice.
+
+**Validation:** the five cluster hashes equal the tagged files; `uv run pytest -q` (114 tests) and Ruff pass.
+
+**Limits:** this is a source-hash match, not a VCS revision recorded inside the run artifacts. The 29 October account-strata and dose tooling (`e3a19a3`) is a later commit on top of the tag, so it is not part of the tagged catalogue.
+>>>>>>> origin/main

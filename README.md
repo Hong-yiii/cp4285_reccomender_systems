@@ -14,8 +14,9 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Current context and next steps](CONTEXT.md)
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
+- [Adapters and parameter-efficient updates](docs/ADAPTERS.md): sourced survey for sparse, continually updated recommenders
 - [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
-- [Dataset assessment](docs/DATASET-ASSESSMENT.md)
+- [Dataset assessment](docs/DATASET-ASSESSMENT.md) and [item subcategories](docs/ITEM-CATEGORIES.md)
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)
 - [Critique requirements](docs/REQUIREMENTS.md), [preparation](docs/DEFENSE.md), [team deck and slide principles](slides/README.md), [deck issues](slides/ISSUES.md) and [neural slide content](docs/SLIDE-FLOW.md)
 - [PESO replication](docs/PESO-REPLICATION.md): exploratory LLM continual-recommendation workstream on PESO's released Instruments data, with retention/flip analysis; not comparable with the SASRec or classical numbers

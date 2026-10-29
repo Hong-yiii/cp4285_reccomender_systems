@@ -13,6 +13,14 @@ dependencies = [
   "torch>=2.6,<3",
 ]
 
+[project.optional-dependencies]
+# Item-metadata classifier and Hugging Face publishing only: `uv sync --locked --extra meta`.
+meta = ["huggingface-hub>=0.30,<2", "scikit-learn>=1.5,<2"]
+llm = [
+    "peft>=0.15,<1",
+    "transformers>=4.50,<6",
+]
+
 [project.scripts]
 cp4285 = "cp4285.cli:main"
 
