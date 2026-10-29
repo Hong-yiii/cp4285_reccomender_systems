@@ -29,6 +29,10 @@ def branch_specs(args):
     drop-after-1 point, so the plan emits only the later rollback timings. Stage B runs
     all carry the rival and trigger measurement rules and get matching clean-reference
     runs, so the summary compares like with like under one (condition, push, rival) key."""
+    if getattr(args, "stage", "A") == "strata":
+        return strata_specs(args)
+    if getattr(args, "stage", "A") == "dose":
+        return dose_specs(args)
     a, slow = str(args.alpha), str(args.slow_alpha)
     watch = ["--rival-share", str(args.rival_share), "--trigger-share", str(args.trigger_share)]
 
@@ -75,6 +79,85 @@ def branch_specs(args):
     return stage_a + (stage_b if args.stage in ("B", "all") else [])
 
 
+def strata_specs(args):
+    """Account-stratified real-history arms: top and bottom of activity/reach, at a fixed
+    account count and at a fixed event budget, plus the value-invariant k grid. Every arm
+    uses the same alpha, so the event budget is matched by construction; the budget choice
+    only controls how that fixed total is spread over the selected accounts."""
+    metrics = [m for m in args.strata_metrics.split(",") if m]
+    budgets = [b for b in args.strata_budgets.split(",") if b]
+    ks = [int(k) for k in args.strata_k.split(",") if k]
+    if any(m not in ("activity", "reach") for m in metrics):
+        raise ValueError("--strata-metrics chooses from activity,reach")
+    if any(b not in ("accounts", "events", "value") for b in budgets):
+        raise ValueError("--strata-budgets chooses from accounts,events,value")
+    if (args.strata_share is None) == (args.strata_accounts is None):
+        raise ValueError("Give exactly one of --strata-share and --strata-accounts")
+    if args.strata_share is not None and not 0 < args.strata_share < 1:
+        raise ValueError("--strata-share must be strictly between 0 and 1")
+    if args.strata_accounts is not None and args.strata_accounts < 1:
+        raise ValueError("--strata-accounts must be at least 1")
+    if "value" in budgets and any(k < 1 for k in ks):
+        raise ValueError("--strata-k must be at least 1")
+    condition = args.strata_condition
+    prefix = "iso" if condition == "isolated" else "shared"
+    common = ["--corruption", "real-history", "--alpha", str(args.alpha), "--eval-strata"]
+    if args.strata_accounts is not None:
+        common += ["--user-accounts", str(args.strata_accounts)]
+    else:
+        common += ["--user-share", str(args.strata_share)]
+    stage = [("init", ["--stage", "init", "--eval-strata"]),
+             (f"{prefix}-clean-strata", ["--stage", "branch", "--condition", condition,
+                                          "--eval-strata"])]  # fmt: skip
+    for metric in metrics:
+        for side in ("top", "bottom"):
+            for budget in budgets:
+                if budget == "value":
+                    for k in ks:
+                        name = f"{prefix}-hijack-{metric}-{side}-valuek{k}"
+                        extra = common + ["--user-stratum", metric, "--user-side", side,
+                                          "--user-budget", "value", "--value-k", str(k)]  # fmt: skip
+                        stage.append((name, ["--stage", "branch", "--condition", condition,
+                                             *extra]))  # fmt: skip
+                else:
+                    name = f"{prefix}-hijack-{metric}-{side}-{budget}"
+                    extra = common + ["--user-stratum", metric, "--user-side", side,
+                                      "--user-budget", budget]  # fmt: skip
+                    stage.append((name, ["--stage", "branch", "--condition", condition, *extra]))
+    return stage
+
+
+def dose_specs(args):
+    """A threshold sweep: one clean reference and one attacked branch per dose and seed.
+    Doses are shares of the attacked block's training examples, the catalogue's alpha."""
+    doses = []
+    for raw in args.doses.split(","):
+        raw = raw.strip()
+        if not raw:
+            continue
+        dose = float(raw)
+        if not 0 < dose < 1:
+            raise ValueError("--doses must be strictly between 0 and 1")
+        doses.append(dose)
+    doses = sorted(set(doses))
+    if not doses:
+        raise ValueError("--doses needs at least one value")
+    if args.dose_corruption == "relabel":
+        raise ValueError("A dose sweep is defined for user-level corruptions, not relabel")
+    condition = args.dose_condition
+    prefix = "iso" if condition == "isolated" else "shared"
+    stage = [("init", ["--stage", "init"]),
+             (f"{prefix}-clean-dose", ["--stage", "branch", "--condition", condition])]  # fmt: skip
+    for dose in doses:
+        bp = round(dose * 10_000)
+        name = f"{prefix}-hijack-{bp}bp"
+        extra = ["--corruption", args.dose_corruption, "--alpha", str(dose)]
+        if args.dose_corruption == "shill":
+            extra = ["--attack", "bandwagon", "--alpha", str(dose)]
+        stage.append((name, ["--stage", "branch", "--condition", condition, *extra]))
+    return stage
+
+
 def add_arguments(parser):
     parser.add_argument("--data-root", required=True, help="Folder with the domain folders")
     parser.add_argument("--categories-root", required=True,
@@ -84,7 +167,7 @@ def add_arguments(parser):
     parser.add_argument("--domains", default=",".join(DOMAIN_DIRS),
                         help="Comma-separated keys: " + ", ".join(sorted(DOMAIN_DIRS)))
     parser.add_argument("--seeds", default="42", help="Comma-separated seeds")
-    parser.add_argument("--stage", choices=("A", "B", "all"), default="A")
+    parser.add_argument("--stage", choices=("A", "B", "strata", "dose", "all"), default="A")
     parser.add_argument("--alpha", type=float, default=0.03, help="Core corruption share")
     parser.add_argument("--slow-alpha", type=float, default=0.01, help="Low-and-slow share")
     parser.add_argument("--push-share", type=float, default=0.013,
@@ -92,6 +175,17 @@ def add_arguments(parser):
     parser.add_argument("--rival-share", type=float, default=0.05, help="Rival-category rule")
     parser.add_argument("--trigger-share", type=float, default=0.1, help="Trigger-category rule")
     parser.add_argument("--relabel-frac", type=float, default=0.1, help="Relabelled item share")
+    parser.add_argument("--strata-metrics", default="reach", help="activity,reach")
+    parser.add_argument("--strata-share", type=float, default=0.1, help="Account share per side")
+    parser.add_argument("--strata-accounts", type=int, help="Explicit accounts per side")
+    parser.add_argument("--strata-budgets", default="accounts,events",
+                        help="accounts,events,value")
+    parser.add_argument("--strata-k", default="2,4", help="Value-invariant k grid")
+    parser.add_argument("--strata-condition", choices=("shared", "isolated"), default="isolated")
+    parser.add_argument("--doses", default="0.001,0.0025,0.005,0.01,0.02,0.03,0.05")
+    parser.add_argument("--dose-corruption", default="real-history",
+                        help="User-level corruption for the dose sweep")
+    parser.add_argument("--dose-condition", choices=("shared", "isolated"), default="isolated")
     parser.add_argument("--output", help="Also save the plan here (create-only)")
 
 

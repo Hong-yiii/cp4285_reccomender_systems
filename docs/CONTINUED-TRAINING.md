@@ -327,3 +327,31 @@ Changes from the seed-42 reading written earlier on 26 October:
 Noise: re-running the same clean configuration changes the pushed-category rank by at most 0.20. Within a domain, seeds spread a cell's rank change by a median of 0.42 ranks. Two random draws of the same 1% shill recipe differed by 1.4 ranks at block 1 (Instruments, seed 42). Means over nine pairs below about 0.3 ranks are within noise.
 
 Limits: one model size (Llama-3.2-1B, LoRA rank 8) and one attacked block; dose only on Instruments; rare targets only at seed 42. The two conditions also differ in capacity (one adapter against five summed), so their contrast measures persistence in this harness. The modelling choices listed above remain agent proposals for team review.
+
+## Account strata and critical mass (agent proposal, 29 October 2026)
+
+Implementation of issues #18 and #19. No run has been launched and no result is claimed; the run matrices and costs are proposals for team approval.
+
+**Account quality.** `real-history` can select accounts from a deterministic stratum instead of drawing them uniformly:
+
+- `--user-stratum activity` counts a user's training targets. `--user-stratum reach` averages `log1p` item popularity over the user's distinct training targets, where popularity is the number of users whose training targets contain the item. Reach is interaction reach, not social followers.
+- Strata are computed from training targets only; the last two events of every user stay validation and test and are never read.
+- `--user-side top|bottom`, with exactly one of `--user-share` or `--user-accounts`, takes the same number of accounts from one ranked list. Ties break on user id and no RNG selects users, so a plan replays exactly.
+- `--user-budget accounts` spreads the fixed `alpha` event budget evenly; `events` spreads it in proportion to each account's trainable capacity; `value` shrinks the top-side account count by `--value-k`, so one high-stratum account carries about `k` times a low-stratum account's insertions. The event budget itself is still set by `alpha`, so both sides are event-matched by construction.
+- `--eval-strata` adds `push_activity_top`, `push_activity_bottom`, `push_reach_top` and `push_reach_bottom` to every scored cell. The split is a median-rank split of genuine test users, with ties by user id.
+- Reports add `selection` (metric, side, budget, `k`, population, accounts, events, mean and maximum insertions, boundary, Spearman correlation between activity and reach) and `separability_auc_same_stratum`, which compares edited profiles with untouched users on the same side so the AUC is not merely activity or reach showing through.
+
+First pass: Instruments, seeds 42–44, isolated, 2 strata × 2 budgets plus a `k` grid and clean references, 22 runs at roughly 0.2 GPU-hours each (about 5.3 GPU-hours). Extend to `activity` only if the `reach` effect is large. This answers "which accounts", not only "how many"; the value invariant is an assumption, not an estimated exchange rate.
+
+**Critical mass.** `--stage dose` emits one attacked branch per dose and seed, with a shared clean reference. Doses are shares of the attacked block's training examples: 0.001, 0.0025, 0.005, 0.01, 0.02, 0.03 and 0.05 in the default plan. The primary endpoint is the mean rank change of the pushed category among genuine users, because top-10 share saturates (the clean Instruments model already has the category in 77% of top-10 lists). Top-5 share, top-1 share, top-10 churn and a normalised gain are reported beside it.
+
+`cp4285 dose-summary` pairs each attacked run with the clean run of the same seed, pushed category and condition, joins on user, and bootstraps the mean difference over users. The pre-registered rule is: the smallest dose whose mean rank change is at least one rank in the promoted direction and whose bootstrap interval lies entirely below zero in at least two runs. A flat or non-monotone curve is reported as "no threshold identifiable", not smoothed away. First pass: Instruments, seeds 42–44, 37 runs (about 7.4 GPU-hours, 9 with overhead); the largest- and smallest-effect domains follow only if the core curve is informative.
+
+Definitions that need team confirmation before any run:
+
+- `reach` or `activity` as the primary account metric, and the `k` grid;
+- whether "matched events" means the capacity-proportional split used here;
+- the threshold constants (-1 rank, top-5 at 50%) and the two-of-three-runs rule;
+- isolated adapters only for the core curve.
+
+Limits: the strata are confounded with history length and item popularity, so report both metrics and the overlap; a category-level threshold need not transfer to item-level recommendation; a "critical number" is a property of this testbed, not a physical constant.

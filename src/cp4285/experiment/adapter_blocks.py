@@ -28,6 +28,7 @@ by a trigger category on request, with the rival category tracked beside it.
 """
 
 import json
+import math
 import random
 import time
 from collections import Counter
@@ -38,7 +39,7 @@ import torch
 
 from .corruption import KINDS, apply_users, relabel_map
 from .metrics import from_ranks
-from .shilling import ATTACKS, PREFIX
+from .shilling import ATTACKS, PREFIX, training_examples
 from .utils import save_json
 
 BLOCKS = range(5)
@@ -116,6 +117,39 @@ def add_arguments(parser):
         type=float,
         help="relabel: share of a block's other items re-listed under the pushed category",
     )
+    parser.add_argument(
+        "--user-stratum",
+        choices=("none", "activity", "reach"),
+        default="none",
+        help="real-history: select accounts by training activity or interaction reach",
+    )
+    parser.add_argument(
+        "--user-side", choices=("top", "bottom"), default="top", help="Stratum end to select"
+    )
+    parser.add_argument("--user-accounts", type=int, help="Explicit account count (replayable)")
+    parser.add_argument(
+        "--user-share", type=float, help="Account share: n = floor(share * population)"
+    )
+    parser.add_argument(
+        "--user-budget",
+        choices=("accounts", "events", "value"),
+        default="accounts",
+        help="How the fixed alpha event budget is spread over the selected accounts",
+    )
+    parser.add_argument(
+        "--value-k",
+        type=int,
+        default=1,
+        help="value budget: one high-stratum account carries about k low-stratum accounts",
+    )
+    parser.add_argument(
+        "--max-insertions", type=int, default=10, help="Cap per selected account"
+    )
+    parser.add_argument(
+        "--eval-strata",
+        action="store_true",
+        help="Report the pushed category separately for activity/reach halves of test users",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs0", type=int, default=1, help="Epochs on block 0")
     parser.add_argument("--epochs", type=int, default=1, help="Epochs per update block")
@@ -187,9 +221,42 @@ def ranks_of(scores, columns):
     return 1 + (scores > picked).sum(1) + ((scores == picked) & (index < columns[:, None])).sum(1)
 
 
-def evaluate(learner, rows, push=None, dumps=None, clock=None, rival=None, trigger=None):
+def strata_masks(rows, users):
+    """Activity/reach halves of genuine test users, deterministic and label-free.
+
+    Activity is the evaluated history length; reach is the mean log1p training popularity
+    of the items in that history. Each metric is split at its median rank, with ties broken
+    by user id, so every row lands in exactly one half and the two halves are as even as
+    the number of rows allows.
+    """
+    counts = Counter(item for _, item in training_examples(users))
+
+    def mean_reach(history):
+        distinct = set(history)
+        return sum(math.log1p(counts.get(i, 0)) for i in distinct) / len(distinct) if distinct else 0.0
+
+    scores = {"activity": [len(r["history"]) for r in rows],
+              "reach": [mean_reach(r["history"]) for r in rows]}  # fmt: skip
+    out = {}
+    for name, values in scores.items():
+        order = sorted(range(len(rows)), key=lambda i: (-values[i], rows[i]["user"]))
+        cut = max(1, len(order) // 2)
+        top = [False] * len(rows)
+        bottom = [False] * len(rows)
+        for i in order[:cut]:
+            top[i] = True
+        for i in order[cut:]:
+            bottom[i] = True
+        out[f"{name}_top"], out[f"{name}_bottom"] = top, bottom
+    return out
+
+
+def evaluate(learner, rows, push=None, dumps=None, clock=None, rival=None, trigger=None,
+             strata=None):
     if any(r["user"].startswith(PREFIX) for r in rows):
         raise ValueError("Injected users must never be evaluated")
+    if strata is not None and any(len(mask) != len(rows) for mask in strata.values()):
+        raise ValueError("Strata masks must align with the evaluated rows")
     start = time.perf_counter()
     scores = learner.score([r["history"] for r in rows])
     if clock is not None:
@@ -201,13 +268,21 @@ def evaluate(learner, rows, push=None, dumps=None, clock=None, rival=None, trigg
 
     def watch(name, column, mask):
         """Rank stats of one tracked category for the masked genuine users."""
+        mask = torch.as_tensor(mask, dtype=torch.bool, device=targets.device)
         picked = ranks_of(scores, torch.full_like(targets, column))[mask].double()
+        if not bool(mask.any()):
+            cell[name] = {"users": 0, "mean_rank": None,
+                          **{f"hit@{k}": None for k in KS}}  # fmt: skip
+            return
         cell[name] = {"users": int(mask.sum()), "mean_rank": float(picked.mean()),
                       **{f"hit@{k}": float((picked <= k).double().mean()) for k in KS}}  # fmt: skip
 
     if push is not None:
         genuine = targets != push
         watch("push", push, genuine)
+        if strata is not None:
+            for label, mask in strata.items():
+                watch(f"push_{label}", push, genuine & torch.as_tensor(mask, dtype=torch.bool))
         if trigger is not None:  # a hidden trigger shows only in the segment it conditions on
             has = torch.tensor([trigger in r["history"] for r in rows]) & genuine
             if has.any():
@@ -217,11 +292,22 @@ def evaluate(learner, rows, push=None, dumps=None, clock=None, rival=None, trigg
     if rival is not None:  # demotion's point is that the rival falls, so it is tracked too
         watch("rival", rival, targets != rival)
     if dumps is not None:
+        top = torch.topk(scores, k=min(10, scores.shape[1]), dim=1).indices
         dumps.parent.mkdir(parents=True, exist_ok=True)
         with dumps.open("x") as f:
-            for r, rank in zip(rows, ranks.tolist()):
-                f.write(json.dumps({"user": r["user"], "target": r["target"], "rank": rank}) + "\n")
+            for r, rank, top_row in zip(rows, ranks.tolist(), top.tolist()):
+                f.write(json.dumps({"user": r["user"], "target": r["target"], "rank": rank,
+                                    "top": top_row}) + "\n")  # fmt: skip
     return cell
+
+
+def strata_selection(args):
+    """The selected-account settings, or None for the legacy uniform draw."""
+    if getattr(args, "user_stratum", "none") == "none":
+        return None
+    return {"metric": args.user_stratum, "side": args.user_side, "budget": args.user_budget,
+            "share": args.user_share, "accounts": args.user_accounts,
+            "value_k": args.value_k}  # fmt: skip
 
 
 def corrupt_once(users, category, args, push, seed):
@@ -234,9 +320,12 @@ def corrupt_once(users, category, args, push, seed):
     if args.corruption == "relabel":
         train_map, report = relabel_map(users, category, push, args.relabel_frac, seed)
         return users, train_map, report
-    poisoned, report = apply_users(users, category, push, args.corruption, args.alpha, seed,
-                                   attack=args.attack, segment=args.segment,
-                                   target_share=args.target_share, rival=args.rival)  # fmt: skip
+    poisoned, report = apply_users(
+        users, category, push, args.corruption, args.alpha, seed,
+        attack=args.attack, segment=args.segment, target_share=args.target_share,
+        rival=args.rival, selection=strata_selection(args),
+        max_insertions=getattr(args, "max_insertions", 10),
+    )  # fmt: skip
     return poisoned, category, report
 
 
@@ -292,6 +381,25 @@ def run(args):
         raise ValueError("The demotion corruption needs --rival or --rival-share")
     if args.trigger is not None and args.push is None and args.push_share is None:
         raise ValueError("--trigger splits the push measurement and needs --push or --push-share")
+    if getattr(args, "user_stratum", "none") != "none":
+        if args.corruption != "real-history":
+            raise ValueError("--user-stratum needs --corruption real-history")
+        if args.placement != "block":
+            raise ValueError("User-stratum runs attack one block; --placement all is not supported")
+        if (args.user_share is None) == (args.user_accounts is None):
+            raise ValueError("Give exactly one of --user-share and --user-accounts")
+        if args.user_share is not None and not 0 < args.user_share < 1:
+            raise ValueError("--user-share must be strictly between 0 and 1")
+        if args.user_accounts is not None and args.user_accounts < 1:
+            raise ValueError("--user-accounts must be at least 1")
+        if args.user_budget == "value" and args.value_k < 1:
+            raise ValueError("--value-k must be at least 1")
+        if args.max_insertions < 1:
+            raise ValueError("--max-insertions must be at least 1")
+    elif args.user_share is not None or args.user_accounts is not None:
+        raise ValueError("--user-share/--user-accounts need --user-stratum")
+    if getattr(args, "eval_strata", False) and args.push is None and args.push_share is None:
+        raise ValueError("--eval-strata needs --push or --push-share")
     if args.rollback_after and args.rollback_block is not None:
         raise ValueError("Use --rollback-after or --rollback-block, not both")
     drop_at = args.attack_block if args.rollback_after else args.rollback_block
@@ -316,6 +424,10 @@ def run(args):
                 random.Random(args.seed + b).sample(rows, min(caps)), key=lambda r: r["user"]
             )
         tests.append(rows)
+    strata_by_block = (
+        [strata_masks(tests[j], blocks[j]) for j in BLOCKS]
+        if getattr(args, "eval_strata", False) else [None] * len(BLOCKS)
+    )
     if args.push_share is not None:  # the rule, so no domain's target is picked by hand
         args.push = nearest_share(data, args.push_share)
     if args.rival is None and args.rival_share is not None:
@@ -333,6 +445,13 @@ def run(args):
               "trigger_name": None if args.trigger is None else names[args.trigger],
               "blocks": [{k: (len(v) if isinstance(v, list) else v)
                                                     for k, v in d.items()} for d in data]}  # fmt: skip
+    if getattr(args, "eval_strata", False):
+        result["strata"] = {
+            "rule": "median-rank split of genuine test users by history length and mean "
+                    "log1p training popularity; ties by user id",
+            "blocks": {f"block{j}": {name: int(sum(mask)) for name, mask in strata.items()}
+                       for j, strata in enumerate(strata_by_block)},
+        }  # fmt: skip
     if args.stage == "init":
         rows = data[0]["train"]
         if args.placement == "init":  # the corruption sits in the base weights Theta_0
@@ -354,7 +473,7 @@ def run(args):
         result["cells"] = {
             f"state0_block{j}": evaluate(
                 learner, tests[j], args.push, dump(f"state0_block{j}"), clock,
-                rival=args.rival, trigger=args.trigger
+                rival=args.rival, trigger=args.trigger, strata=strata_by_block[j]
             )
             for j in BLOCKS
         }
@@ -392,19 +511,19 @@ def run(args):
                                                 random.Random(args.seed + b), clock)  # fmt: skip
             result["cells"][f"state{b}_block{b}"] = evaluate(
                 learner, tests[b], push, dump(f"state{b}_block{b}"), clock,
-                rival=args.rival, trigger=args.trigger
+                rival=args.rival, trigger=args.trigger, strata=strata_by_block[b]
             )
             if drop_at is not None and b == drop_at:
                 # The rest of the stream builds without the poisoned adapter.
                 learner.drop(f"s{args.attack_block}")
                 result["cells"][f"dropped{b}_block{b}"] = evaluate(
                     learner, tests[b], push, dump(f"dropped{b}_block{b}"), clock,
-                    rival=args.rival, trigger=args.trigger
+                    rival=args.rival, trigger=args.trigger, strata=strata_by_block[b]
                 )
         for j in range(4):
             result["cells"][f"state4_block{j}"] = evaluate(
                 learner, tests[j], push, dump(f"state4_block{j}"), clock,
-                rival=args.rival, trigger=args.trigger
+                rival=args.rival, trigger=args.trigger, strata=strata_by_block[j]
             )
         if args.condition == "isolated" and attacked and drop_at is None:
             attacked_adapter = f"s{args.attack_block}"
@@ -412,7 +531,7 @@ def run(args):
             result["rollback"] = {
                 f"state4_block{j}": evaluate(
                     learner, tests[j], push, dump(f"rollback_block{j}"), clock,
-                    rival=args.rival, trigger=args.trigger
+                    rival=args.rival, trigger=args.trigger, strata=strata_by_block[j]
                 )
                 for j in BLOCKS
             }

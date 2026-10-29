@@ -354,3 +354,21 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 
 **Limits:** the decomposition compares separate drop runs with the attacked run, so it carries run-to-run noise (at most 0.20 ranks for identical clean configurations). Reasons given for the mechanisms are interpretations of these measurements.
 
+
+## 29 October 2026 — Account strata and critical-mass dose sweep (issues #18, #19)
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** implement the account-quality and critical-mass actionables from the late-October feedback (GitHub issues #18 and #19) on top of the landed attack catalogue.
+
+**Assistance:**
+- Added `experiment/user_strata.py`: training-only activity and reach strata, deterministic head/tail selection with user-id tie-breaks, even and capacity-proportional insertion budgets, the value-invariant account scaling, and a Spearman/overlap confound report.
+- Extended `real_history` with selection and per-account allocation while keeping the legacy uniform path unchanged. Reports add the selection block and a same-stratum separability AUC.
+- Added `adapter-blocks` flags `--user-stratum`, `--user-side`, `--user-share`, `--user-accounts`, `--user-budget`, `--value-k`, `--max-insertions` and `--eval-strata`, plus `push_activity_*` and `push_reach_*` cells.
+- Added `robustness-plan --stage strata` and `--stage dose`; the dose plans cover 0.1% to 5% by default. Dumps now carry the top-10 set for churn.
+- Added `experiment/dose.py` and `cp4285 dose-summary`: paired user joining, mean rank change with a paired bootstrap, top-1/5/10 shares, churn, normalised gain, and the pre-registered threshold verdict.
+- Documented the design, first-pass run matrices, costs and open definitions in `CONTINUED-TRAINING.md` and `IMPLEMENTATION.md`.
+
+**Validation:** 114 tests pass with the `llm` and `meta` extras; Ruff is clean. New tests cover stratum determinism, training-only features, budget arithmetic, the value invariant, selected real-history, per-half evaluation cells, planner parsing and the dose curve/threshold.
+
+**Limits:** No run has been launched. The run matrices (22 and 37 runs, about 5.3 and 7.4 GPU-hours) need approval. The primary metric, k grid, matched-event interpretation and threshold constants remain proposals for team confirmation.
