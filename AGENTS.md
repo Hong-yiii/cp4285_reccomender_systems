@@ -13,6 +13,7 @@ This checkout is the canonical **group-project** home, not the whole course work
 - `slides/README.md`, `slides/ISSUES.md`: pointer to the team's Google Slides deck (canonical; edit it there, only when asked), slide principles for a class audience, and known deck issues.
 - `docs/SOURCES.md`: primary references, official course links and local-only source locations.
 - `docs/SASREC.md`: selected original architecture, pinned upstream code, license and explicit training/evaluation differences.
+- `docs/ADAPTERS.md`: sourced survey of adapters and parameter-efficient updates for sparse, continually updated recommenders; its closing experiment is an agent proposal.
 - `docs/PACKAGES-AND-BUILDING.md`, `notebooks/01_shared_lifecycle.ipynb`: ABC development guide and runnable walkthrough; `boilerplate-v1` is the separate lightweight reference tag.
 - `src/cp4285/experiment/`, `src/cp4285/models/`, `tests/`: protocol ownership, concrete learners and lifecycle tests. Keep native learning units and distinct classical/neural evaluations explicit; batch refits are not continuation.
 - `docs/AI_LOG.md`: collective AI-use documentation.

@@ -14,6 +14,7 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 - [Current context and next steps](CONTEXT.md)
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
+- [Adapters and parameter-efficient updates](docs/ADAPTERS.md): sourced survey for sparse, continually updated recommenders
 - [Classical comparator](docs/CLASSICAL.md): Markov, QR-factorised Markov and SLIST under B contamination
 - [Dataset assessment](docs/DATASET-ASSESSMENT.md) and [item subcategories](docs/ITEM-CATEGORIES.md)
 - [Runbook](docs/IMPLEMENTATION.md) and [pinned SASRec implementation](docs/SASREC.md)

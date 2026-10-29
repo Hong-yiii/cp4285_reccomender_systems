@@ -33,7 +33,7 @@ Interpret “all evals on Dataset 1” as the intended primary retention evaluat
 | Prepare critique materials before the full study | Explicit immediate priority at 00:56:18 |
 | Shopping versus movies | Illustrative, not selected |
 | MF, two-tower, transformer, recurrent model | Candidates; no final selection |
-| NDCG@10 | Leading metric proposal; cutoff/protocol still open |
+| NDCG@10 | Leading metric proposal at the meeting; Hit@10 adopted for reporting on 28 September (issue #8), NDCG@10 kept as tie-break |
 | Mixtures such as 20%, 50%, 100%, 200% | Examples with no agreed denominator |
 | Neural model will be more resilient | Hypothesis at 00:22:40 |
 | New data will necessarily cause forgetting | Not established; explicitly questioned at 01:03:17 |
