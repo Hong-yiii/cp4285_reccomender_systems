@@ -147,13 +147,14 @@ def dose_specs(args):
     condition = args.dose_condition
     prefix = "iso" if condition == "isolated" else "shared"
     stage = [("init", ["--stage", "init"]),
-             (f"{prefix}-clean-dose", ["--stage", "branch", "--condition", condition])]  # fmt: skip
+             (f"{prefix}-clean-dose", ["--stage", "branch", "--condition", condition,
+                                        "--dumps"])]  # fmt: skip
     for dose in doses:
         bp = round(dose * 10_000)
         name = f"{prefix}-hijack-{bp}bp"
-        extra = ["--corruption", args.dose_corruption, "--alpha", str(dose)]
+        extra = ["--corruption", args.dose_corruption, "--alpha", str(dose), "--dumps"]
         if args.dose_corruption == "shill":
-            extra = ["--attack", "bandwagon", "--alpha", str(dose)]
+            extra = ["--attack", "bandwagon", "--alpha", str(dose), "--dumps"]
         stage.append((name, ["--stage", "branch", "--condition", condition, *extra]))
     return stage
 
