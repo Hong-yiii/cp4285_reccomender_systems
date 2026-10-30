@@ -28,3 +28,18 @@ One domain, three seeds, one attacked block, category targets, isolated adapters
 - [The group] Decide whether the activity stratum is worth a second pass; reach showed no ordering.
 - [The group] Choose one second domain for the dose curve if the 1% threshold is to be tested for transfer.
 - [The group] Record the run IDs and the `bad-dumps-2026-10-29` archive in the next meeting notes.
+
+## Cross-domain replication
+
+- Video Games and CDs & Vinyl, seeds 42–44, six doses from 0.25% to 5%, plus top/bottom reach at 3%: 54 new runs, jobs 1041298–1041303.
+- The mean-rank threshold is around 1% in all three domains. CDs' formal 0.25% point is fragile (one positive seed, pooled interval crosses zero); all three CD seeds are negative from 0.5%.
+- Normalised gain at 3–5% is similar across domains (0.42–0.53). Raw rank change is not comparable: CDs' clean category starts near rank 14, Instruments near 9.
+- Top-5 visibility does not transfer: Instruments 55% at 3% and 81% at 5%; Video Games 25% and 46%; CDs 13% and 24%.
+- Reach top > bottom in all three Video Games seeds (−3.91 against −3.23). Instruments is null; CDs is inconclusive because the bottom side ranges from 0.00 to −5.74.
+- The six `cross-init` runs were unused (branches pointed at the existing `lm-{domain}-s{seed}-init`); they can be deleted.
+
+### Next steps
+
+- [The group] Decide whether the top-5 visibility gap is a dataset property or a target-choice artefact.
+- [The group] Add seeds for the CDs reach contrast before treating the top-vs-bottom difference as real.
+- [The group] Use normalised gain and top-K, not raw rank, in the poster.

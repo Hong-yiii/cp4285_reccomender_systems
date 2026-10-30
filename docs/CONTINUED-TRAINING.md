@@ -397,3 +397,26 @@ Ran on Instruments, seeds 42–44, isolated adapters, one attacked block. The st
 - These are category-level results on one domain and one attacked block. They do not show that the same 1% threshold holds for item-level recommendation, another domain or a different adapter capacity.
 
 The first dose attempt was discarded: its dumps stored the user's target rank rather than the pushed category's rank. The corrected runs and the `push_rank` dump field are the basis of the table above; the bad folders are kept under `bad-dumps-2026-10-29`.
+
+### Cross-domain replication, 30 October 2026
+
+Video Games (43 categories) and CDs & Vinyl (59) ran the same protocol as Instruments: seeds 42–44, isolated adapters, one attacked block, six doses from 0.25% to 5%, and top/bottom reach strata at 3%. 54 new runs (jobs 1041298–1041303). The clean pushed-category means were 10.50 (VG) and 14.48 (CD), against 9.14 on Instruments, so raw rank changes are not directly comparable.
+
+**Dose.** Relative gain is `(clean_rank − attacked_rank) / (clean_rank − 1)`, averaged per user; top-5 is the share of genuine users with the pushed category in their top five.
+
+| Dose | Ins gain | VG gain | CD gain | Ins top-5 | VG top-5 | CD top-5 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0.25% | 0.076 | 0.008 | 0.063 | 0.06 | 0.02 | 0.02 |
+| 0.5% | 0.000 | 0.089 | 0.146 | 0.04 | 0.05 | 0.03 |
+| 1% | 0.237 | 0.161 | 0.239 | 0.10 | 0.06 | 0.04 |
+| 2% | 0.434 | 0.301 | 0.399 | 0.49 | 0.08 | 0.13 |
+| 3% | 0.429 | 0.431 | 0.417 | 0.55 | 0.25 | 0.13 |
+| 5% | 0.503 | 0.531 | 0.526 | 0.81 | 0.46 | 0.24 |
+
+- **The mean-rank threshold is around 1% in all three domains.** The formal rule selects 0.25% on CDs, but that point has one positive seed and its pooled interval includes zero. All three CD seeds are negative from 0.5% upward, so 0.5–1% is the defensible reading. Video Games and Instruments select 1%.
+- **Raw rank change is mostly baseline.** CDs move −7.4 ranks at 5% because the clean category sits near rank 14; Instruments move −4.45 from rank 9. Once normalised, the three domains are close at 3–5% (0.42–0.53), though Video Games is lower at 1–2%.
+- **Top-5 visibility does not transfer.** Instruments reaches 50% at 3% and 81% at 5%; Video Games reaches only 46% at 5%; CDs 24%. The category is already more dispersed in VG/CD, so a similar relative gain does not produce the same visible placement.
+- **The reach advantage is domain-dependent.** On Video Games, top reach is stronger than bottom in all three seeds: −3.91 against −3.23 ranks (differences 0.5–1.0). On Instruments the two are equal (−2.92 against −2.90). On CDs the top mean is higher (−4.77 against −3.34) but the bottom side ranges from 0.00 to −5.74, so the contrast is inconclusive. The Instruments null is not universal.
+- **The six `cross-init` runs were unused.** The plans named a fresh init line but every branch pointed at the existing `lm-{domain}-s{seed}-init` checkpoint. They can be deleted; they do not affect any result.
+
+Limits: three seeds, one model size, one attacked block, category targets, isolated adapters. The CD low-dose curve is noisy and the CD reach contrast needs more seeds. The stable part is the relative ordering and the ~1% mean-rank edge, not a universal top-5 threshold.

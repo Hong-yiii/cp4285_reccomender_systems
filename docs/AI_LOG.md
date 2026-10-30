@@ -967,3 +967,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 137 tests and Ruff pass; 30 strata runs and 24 corrected dose runs have metrics; the dump `push_rank` mean matches the metrics push cell exactly on spot checks. The first 21 dose folders are archived under `bad-dumps-2026-10-29`.
 
 **Limits:** one domain (Instruments), three seeds, one attacked block, category-level targets, isolated adapters. Reach is confounded with history length and item popularity. The low-dose curve is non-monotone; the 1% threshold is the first point meeting the pre-registered rule, not a smooth physical constant.
+
+## 30 October 2026 — Cross-domain replication
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** run the critical-mass and account-strata experiment on the other PESO domains.
+
+**Assistance:**
+- Generated six plan files for Video Games and CDs & Vinyl, seeds 42–44: one clean reference, six doses (0.25–5%), and top/bottom reach at 3%. Submitted jobs 1041298–1041303; all completed.
+- Ran `dose-summary` separately per domain and computed normalised gain, top-5/top-10 shares, and the reach contrast.
+- Wrote the cross-domain results into `CONTINUED-TRAINING.md`, `CONTEXT.md`, `reference.html` and `docs/updates/2026-10-30-account-strata-dose.md`.
+
+**Validation:** all 60 plan lines parsed; every cross run has `metrics.json`; no `FAILED` or traceback lines. The clean/dose configs share the same pushed category per domain. 137 tests and Ruff pass on the docs tree.
+
+**Limits:** three seeds, one model, one attacked block, category targets. The CD low-dose curve is noisy; its formal 0.25% threshold is not robust. Six `cross-init` runs were trained but unused; they can be deleted. Raw rank changes are baseline-confounded, so the write-up uses normalised gain and top-5.
