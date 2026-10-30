@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#attack-catalogue-checkpoint"><strong>Latest · 26 · Attack catalogue</strong></a>
+          <a href="#strata-dose-checkpoint"><strong>Latest · 27 · Strata and dose</strong></a>
+          <a href="#attack-catalogue-checkpoint">26 · Attack catalogue</a>
           <a href="#metrics-checkpoint">25 · Shared metrics</a>
           <a href="#item-categories-checkpoint">24 · Item subcategories</a>
           <a href="#peso-penalty">23 · A penalty that acts</a>
@@ -742,15 +743,14 @@
             <a href="#abc-integration">section 20</a> and the
             <a href="docs/PACKAGES-AND-BUILDING.md">runnable development guide</a>.
             The lightweight reference is tagged <code>boilerplate-v1</code>.
-            Branch <code>item-categories-main</code> (22 October 2026) adds
-            <a href="#item-categories-checkpoint">section 21: item subcategories</a>.
-            Branch <code>standard-metrics</code> adds
-            <a href="#metrics-checkpoint">section 22: shared ranking metrics</a>.
-            Section 23 (26 October 2026) records the
+            Sections 24 and 25 (22 October 2026) record
+            <a href="#item-categories-checkpoint">item subcategories</a> and
+            <a href="#metrics-checkpoint">shared ranking metrics</a>.
+            Section 26 (26 October 2026) records the
             <a href="#attack-catalogue-checkpoint">corrupted-stream attack catalogue and rollback
-            timing</a>; its code is tagged <code>attack-catalogue-2026-10-26</code>. The
-            29 October account-strata and dose tooling is documented in
-            <a href="CONTEXT.md">current context</a> and the runbook; it has no results yet.
+            timing</a>; its code is tagged <code>attack-catalogue-2026-10-26</code>.
+            Section 27 (30 October 2026) records the first
+            <a href="#strata-dose-checkpoint">account-strata and dose results</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3766,6 +3766,41 @@ scores = branch.score(fixed_queries)</pre>
           <p class="small"><a href="#review-status">Back to current status</a></p>
         </section>
         <!-- APPENDED ATTACK-CATALOGUE CHECKPOINT 2026-10-26 END -->
+        <!-- APPENDED STRATA-DOSE CHECKPOINT 2026-10-30 BEGIN -->
+        <section id="strata-dose-checkpoint">
+          <span class="section-num">27 / ACCOUNT STRATA AND DOSE · 30 OCTOBER 2026</span>
+          <h2>Reach did not pick stronger accounts; 1% was the first dose that cleared the rule.</h2>
+          <p>
+            <span class="label fact">FACT</span> Instruments, seeds 42–44, one attacked block,
+            isolated adapters, category targets. The strata pass ran 30 jobs (1035987–1035989); the
+            corrected dose pass ran 24 (1038273–1038275). A first dose pass was discarded because its
+            dumps stored the target rank instead of the pushed category's rank; those 21 folders are
+            archived as <code>bad-dumps-2026-10-29</code>.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> At a 3% event dose and 10% of users, the top reach
+            stratum moved the pushed category −2.92 ranks and the bottom stratum −2.90 (SD 0.44 and
+            0.43). The seed-level sign flips. Concentrating the same event budget into 45 top-reach
+            accounts (k=4) moved it only −1.57 ranks, against −2.92 for 177 accounts at about 1.5
+            insertions each.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> The pre-registered dose rule selects
+            <strong>1%</strong>: mean −2.13 ranks, 95% CI −3.22 to −1.55, all three seed-level
+            intervals below zero. Top-5 reaches 50% at 3% and 81% at 5%; top-10 saturates at 1%; the
+            pushed category never reaches rank 1. The 0.1–0.5% points are non-monotone (+0.47,
+            −0.80, −0.22), so the first crossing is reported rather than a smooth curve.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> On this testbed the number of touched accounts
+            matters more than their reach: one high-reach account is not worth several low-reach
+            accounts at a fixed event budget. The 1% threshold is a property of this domain, block
+            and category task, not a physical constant.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a> ·
+            <a href="docs/CONTINUED-TRAINING.md#first-results-30-october-2026">CONTINUED-TRAINING.md</a></p>
+        </section>
+        <!-- APPENDED STRATA-DOSE CHECKPOINT 2026-10-30 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />

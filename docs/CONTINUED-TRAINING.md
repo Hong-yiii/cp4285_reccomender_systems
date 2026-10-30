@@ -357,3 +357,43 @@ Definitions that need team confirmation before any run:
 - isolated adapters only for the core curve.
 
 Limits: the strata are confounded with history length and item popularity, so report both metrics and the overlap; a category-level threshold need not transfer to item-level recommendation; a "critical number" is a property of this testbed, not a physical constant.
+
+### First results, 30 October 2026
+
+Ran on Instruments, seeds 42–44, isolated adapters, one attacked block. The strata pass used 10% of users at a 3% event dose; the dose pass used the legacy uniform `real-history` selection at 0.1%–5%. No result below is a cross-domain claim.
+
+**Account quality.** Mean rank change of the pushed category against the clean run of the same seed; negative means it moved up. Clean means were 9.79, 9.38 and 8.26.
+
+| Arm | Mean Δrank | SD | Accounts | Insertions/account |
+| --- | --- | --- | --- | --- |
+| Top reach, matched accounts | −2.92 | 0.44 | 177 | 1.48 |
+| Bottom reach, matched accounts | −2.90 | 0.43 | 177 | 1.48 |
+| Top reach, matched events | −2.43 | 0.72 | 177 | 1.48 |
+| Bottom reach, matched events | −2.97 | 0.71 | 177 | 1.48 |
+| Top reach, value k=2 | −1.83 | 1.20 | 89 | 2.94 |
+| Top reach, value k=4 | −1.57 | 0.37 | 45 | 5.82 |
+| Bottom reach, value k=2 | −2.89 | 0.44 | 177 | 1.48 |
+| Bottom reach, value k=4 | −2.90 | 0.45 | 177 | 1.48 |
+
+- **Reach does not order accounts.** Top and bottom are within noise at matched accounts; the seed-level sign flips. A "hub-like" user is not a stronger vehicle on this testbed.
+- **Concentrating the same event budget into fewer accounts weakens the attack.** Top-reach k=4 uses 45 accounts at about 5.8 insertions each and moves the category 1.57 ranks, against 2.92 for 177 accounts at about 1.5 insertions each. One high-reach account is not worth four low-reach accounts here.
+- The bottom-side value arms keep the full account count by construction, so they are a determinism check, not an independent k contrast. The fair comparison is top k=2/4 against bottom full accounts.
+
+**Critical mass.** Paired user bootstrap (2,000 draws), 1,740 genuine users per run, three seeds.
+
+| Dose | Mean Δrank | 95% CI | Top-5 | Top-10 | Churn |
+| --- | --- | --- | --- | --- | --- |
+| 0.1% | +0.47 | (+0.13, +0.94) | 0.04 | 0.68 | 0.45 |
+| 0.25% | −0.80 | (−1.89, +0.35) | 0.06 | 0.98 | 0.41 |
+| 0.5% | −0.22 | (−0.84, +0.66) | 0.04 | 0.88 | 0.45 |
+| 1% | −2.13 | (−3.22, −1.55) | 0.10 | 1.00 | 0.41 |
+| 2% | −3.79 | (−4.91, −2.79) | 0.49 | 1.00 | 0.45 |
+| 3% | −3.85 | (−5.24, −3.01) | 0.55 | 1.00 | 0.48 |
+| 5% | −4.45 | (−5.63, −3.12) | 0.81 | 1.00 | 0.56 |
+
+- **The pre-registered threshold is 1%**: mean −2.13 ranks, interval entirely below zero, and three of three seed-level intervals below zero. The 0.25% and 0.5% points are non-monotone and their mean gains are below one rank, so they do not meet the rule.
+- **Top-5 reaches 50% at 3%** and 81% at 5%. **Top-10 saturates at 1%**, which is why the threshold is defined on mean rank rather than top-10. The pushed category never reaches rank 1 at any tested dose.
+- The low-dose non-monotonicity is expected at this scale: the number of edited examples changes the training length and therefore the run's RNG trajectory. The 0.1% arm edited 9 users on seed 42; that point is not evidence of a backfire.
+- These are category-level results on one domain and one attacked block. They do not show that the same 1% threshold holds for item-level recommendation, another domain or a different adapter capacity.
+
+The first dose attempt was discarded: its dumps stored the user's target rank rather than the pushed category's rank. The corrected runs and the `push_rank` dump field are the basis of the table above; the bad folders are kept under `bad-dumps-2026-10-29`.

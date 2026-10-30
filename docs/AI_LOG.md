@@ -951,3 +951,19 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** the dump now carries `target`, `rank`, `push_rank` and `top`; 137 tests and Ruff pass.
 
 **Limits:** the first dose runs (seed 42 and the partial seeds 43–44) are kept aside as bad-dump evidence and must not be summarised.
+
+## 30 October 2026 — Strata and dose first pass
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** launch the #18 and #19 matrices and report the first results.
+
+**Assistance:**
+- Launched six jobs on the NUS SoC cluster: 1035987–1035989 (strata, seeds 42–44) and 1035990–1035992 (dose, seeds 42–44). All strata jobs completed; the first dose attempt produced invalid dumps and was cancelled.
+- Fixed `--dumps` to write `push_rank`, updated `dose.pair` to require it, and re-ran the dose matrix as 1038273–1038275. All three completed.
+- Recomputed the three-seed strata table and the three-seed paired-bootstrap dose curve. Threshold: 1% (mean −2.13 ranks, CI −3.22 to −1.55); top-5 50% at 3%, 81% at 5%; top-10 saturates at 1%.
+- Wrote the results into `docs/CONTINUED-TRAINING.md`, `CONTEXT.md` and `docs/updates/2026-10-30-account-strata-dose.md`.
+
+**Validation:** 137 tests and Ruff pass; 30 strata runs and 24 corrected dose runs have metrics; the dump `push_rank` mean matches the metrics push cell exactly on spot checks. The first 21 dose folders are archived under `bad-dumps-2026-10-29`.
+
+**Limits:** one domain (Instruments), three seeds, one attacked block, category-level targets, isolated adapters. Reach is confounded with history length and item popularity. The low-dose curve is non-monotone; the 1% threshold is the first point meeting the pre-registered rule, not a smooth physical constant.
