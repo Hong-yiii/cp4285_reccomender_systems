@@ -6,7 +6,8 @@
 
 - High activity beat low activity in every domain at 3% and matched accounts: Instruments −3.65 against −1.58; Video Games −5.14 against −2.52; CDs −7.09 against −2.59.
 - Low activity is not dormancy. The result weakens the “dormant accounts are easy” version of the threat; true dormant accounts remain untested.
-- Plausible explanation: high-activity users contribute more training targets and item contexts, so the inserted target is learned in more contexts. Activity is confounded with history length and item popularity.
+- Plausible explanation: high-activity users contribute more training targets and more diverse item contexts. Activity is confounded with history length and item popularity.
+- Per-user check (Instruments seed 42, random 3%): edited users −5.17 against untouched −5.12; edited × activity +0.06 (95% bootstrap −0.19 to +0.47). The aggregate effect is model-level, not that edited high-activity users’ own ranks move more.
 
 ## Classic shills
 

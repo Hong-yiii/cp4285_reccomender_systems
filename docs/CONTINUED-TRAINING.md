@@ -435,6 +435,8 @@ Limits: three seeds, one model size, one attacked block, category targets, isola
 
 High-activity accounts are stronger in every domain. Plausible explanation: high-activity users contribute more training targets and more diverse item contexts, so their sequences contribute more target terms to the loss; low-activity users give the inserted target a thinner context. Diagnostics on the selected strata: top against bottom activity had mean history 17.8 against 5.0, 15.4 against 2.0 training targets, and 1.25 against 0.49 bits of category entropy; reach (1.09 against 1.05) and item popularity (1.09 against 1.05) were nearly identical. The effect is about amount and diversity of context, not reach. Activity correlates with history length at ρ = 0.95, so this is nearly a history-length contrast; low activity is not dormancy. The result argues against, not for, the “dormant accounts are easy” version of the threat.
 
+A per-user check sharpens the mechanism. On a random 3% `real-history` run (Instruments seed 42), edited users' own push-rank change was −5.17 against −5.12 for untouched users. The edited-minus-untouched gap by activity quartile ranged from −0.55 to +0.58, and the edited × activity coefficient was +0.06 (95% bootstrap −0.19 to +0.47). So the aggregate high-activity effect is not that edited high-activity users' own recommendations move more; it is that editing their histories changes the shared model more. The attack behaves as a global category association with spillover, not per-user poisoning. This is one run and the deltas share a model, so it is descriptive, not a significance test.
+
 **The classic shills reproduce.** Effect at 3% and profile-separability AUC:
 
 | Domain | Random | Average | Bandwagon | Clone |
