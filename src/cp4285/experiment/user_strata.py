@@ -17,10 +17,12 @@ number of accounts for a given share. Ties break on the user id; no RNG is used 
 users, so a plan can be replayed exactly.
 """
 
+import hashlib
 import math
 from collections import Counter
 
 METRICS = ("activity", "reach")
+GROUPS = ("dormant", "continuing")
 SIDES = ("top", "bottom")
 BUDGETS = ("accounts", "events", "value")
 
@@ -90,6 +92,21 @@ def select(scores, side, *, share=None, accounts=None):
         raise ValueError(f"Asked for {n} accounts from a population of {len(scores)}")
     order = ranked(scores)
     return (order[:n] if side == "top" else order[-n:]), order
+
+
+def group_select(members, *, accounts, seed=0):
+    """A deterministic pseudo-random subset of a membership set.
+
+    The order is a SHA-256 of ``seed|user``, so the choice is stable across processes and
+    does not consume the training RNG. Used for dormant/continuing groups, where there is
+    no continuous score to rank.
+    """
+    if accounts is None or accounts < 1:
+        raise ValueError("A group stratum needs an explicit account count")
+    if accounts > len(members):
+        raise ValueError(f"Asked for {accounts} accounts from a group of {len(members)}")
+    order = sorted(members, key=lambda u: hashlib.sha256(f"{seed}|{u}".encode()).hexdigest())
+    return order[:accounts], order
 
 
 def allocate(chosen, users, events, *, budget, max_insertions=10):

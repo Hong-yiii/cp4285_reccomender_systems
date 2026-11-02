@@ -37,6 +37,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from . import user_strata
 from .corruption import KINDS, apply_users, relabel_map
 from .metrics import from_ranks
 from .shilling import ATTACKS, PREFIX, training_examples
@@ -119,9 +120,9 @@ def add_arguments(parser):
     )
     parser.add_argument(
         "--user-stratum",
-        choices=("none", "activity", "reach"),
+        choices=("none", "activity", "reach", "dormant", "continuing"),
         default="none",
-        help="real-history: select accounts by training activity or interaction reach",
+        help="real-history: select accounts by activity/reach or a block-membership group",
     )
     parser.add_argument(
         "--user-side", choices=("top", "bottom"), default="top", help="Stratum end to select"
@@ -310,12 +311,22 @@ def strata_selection(args):
     """The selected-account settings, or None for the legacy uniform draw."""
     if getattr(args, "user_stratum", "none") == "none":
         return None
-    return {"metric": args.user_stratum, "side": args.user_side, "budget": args.user_budget,
-            "share": args.user_share, "accounts": args.user_accounts,
-            "value_k": args.value_k}  # fmt: skip
+    group = args.user_stratum in user_strata.GROUPS
+    return {"metric": args.user_stratum, "side": "all" if group else args.user_side,
+            "budget": args.user_budget, "share": args.user_share,
+            "accounts": args.user_accounts, "value_k": args.value_k}  # fmt: skip
 
 
-def corrupt_once(users, category, args, push, seed):
+def user_groups(blocks):
+    """Block-2 dormant and continuing users, from presence across the released blocks."""
+    present = [set(block) for block in blocks]
+    return {
+        "dormant": (present[0] - present[1]) & present[2],
+        "continuing": present[1] & present[2],
+    }
+
+
+def corrupt_once(users, category, args, push, seed, members=None):
     """Apply the run's corruption once; returns (users, category for training, report).
 
     The shill, real-history, demotion and vandalism corruptions return edited users and
@@ -325,16 +336,20 @@ def corrupt_once(users, category, args, push, seed):
     if args.corruption == "relabel":
         train_map, report = relabel_map(users, category, push, args.relabel_frac, seed)
         return users, train_map, report
+    selection = strata_selection(args)
+    if selection is not None:
+        selection["seed"] = seed
+        selection["members"] = members
     poisoned, report = apply_users(
         users, category, push, args.corruption, args.alpha, seed,
         attack=args.attack, segment=args.segment, target_share=args.target_share,
-        rival=args.rival, selection=strata_selection(args),
+        rival=args.rival, selection=selection,
         max_insertions=getattr(args, "max_insertions", 10),
     )  # fmt: skip
     return poisoned, category, report
 
 
-def stream_for(users, category, block, args, push, attacked):
+def stream_for(users, category, block, args, push, attacked, members=None):
     """One update block's corrupted training inputs, per the corruption and placement.
 
     Placement `block` corrupts only the attacked block, `all` every update block; the
@@ -344,7 +359,7 @@ def stream_for(users, category, block, args, push, attacked):
                          or (args.placement == "block" and block == args.attack_block))  # fmt: skip
     if not here:
         return users, category, None
-    return corrupt_once(users, category, args, push, args.seed + block)
+    return corrupt_once(users, category, args, push, args.seed + block, members=members)
 
 
 def learner_for(args, names):
@@ -391,6 +406,13 @@ def run(args):
             raise ValueError("--user-stratum needs --corruption real-history")
         if args.placement != "block":
             raise ValueError("User-stratum runs attack one block; --placement all is not supported")
+        if args.user_stratum in user_strata.GROUPS:
+            if args.stage != "branch" or args.attack_block != 2:
+                raise ValueError("Dormant/continuing strata need a branch run attacking block 2")
+            if args.user_accounts is None:
+                raise ValueError("Dormant/continuing strata need --user-accounts")
+            if args.user_budget != "accounts":
+                raise ValueError("Dormant/continuing strata support the accounts budget only")
         if (args.user_share is None) == (args.user_accounts is None):
             raise ValueError("Give exactly one of --user-share and --user-accounts")
         if args.user_share is not None and not 0 < args.user_share < 1:
@@ -419,6 +441,8 @@ def run(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
     blocks, category, names = load(args.data, args.categories, args.names)
+    groups = (user_groups(blocks) if getattr(args, "user_stratum", "none") in user_strata.GROUPS
+              else {})  # fmt: skip
     data = [split(users, category) for users in blocks]
     tests = []
     for b, d in enumerate(data):
@@ -500,7 +524,9 @@ def run(args):
             raise ValueError("This corruption needs --push, the promoted category")
         result["cells"], result["losses"] = {}, {}
         for b in range(1, 5):
-            users, train_map, report = stream_for(blocks[b], category, b, args, push, attacked)
+            members = groups.get(args.user_stratum) if b == args.attack_block else None
+            users, train_map, report = stream_for(blocks[b], category, b, args, push, attacked,
+                                                  members=members)  # fmt: skip
             if report is not None:
                 report["block"] = b
                 if args.placement == "all":  # one report per attacked block

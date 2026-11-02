@@ -85,6 +85,28 @@ def _selected_accounts(users, selection, alpha):
     budget = selection.get("budget", "accounts")
     value_k = selection.get("value_k", 1)
     max_insertions = selection.get("max_insertions", 10)
+    if metric in user_strata.GROUPS:
+        if budget != "accounts":
+            raise ValueError("Group strata support the accounts budget only")
+        members = selection.get("members") or []
+        accounts = selection.get("accounts")
+        real = len(training_examples(users))
+        events = _insertion_target(alpha, real)
+        n = min(accounts or 0, events, len(members))
+        if n < 1:
+            raise ValueError(f"Group {metric} has no usable members")
+        seed = selection.get("seed", 0)
+        chosen, order = user_strata.group_select(members, accounts=n, seed=seed)
+        alloc = user_strata.allocate(chosen, users, events, budget="accounts",
+                                     max_insertions=max_insertions)  # fmt: skip
+        info = {
+            "metric": metric, "side": "all", "budget": budget, "value_k": 1,
+            "population": len(members), "stratum_users": len(chosen),
+            "accounts_selected": len(chosen), "events_target": events,
+            "mean_insertions": events / len(chosen), "max_insertions": max_insertions,
+            "stratum_boundary": None, "spearman_activity_reach": None,
+        }
+        return chosen, order, alloc, {u: 1.0 for u in members}, info
     if metric not in user_strata.METRICS:
         raise ValueError(f"Unknown stratum metric {metric}; choose from {user_strata.METRICS}")
     if side not in user_strata.SIDES:
@@ -178,9 +200,12 @@ def real_history(users, category, target, alpha, seed, *, target_share=0.5, sele
         # Compare edited profiles with untouched users on the same side of the stratum,
         # so the AUC is not just activity or reach showing through.
         ranked = order
-        half = max(len(ranked) // 2, len(chosen))
-        pool = ranked[:half] if selection["side"] == "top" else ranked[-half:]
-        pool = [u for u in pool if u not in touched]
+        if selection.get("metric") in user_strata.GROUPS:
+            pool = [u for u in ranked if u not in touched]
+        else:
+            half = max(len(ranked) // 2, len(chosen))
+            pool = ranked[:half] if selection["side"] == "top" else ranked[-half:]
+            pool = [u for u in pool if u not in touched]
         sample = random.Random(seed).sample(pool, min(len(touched), len(pool)))
         report["separability_auc_same_stratum"] = separability(
             features({u: users[u] for u in sample}, category, counts),
