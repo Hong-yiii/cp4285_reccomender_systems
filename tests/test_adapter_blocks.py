@@ -341,3 +341,44 @@ def test_stratified_real_history_partitions_the_push(tmp_path):
             "--attack", "bandwagon", "--user-stratum", "activity", "--user-share", "0.5",
             "--push", "1",
         ))  # fmt: skip
+
+
+def test_user_groups_labels_block_two():
+    def u():
+        return {"previous_block": [], "current_block": ["0", "1", "2"]}
+
+    blocks = [{"a": u(), "b": u(), "c": u()},
+              {"a": u(), "c": u()},
+              {"a": u(), "b": u(), "c": u()},
+              {"a": u(), "b": u(), "c": u()},
+              {"a": u(), "b": u(), "c": u()}]  # fmt: skip
+    groups = adapter_blocks.user_groups(blocks)
+    assert groups["dormant"] == {"b"}
+    assert groups["continuing"] == {"a", "c"}
+
+
+def toy_data_groups(path):
+    path.mkdir()
+    users = {f"u{u}": {"previous_block": [], "current_block": ["0", "4", "8", "4", "0"]} for u in range(8)}
+    for b in range(5):
+        keep = users if b != 1 else {u: d for u, d in users.items() if int(u[1:]) < 4}
+        (path / f"Toy.all.block_{b}.json").write_text(json.dumps(keep))
+    index = {str(i): [f"<cat_{i // 4}>"] for i in range(12)}
+    (path / "Toy.index.cat2.json").write_text(json.dumps(index))
+    names = {"categories": {f"<cat_{k}>": {"subcategory": n} for k, n in enumerate(NAMES)}}
+    (path / "stats.json").write_text(json.dumps(names))
+    return path
+
+
+def test_dormant_branch_on_toy_blocks(tmp_path):
+    data = toy_data_groups(tmp_path / "data")
+    adapter_blocks.run(parse(data, tmp_path / "init", "--stage", "init", "--push", "1"))
+    run = adapter_blocks.run(parse(
+        data, tmp_path / "dorm", "--stage", "branch", "--init", str(tmp_path / "init"),
+        "--attack-block", "2", "--corruption", "real-history", "--user-stratum", "dormant",
+        "--user-accounts", "2", "--alpha", "0.2", "--push", "1", "--condition", "isolated",
+    ))  # fmt: skip
+    sel = run["attack"]["selection"]
+    assert run["attack"]["block"] == 2
+    assert sel["metric"] == "dormant" and sel["population"] == 4
+    assert 1 <= sel["accounts_selected"] <= 2

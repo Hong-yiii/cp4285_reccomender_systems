@@ -166,3 +166,20 @@ def test_training_mix_counts_match_the_report():
         added = len(training_examples(corrupted)) - real
         assert added == report[key]
         assert report["alpha"] == pytest.approx(report[key] / len(training_examples(corrupted)))
+
+
+def test_group_stratum_edits_only_members():
+    users = block()
+    members = {u for u in users if int(u[1:]) < 10}
+    selection = {"metric": "dormant", "side": "all", "budget": "accounts",
+                 "share": None, "accounts": 5, "value_k": 1, "seed": 1,
+                 "members": members}  # fmt: skip
+    corrupted, report = apply_users(users, CATEGORY, 3, "real-history", 0.2, 1,
+                                    selection=selection)  # fmt: skip
+    edited = {u for u in corrupted if corrupted[u]["current_block"] != users[u]["current_block"]}
+    assert edited and edited.issubset(members)
+    assert report["selection"]["metric"] == "dormant"
+    assert report["selection"]["accounts_selected"] == len(edited)
+    for u in edited:
+        assert corrupted[u]["current_block"][-2:] == users[u]["current_block"][-2:]
+        assert corrupted[u]["previous_block"] == users[u]["previous_block"]

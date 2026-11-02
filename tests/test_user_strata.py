@@ -80,3 +80,15 @@ def test_summary_reports_the_confound():
     assert set(summary) == {"population", "activity", "reach",
                             "spearman_activity_reach", "top_half_overlap"}  # fmt: skip
     assert -1 <= summary["spearman_activity_reach"] <= 1
+
+
+def test_group_select_is_deterministic_and_bounded():
+    members = {f"u{i}" for i in range(10)}
+    first, order = user_strata.group_select(members, accounts=4, seed=7)
+    second, _ = user_strata.group_select(members, accounts=4, seed=7)
+    assert first == second and len(first) == len(set(first)) == 4
+    assert set(first).issubset(members) and len(order) == 10
+    with pytest.raises(ValueError):
+        user_strata.group_select(members, accounts=11, seed=7)
+    with pytest.raises(ValueError):
+        user_strata.group_select(members, accounts=0, seed=7)
