@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#activity-shills-endpoints"><strong>Latest · 28 · Activity and endpoints</strong></a>
+          <a href="#dataset-covariates"><strong>Latest · 29 · Dataset covariates</strong></a>
+          <a href="#activity-shills-endpoints">28 · Activity and endpoints</a>
           <a href="#strata-dose-checkpoint">27 · Strata and dose</a>
           <a href="#attack-catalogue-checkpoint">26 · Attack catalogue</a>
           <a href="#metrics-checkpoint">25 · Shared metrics</a>
@@ -754,6 +755,8 @@
             <a href="#strata-dose-checkpoint">account-strata and dose results</a>.
             Section 28 (2 November 2026) records the
             <a href="#activity-shills-endpoints">activity, classic-shill and endpoint results</a>.
+            Section 29 records the
+            <a href="#dataset-covariates">dataset covariates</a> behind the top-5 gap.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3847,6 +3850,30 @@ scores = branch.score(fixed_queries)</pre>
             <a href="docs/CONTINUED-TRAINING.md#activity-classic-shills-and-endpoint-probes-2-november-2026">CONTINUED-TRAINING.md</a></p>
         </section>
         <!-- APPENDED ACTIVITY-SHILLS-ENDPOINTS CHECKPOINT 2026-11-02 END -->
+        <!-- APPENDED DATASET-COVARIATES CHECKPOINT 2026-11-02 BEGIN -->
+        <section id="dataset-covariates">
+          <span class="section-num">29 / DATASET COVARIATES · 2 NOVEMBER 2026</span>
+          <h2>Top-5 visibility follows the category tail, not the target base rate.</h2>
+          <p>
+            <span class="label fact">FACT</span> Instruments (30 categories, HHI 0.298) put the
+            pushed category in 55% of top-5 lists at 3%; Video Games (43, 0.204) 25%; CDs (59,
+            0.113) 13%. The number of categories covering 90% of test targets is 7, 6 and 15.
+            Normalised gain at 3–5% stays flat at 0.42–0.53.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Target base rate (1.1–1.5%), item density
+            (2.0–3.5e-4), block-0/1 item overlap (0.13–0.15) and JS drift (0.0065–0.0093) do not
+            order the top-5 gap. Ratings are not in the released block files.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> A longer category tail makes top-5 harder to
+            reach even when the mean-rank association is similar. With three domains the covariates
+            are correlated, so this is descriptive, not a causal decomposition.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a> ·
+            <a href="docs/CONTINUED-TRAINING.md#dataset-covariates-2-november-2026">CONTINUED-TRAINING.md</a></p>
+        </section>
+        <!-- APPENDED DATASET-COVARIATES CHECKPOINT 2026-11-02 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />
