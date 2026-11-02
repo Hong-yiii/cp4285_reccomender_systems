@@ -33,3 +33,12 @@
 - [The group] Use the Random/Average result as the Lam–Riedl replication and cite the paper in the related-work section.
 - [The group] Decide whether the CD reach contrast is worth more seeds or should be reported as inconclusive.
 - [The group] Keep top-1 out of the critical-mass claim; only top-5 and mean rank are supported.
+
+## Dataset covariates
+
+- Top-5 visibility tracks category concentration: Instruments (30 categories, HHI 0.298, 55% at 3%), Video Games (43, 0.204, 25%), CDs (59, 0.113, 13%).
+- Normalised gain at 3–5% stays flat (0.42–0.53), so the mean-rank effect is similar; the visibility gap follows the length of the category tail.
+- Target base rate, density, cross-block overlap and JS drift do not order the gap. Ratings are not in the block files.
+- Three domains only: the covariates are correlated, so this is descriptive, not causal.
+
+Table: `CONTINUED-TRAINING.md#dataset-covariates-2-november-2026`.

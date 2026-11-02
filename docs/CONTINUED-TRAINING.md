@@ -469,3 +469,26 @@ The CD reach contrast over six seeds is top −4.85 (SD 1.21) against bottom −
 On Instruments, 10% and 20% doses move the mean rank −6.13 and −6.45 but never make the pushed category top-1: top-5 reaches 97–99% and 99.7–99.9%, while top-1 stays at 0–0.5%. At 10%, 0% of users are at rank 1 and 97.1% at ranks 2–5; at 20%, 0.1% and 99.7%. Plausible explanations: the same event budget spread over fewer accounts touches fewer user contexts, and repeated insertions into one history are partly redundant, so breadth matters more than depth. The allocation shows the trade: Video Games used 103 accounts at 1.39 insertions each in the full arm, against 26 accounts at 5.50 at k=4; CDs used 101 at 1.83 against 26 at 7.12. Because k changes both breadth and depth, this is consistent with breadth over depth but does not isolate redundancy. A category can saturate top-5 without becoming the single most likely next category, because top-1 is one slot and the category task still has a dominant alternative per user. The high-dose results do not test item-level top-1.
 
 Limits: three seeds for the activity and shill tables, six for CD; one model size, one attacked block, category targets, isolated adapters. The explanations above are interpretations, not identified mechanisms. True dormant accounts would need a time-gap or block-2 definition; low activity is only a proxy.
+
+### Dataset covariates, 2 November 2026
+
+The three domains differ in how concentrated their category targets are. Structural covariates come from the released blocks and category indices; outcomes are the three-seed dose results above. `Labels 90%` is the number of categories covering 90% of test targets; entropy and HHI are over blocks 1–4 test targets; density is events divided by users times items; overlap is block 0 against block 1; drift is the mean Jensen–Shannon divergence between consecutive blocks' training-category mixes.
+
+| Domain | Cats | Target share | Entropy | HHI | Labels 90% | Mean hist | Items | Density | Items/user | User overlap | Item overlap | JS drift |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Instruments | 30 | 0.0129 | 2.49 | 0.298 | 7 | 8.1 | 53,509 | 2.01e-4 | 10.8 | 0.33 | 0.13 | 0.0065 |
+| Video Games | 43 | 0.0109 | 2.64 | 0.204 | 6 | 7.3 | 25,935 | 3.34e-4 | 8.7 | 0.22 | 0.15 | 0.0093 |
+| CDs & Vinyl | 59 | 0.0146 | 3.83 | 0.113 | 15 | 9.3 | 39,191 | 3.49e-4 | 13.7 | 0.33 | 0.15 | 0.0068 |
+
+| Domain | Clean pushed rank | Top-5 at 3% | Top-5 at 5% | Normalised gain at 3% | Normalised gain at 5% |
+| --- | --- | --- | --- | --- | --- |
+| Instruments | 9.14 | 0.55 | 0.81 | 0.429 | 0.503 |
+| Video Games | 10.50 | 0.25 | 0.46 | 0.431 | 0.531 |
+| CDs & Vinyl | 14.48 | 0.13 | 0.24 | 0.417 | 0.526 |
+
+- **Top-5 visibility tracks category concentration.** Instruments is the most concentrated (30 categories, HHI 0.298, 7 labels for 90% of targets) and has the highest top-5 share; CDs is the most dispersed (59 categories, HHI 0.113, 15 labels) and the lowest. Video Games sits between them. The ordering is monotone on categories, entropy, HHI and clean rank.
+- **Relative gain is flat.** At 3–5% the normalised gain is 0.42–0.53 in all three domains, so the mean-rank effect is similar even though visibility is not. The gap is about the length of the category tail, not the strength of the association.
+- **Other covariates do not order the gap.** Target base rate is 1.1–1.5%, density varies by less than a factor of two, item overlap is 0.13–0.15, and JS drift does not follow the top-5 order. Ratings are not in the released block files, so rating strength is unavailable.
+- **This is descriptive, not causal.** With three domains, catalogue size, entropy, HHI, labels-for-90% and clean rank are correlated. The table is consistent with the category-tail explanation, but it does not identify which covariate causes the visibility gap. A fourth domain or a controlled category-cardinality manipulation would be needed.
+
+The table is saved on the cluster as `reports/covariates-2026-11-02.json`.

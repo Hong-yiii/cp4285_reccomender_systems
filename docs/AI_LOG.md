@@ -997,3 +997,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** all 12 jobs completed with exit 0 and no `FAILED`/traceback lines; every new run has `metrics.json`; the six-seed CD summary saved on the cluster. 137 tests and Ruff pass on the docs tree.
 
 **Limits:** three seeds for activity/shills, six for CD; one model, one attacked block, category targets, isolated adapters. Low activity is not dormancy. The explanations are interpretations, not identified mechanisms.
+
+## 2 November 2026 — Dormant stratum, covariate table and target-share batch
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** pursue the true-dormancy test, the dataset-covariate explanation and the target-share sweep.
+
+**Assistance:**
+- Added `dormant` and `continuing` strata for block-2 real-history attacks (`user_strata.py`, `corruption.py`, `adapter_blocks.py`) with a SHA-256 account order; tested with unit and toy block-2 integration tests. Merged as #37.
+- Computed the dataset covariates from the released blocks and category indices: category count, target share, entropy, HHI, labels-for-90%, mean history, items, density, cross-block overlap and JS drift. Wrote the table and interpretation into `CONTINUED-TRAINING.md`, `CONTEXT.md`, `reference.html` and the 2 November update note.
+- Submitted 45 runs in six jobs (1063496–1063501): 18 dormant/continuing runs attacking block 2, and 27 target-share runs at 0.25/0.5/0.75 on three domains.
+
+**Validation:** 141 tests and Ruff pass; source hashes match the cluster copy. The covariate table is saved as `reports/covariates-2026-11-02.json`.
+
+**Limits:** covariates are descriptive with three domains and correlated columns. The dormant/continuing and target-share results are pending.
