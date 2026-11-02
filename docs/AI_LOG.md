@@ -982,3 +982,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** all 60 plan lines parsed; every cross run has `metrics.json`; no `FAILED` or traceback lines. The clean/dose configs share the same pushed category per domain. 137 tests and Ruff pass on the docs tree.
 
 **Limits:** three seeds, one model, one attacked block, category targets. The CD low-dose curve is noisy; its formal 0.25% threshold is not robust. Six `cross-init` runs were trained but unused; they can be deleted. Raw rank changes are baseline-confounded, so the write-up uses normalised gain and top-5.
+
+## 2 November 2026 — Activity, classic shills and endpoint probes
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** run the remaining non-Amazon follow-ups and push the results with plausible explanations.
+
+**Assistance:**
+- Submitted 12 jobs (1045579–1045587 and 1045607–1045609), 75 runs: activity top/bottom on three domains, Random/Average shills on three domains, CDs seeds 45–47, k=2/4 on Video Games and CDs, and 10%/20% on Instruments.
+- Computed the activity and shill contrasts, the six-seed CD dose summary, the k-value contrasts and the high-dose endpoint table.
+- Wrote the results and labelled plausible mechanisms into `CONTINUED-TRAINING.md`, `CONTEXT.md`, `reference.html` and `docs/updates/2026-11-02-activity-shills-endpoints.md`.
+
+**Validation:** all 12 jobs completed with exit 0 and no `FAILED`/traceback lines; every new run has `metrics.json`; the six-seed CD summary saved on the cluster. 137 tests and Ruff pass on the docs tree.
+
+**Limits:** three seeds for activity/shills, six for CD; one model, one attacked block, category targets, isolated adapters. Low activity is not dormancy. The explanations are interpretations, not identified mechanisms.
