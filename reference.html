@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#strata-dose-checkpoint"><strong>Latest · 27 · Strata and dose</strong></a>
+          <a href="#activity-shills-endpoints"><strong>Latest · 28 · Activity and endpoints</strong></a>
+          <a href="#strata-dose-checkpoint">27 · Strata and dose</a>
           <a href="#attack-catalogue-checkpoint">26 · Attack catalogue</a>
           <a href="#metrics-checkpoint">25 · Shared metrics</a>
           <a href="#item-categories-checkpoint">24 · Item subcategories</a>
@@ -751,6 +752,8 @@
             timing</a>; its code is tagged <code>attack-catalogue-2026-10-26</code>.
             Section 27 (30 October 2026) records the first
             <a href="#strata-dose-checkpoint">account-strata and dose results</a>.
+            Section 28 (2 November 2026) records the
+            <a href="#activity-shills-endpoints">activity, classic-shill and endpoint results</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3809,6 +3812,41 @@ scores = branch.score(fixed_queries)</pre>
             <a href="docs/CONTINUED-TRAINING.md#first-results-30-october-2026">CONTINUED-TRAINING.md</a></p>
         </section>
         <!-- APPENDED STRATA-DOSE CHECKPOINT 2026-10-30 END -->
+        <!-- APPENDED ACTIVITY-SHILLS-ENDPOINTS CHECKPOINT 2026-11-02 BEGIN -->
+        <section id="activity-shills-endpoints">
+          <span class="section-num">28 / ACTIVITY, SHILLS AND ENDPOINTS · 2 NOVEMBER 2026</span>
+          <h2>Active accounts beat low-activity ones; classic shills work; top-1 does not.</h2>
+          <p>
+            <span class="label fact">FACT</span> 75 runs across jobs 1045579–1045587 and
+            1045607–1045609. At 3% and matched accounts, high activity beat low activity in every
+            domain: Instruments −3.65 against −1.58; Video Games −5.14 against −2.52; CDs −7.09
+            against −2.59. Low activity is a proxy, not dormancy.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Random and Average shills are as strong as
+            bandwagon/clone at 3%, so the attack is not a bandwagon/clone artefact. Profile AUC:
+            random 0.82–0.87; average 0.94–0.95; bandwagon 1.00; clone 0.63–0.76. Clone is the
+            stealthy fake-account attack.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Six-seed CDs put the mean-rank threshold at 0.5%
+            (mean −1.73, 95% CI −4.66 to −0.60) but top-5 stays at 3–4%. k=4 weakens the attack
+            against full accounts (Video Games −2.11 against −3.91; CDs −3.84 against −4.77). At
+            10% and 20% on Instruments, top-5 reaches 97–99% and 99.7–99.9%, but top-1 stays at
+            0–0.5%.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Plausible explanations: high-activity users
+            contribute more training targets and contexts; clone copies real histories, while
+            average/bandwagon create distinctive profile features; CDs’ 59-category tail makes mean
+            rank easier to move than top-5; fewer accounts touch fewer user contexts, and repeated
+            insertions into one history are partly redundant; top-1 is a single slot with a dominant
+            alternative per user. These are interpretations, not identified mechanisms.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a> ·
+            <a href="docs/CONTINUED-TRAINING.md#activity-classic-shills-and-endpoint-probes-2-november-2026">CONTINUED-TRAINING.md</a></p>
+        </section>
+        <!-- APPENDED ACTIVITY-SHILLS-ENDPOINTS CHECKPOINT 2026-11-02 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />
