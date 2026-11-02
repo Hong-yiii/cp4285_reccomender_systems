@@ -433,7 +433,7 @@ Limits: three seeds, one model size, one attacked block, category targets, isola
 | Video Games | −5.14 (SD 1.28) | −2.52 (SD 1.27) |
 | CDs & Vinyl | −7.09 (SD 1.16) | −2.59 (SD 1.09) |
 
-High-activity accounts are stronger in every domain. Plausible explanation: high-activity users contribute more training targets and more item contexts, and their histories are seen more often in the loss; low-activity users give the inserted target a thinner context. This is not an isolated mechanism: activity is confounded with history length and item popularity, and low activity is not dormancy. The result argues against, not for, the “dormant accounts are easy” version of the threat.
+High-activity accounts are stronger in every domain. Plausible explanation: high-activity users contribute more training targets and more diverse item contexts, so their sequences contribute more target terms to the loss; low-activity users give the inserted target a thinner context. Diagnostics on the selected strata: top against bottom activity had mean history 17.8 against 5.0, 15.4 against 2.0 training targets, and 1.25 against 0.49 bits of category entropy; reach (1.09 against 1.05) and item popularity (1.09 against 1.05) were nearly identical. The effect is about amount and diversity of context, not reach. Activity correlates with history length at ρ = 0.95, so this is nearly a history-length contrast; low activity is not dormancy. The result argues against, not for, the “dormant accounts are easy” version of the threat.
 
 **The classic shills reproduce.** Effect at 3% and profile-separability AUC:
 
@@ -444,7 +444,7 @@ High-activity accounts are stronger in every domain. Plausible explanation: high
 | CDs & Vinyl | −3.42 | −3.62 | −3.05 | −3.03 |
 | AUC range | 0.82–0.87 | 0.94–0.95 | 1.00 | 0.63–0.76 |
 
-The simple RandomBot/AverageBot fills are not weaker than the more elaborate ones, so the attack is not an artefact of bandwagon or clone construction. The difference is detectability: bandwagon is trivially separable, average is highly separable, random is slightly less so, and clone remains the stealthiest. Plausible explanation: the model needs the target association, not a realistic filler distribution; clone copies real histories and therefore looks like the population, while average and bandwagon produce distinctive profile features.
+The simple RandomBot/AverageBot fills are not weaker than the more elaborate ones, so the attack is not an artefact of bandwagon or clone construction. The difference is detectability: bandwagon is trivially separable, average is highly separable, random is slightly less so, and clone remains the stealthiest. Plausible explanation: the model needs the target association, not a realistic filler distribution; clone copies real histories and therefore looks like the population, while average and bandwagon produce distinctive profile features. Diagnostics on the generated profiles: clone length 7.8 against real 7.4, entropy 0.99 against 0.73, top-category share 0.55 against 0.67, and mean log popularity 1.04 against 0.83; average and bandwagon have much higher log popularity (1.30–2.25) and entropy (1.16–1.55).
 
 **CDs: a 0.5% mean-rank edge, no top-5 transfer.** With six seeds (42–47), the CD threshold is 0.5%:
 
@@ -454,7 +454,7 @@ The simple RandomBot/AverageBot fills are not weaker than the more elaborate one
 | 0.5% | −1.73 | (−4.66, −0.60) | 0.03 |
 | 1% | −2.97 | (−6.12, −0.70) | 0.04 |
 
-The CD reach contrast over six seeds is top −4.85 (SD 1.21) against bottom −3.62 (SD 2.14); top is stronger in four of six seeds. Plausible explanations for the CD pattern: its 59 categories put the clean target near rank 14, so a mean-rank shift is easier while top-5 still requires crossing many categories; its test blocks are smaller (866–1,078 users), so the low-dose and reach contrasts carry more variance. The CD result does not establish a clean top-vs-bottom ordering.
+The CD reach contrast over six seeds is top −4.85 (SD 1.21) against bottom −3.62 (SD 2.14); top is stronger in four of six seeds. Plausible explanations for the CD pattern: its 59 categories put the clean target near rank 14, so a mean-rank shift is easier while top-5 still requires crossing many categories; its test blocks are smaller (866–1,078 users) and seed effects are more heterogeneous, so the low-dose and reach contrasts carry more variance. At 1% on seed 42, 0.2% of users put the category at rank 1, 5.3% at 2–5, 63.8% at 6–10 and 30.6% at 11–20: the mean improves while top-5 does not. The CD result does not establish a clean top-vs-bottom ordering.
 
 **Breadth beats concentration, and top-1 is out of reach.** The k-value arms and the high-dose probe:
 
@@ -464,6 +464,6 @@ The CD reach contrast over six seeds is top −4.85 (SD 1.21) against bottom −
 | k=2 (half the accounts) | −1.96 | −3.58 |
 | k=4 (quarter) | −2.11 | −3.84 |
 
-On Instruments, 10% and 20% doses move the mean rank −6.13 and −6.45 but never make the pushed category top-1: top-5 reaches 97–99% and 99.7–99.9%, while top-1 stays at 0–0.5%. Plausible explanations: the same event budget spread over fewer accounts touches fewer user contexts, and repeated insertions into one history are partly redundant, so breadth matters more than depth. A category can saturate top-5 without becoming the single most likely next category, because top-1 is one slot and the category task still has a dominant alternative per user. The high-dose results do not test item-level top-1.
+On Instruments, 10% and 20% doses move the mean rank −6.13 and −6.45 but never make the pushed category top-1: top-5 reaches 97–99% and 99.7–99.9%, while top-1 stays at 0–0.5%. At 10%, 0% of users are at rank 1 and 97.1% at ranks 2–5; at 20%, 0.1% and 99.7%. Plausible explanations: the same event budget spread over fewer accounts touches fewer user contexts, and repeated insertions into one history are partly redundant, so breadth matters more than depth. The allocation shows the trade: Video Games used 103 accounts at 1.39 insertions each in the full arm, against 26 accounts at 5.50 at k=4; CDs used 101 at 1.83 against 26 at 7.12. Because k changes both breadth and depth, this is consistent with breadth over depth but does not isolate redundancy. A category can saturate top-5 without becoming the single most likely next category, because top-1 is one slot and the category task still has a dominant alternative per user. The high-dose results do not test item-level top-1.
 
 Limits: three seeds for the activity and shill tables, six for CD; one model size, one attacked block, category targets, isolated adapters. The explanations above are interpretations, not identified mechanisms. True dormant accounts would need a time-gap or block-2 definition; low activity is only a proxy.
