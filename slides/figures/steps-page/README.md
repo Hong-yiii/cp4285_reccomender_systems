@@ -4,7 +4,8 @@ These are the images on our [UVENTS project page](https://uvents.nus.edu.sg/even
 
 | File | Shows |
 | --- | --- |
-| `1-animation.gif` | Main image: Keyboards & MIDI rises, fades and falls, with the flower reacting |
+| `0-main-animation.gif` | Main image: the Forget-Me-Not banner leads into the story below, then loops back |
+| `1-animation.gif` | The story alone: Keyboards & MIDI rises, fades and falls, with the flower reacting |
 | `2-comic.png` | The same story in four panels |
 | `3-overview.png` | One poisoned update, then three clean ones |
 | `4-forgetting.png` | Forgetting only shows up at the product level |
