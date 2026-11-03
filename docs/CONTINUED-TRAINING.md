@@ -492,3 +492,34 @@ The three domains differ in how concentrated their category targets are. Structu
 - **This is descriptive, not causal.** With three domains, catalogue size, entropy, HHI, labels-for-90% and clean rank are correlated. The table is consistent with the category-tail explanation, but it does not identify which covariate causes the visibility gap. A fourth domain or a controlled category-cardinality manipulation would be needed.
 
 The table is saved on the cluster as `reports/covariates-2026-11-02.json`.
+
+### Dormancy and target share, 3 November 2026
+
+Two follow-ups from jobs 1063496–1063501. All six completed with no failed lines. Negative rank change means the pushed category moved up.
+
+**Dormant and continuing accounts.** The attack moved to block 2, with 100 matched accounts per arm at a 3% event dose. Dormant users are present in block 0, absent in block 1 and present in block 2; continuing users are present in blocks 1 and 2.
+
+| Domain | Dormant | Continuing |
+| --- | --- | --- |
+| Instruments | −2.59 (SD 0.53) | −2.81 (SD 1.36) |
+| Video Games | −3.84 (SD 1.05) | −3.01 (SD 0.94) |
+| CDs & Vinyl | −6.69 (SD 2.18) | −6.49 (SD 1.20) |
+
+- Dormant accounts are **not consistently easier**. They are slightly weaker on Instruments, slightly stronger on Video Games and essentially equal on CDs. At matched accounts and the same event budget, dormancy is not a special vulnerability.
+- Plausible explanation: a one-block gap does not erase the model's earlier exposure to a user. The block-0 history still trains the model, and the user returns in block 2 with a real history, so editing them is closer to editing a continuing user than to creating a new account. This supports “existing accounts are enough,” not “dormant accounts are the easy route.”
+- The comparison is not a clean account-age experiment. Group membership is confounded with history length, activity and item popularity; the pools differ in size (dormant 307/106/188, continuing 249/113/153), and matched account counts do not match composition. The attacked block is 2, so these effect sizes are not directly comparable to the block-1 results.
+
+**Target share.** Bandwagon profiles at target-share 0.25, 0.5 and 0.75, fixed at a 3% event dose.
+
+| Domain | 25% | 50% | 75% | AUC |
+| --- | --- | --- | --- | --- |
+| Instruments | −1.79 | −1.63 | −1.75 | 1.00 |
+| Video Games | −1.33 | −2.18 | −1.62 | 1.00 |
+| CDs & Vinyl | −2.74 | −4.00 | −3.61 | 1.00 |
+
+- The effect does **not** rise monotonically with target share. 50% is usually as good or better than 75%; 25% is weaker in Video Games and CDs.
+- At fixed alpha the sweep kept roughly 66–71 shills and 262 shill examples per run; 25/50/75 changes how many of those examples push the target, not the total example budget. So this is a composition experiment, not a target-frequency dose experiment.
+- Plausible explanation: **target-event redundancy**. Once about half a profile's events push the same target category and items, extra repeats add little information. At 75% the profile also loses filler diversity, which may weaken the context in which the target is learned. The 50% setting is a balance between target evidence and varied context.
+- The sweep did **not** isolate target association from realism. Bandwagon is trivially detectable at every share (AUC 1.00), so lower target share buys no stealth here. A clone target-share sweep would be the cleaner test: clone is the only fill whose AUC is already low.
+
+Limits: three seeds per cell, one model, one attacked block, category targets, isolated adapters. The explanations are plausible mechanisms, not identified causes. The dormancy comparison needs a cleaner account-age definition or more seeds before it is treated as a general account-quality result.

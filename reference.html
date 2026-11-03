@@ -670,7 +670,8 @@
       <aside aria-label="Page navigation">
         <div class="brand">CP4285 / FIELD GUIDE</div>
         <nav aria-label="Contents">
-          <a href="#dataset-covariates"><strong>Latest · 29 · Dataset covariates</strong></a>
+          <a href="#dormancy-target-share"><strong>Latest · 30 · Dormancy and target share</strong></a>
+          <a href="#dataset-covariates">29 · Dataset covariates</a>
           <a href="#activity-shills-endpoints">28 · Activity and endpoints</a>
           <a href="#strata-dose-checkpoint">27 · Strata and dose</a>
           <a href="#attack-catalogue-checkpoint">26 · Attack catalogue</a>
@@ -757,6 +758,8 @@
             <a href="#activity-shills-endpoints">activity, classic-shill and endpoint results</a>.
             Section 29 records the
             <a href="#dataset-covariates">dataset covariates</a> behind the top-5 gap.
+            Section 30 records the
+            <a href="#dormancy-target-share">dormancy and target-share results</a>.
             <strong>Sections 01–19 are dated evidence, not current instructions.</strong>
             Their old import paths, Git status, test counts and deadlines are historical;
             old source links below are pinned to pre-integration main. The network
@@ -3874,6 +3877,31 @@ scores = branch.score(fixed_queries)</pre>
             <a href="docs/CONTINUED-TRAINING.md#dataset-covariates-2-november-2026">CONTINUED-TRAINING.md</a></p>
         </section>
         <!-- APPENDED DATASET-COVARIATES CHECKPOINT 2026-11-02 END -->
+        <!-- APPENDED DORMANCY-TARGET-SHARE CHECKPOINT 2026-11-03 BEGIN -->
+        <section id="dormancy-target-share">
+          <span class="section-num">30 / DORMANCY AND TARGET SHARE · 3 NOVEMBER 2026</span>
+          <h2>Dormant accounts are not the easy route; piling on target events is redundant.</h2>
+          <p>
+            <span class="label fact">FACT</span> Block-2 attack, 100 matched accounts, 3%:
+            dormant against continuing is −2.59 against −2.81 on Instruments, −3.84 against −3.01
+            on Video Games, and −6.69 against −6.49 on CDs. No consistent dormant advantage.
+          </p>
+          <p>
+            <span class="label fact">FACT</span> Target share 25/50/75 at a fixed 3% dose is not
+            monotone. Instruments −1.79/−1.63/−1.75; Video Games −1.33/−2.18/−1.62; CDs
+            −2.74/−4.00/−3.61. Bandwagon profile AUC stays 1.00 at every share.
+          </p>
+          <p>
+            <span class="label infer">INFERENCE</span> Plausible explanations: block-0 exposure still
+            reaches dormant users, and they return with real histories, so a one-block gap is not a
+            reset; and extra target events are partly redundant while 75% loses filler diversity.
+            The dormancy contrast is confounded with group composition, and a clone target-share
+            sweep is still needed to separate target association from realism.
+          </p>
+          <p class="small"><a href="#review-status">Back to current status</a> ·
+            <a href="docs/CONTINUED-TRAINING.md#dormancy-and-target-share-3-november-2026">CONTINUED-TRAINING.md</a></p>
+        </section>
+        <!-- APPENDED DORMANCY-TARGET-SHARE CHECKPOINT 2026-11-03 END -->
         <footer>
           <strong>Repository reviewer reference.</strong> Self-contained HTML
           with no remote scripts, styles, fonts or analytics.<br />
