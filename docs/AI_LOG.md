@@ -1012,3 +1012,18 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 **Validation:** 141 tests and Ruff pass; source hashes match the cluster copy. The covariate table is saved as `reports/covariates-2026-11-02.json`.
 
 **Limits:** covariates are descriptive with three domains and correlated columns. The dormant/continuing and target-share results are pending.
+
+## 3 November 2026 — Dormancy and target-share results
+
+**Tool:** OpenCode (DeepSeek V4.1 Flash).
+
+**Request:** check the dormancy and target-share jobs and write up the results with plausible explanations.
+
+**Assistance:**
+- Confirmed all six jobs (1063496–1063501) completed with exit 0 and no failed lines.
+- Computed the block-2 dormant/continuing contrast and the 25/50/75 target-share sweep.
+- Added the tables and explanations to `CONTINUED-TRAINING.md`, `CONTEXT.md`, `reference.html` and the 3 November update note.
+
+**Validation:** 141 tests and Ruff pass; every new run has metrics.
+
+**Limits:** dormancy is confounded with group composition; the block-2 effect sizes are not comparable to block-1. Target-share uses bandwagon, which is at AUC 1.00 at every share, so it does not isolate target association from realism. Three seeds, one model, category targets.
