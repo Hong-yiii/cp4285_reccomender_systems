@@ -523,3 +523,85 @@ Two follow-ups from jobs 1063496–1063501. All six completed with no failed lin
 - The sweep did **not** isolate target association from realism. Bandwagon is trivially detectable at every share (AUC 1.00), so lower target share buys no stealth here. A clone target-share sweep would be the cleaner test: clone is the only fill whose AUC is already low.
 
 Limits: three seeds per cell, one model, one attacked block, category targets, isolated adapters. The explanations are plausible mechanisms, not identified causes. The dormancy comparison needs a cleaner account-age definition or more seeds before it is treated as a general account-quality result.
+
+## Category granularity: poisoning at 30, 75 and 299 labels (7 November 2026)
+
+Agent proposal at the user's request; not a team-confirmed choice. The fourth STePS
+image, "Forgetting only shows up at the product level", compares Instruments labels at
+PR 14 levels 2, 3 and 4 (30, 75 and 299 labels; effective labels 5.6, 14.6 and 62 in
+[`ladder-2026-10-24.json`](../replication/peso/results/ladder/ladder-2026-10-24.json)).
+This section asks the companion poisoning question: does a 3% update move the pushed
+category more or less as labels get finer, and do adapter isolation and rollback still
+protect the ranking?
+
+**Protocol.** Same Instruments users, blocks and events as the corrupted-stream grid, so
+histories, holdouts and evaluation users are unchanged. Each level's target is the
+category whose share of blocks 1–4 test targets is nearest 1.3%: `Keyboards & MIDI` at
+level 2, `Wind & Woodwind Accessories` at level 3 and `Electric Guitar Amplifiers &
+Preamps` at level 4. A 3% bandwagon stream enters block 1; every attacked run has a
+clean twin; `shared` and `isolated` adapters; an immediate rollback arm; seeds 42–44.
+Level 2 reuses the October grid. Levels 3 and 4 are 36 new runs on the NUS SoC cluster,
+analysed by [`granularity_attack.py`](../replication/peso/granularity_attack.py) into
+[`granularity-2026-11-07.json`](../replication/peso/results/granularity/granularity-2026-11-07.json).
+Level-2 dumps predate `push_rank`, so its row uses the run's aggregate `push` cell;
+levels 3 and 4 pair users through the dumps. Negative rank change means the target moved
+up; positive removal values mean it ended below clean.
+
+| Level | Labels | Target | Clean rank | Immediate (iso) | Top-5 lift (pp) | Top-10 lift (pp) | After 3 clean updates | Rollback at end | Drop immediately | Top-10 slots changed |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2 | 30 | Keyboards & MIDI | +9.16 ± 0.82 | −1.57 ± 0.63 | +4.0 | +18.5 | −0.26 ± 0.27 | +1.93 ± 1.44 | +0.52 ± 0.61 | n/a |
+| 3 | 75 | Wind & Woodwind Accessories | +38.93 ± 2.58 | −16.93 ± 3.21 | +0.5 | +2.7 | −2.72 ± 1.23 | +5.55 ± 1.47 | −7.46 ± 1.93 | 7.9% ± 1.0 |
+| 4 | 299 | Electric Guitar Amplifiers & Preamps | +25.80 ± 8.49 | −8.62 ± 9.56 | +9.3 | +19.5 | +0.11 ± 0.34 | +9.55 ± 5.92 | −0.51 ± 6.09 | 11.7% ± 1.0 |
+
+Mean ± sd over seeds 42–44. Top-5 and top-10 lifts are attacked minus clean shares in
+percentage points. Level 2 cannot supply top-10 churn because its dumps predate the
+per-user top-10 field. The second table separates adapter topologies.
+
+| Level | Shared, immediate | Shared, after 3 clean | Isolated, immediate | Isolated, after 3 clean | Isolated rollback at end | Isolated drop immediately |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2 | −2.01 ± 0.08 | +0.03 ± 0.14 | −1.57 ± 0.63 | −0.26 ± 0.27 | +1.93 ± 1.44 | +0.52 ± 0.61 |
+| 3 | −12.92 ± 4.66 | +0.33 ± 0.25 | −16.93 ± 3.21 | −2.72 ± 1.23 | +5.55 ± 1.47 | −7.46 ± 1.93 |
+| 4 | −7.98 ± 11.03 | +0.52 ± 0.39 | −8.62 ± 9.56 | +0.11 ± 0.34 | +9.55 ± 5.92 | −0.51 ± 6.09 |
+
+- **Raw rank change is not monotone and is baseline-confounded.** The isolated attack
+  moves the target −1.6 ranks at 30 labels, −16.9 at 75 and −8.6 ± 9.6 at 299. The
+  299-label spread is larger than its mean: one seed is null (+1.3 ranks, target
+  slightly down), two move it −17.8 and −9.3. The target starts at #9, #39 and #26
+  respectively, so the same score movement is worth more places when the target is
+  deeper. Normalised gain is 0.20, 0.44 and 0.30 (299 range −0.05 to 0.56), so the
+  relative effect peaks at 75 in these runs, not at 299.
+- **Visibility follows where the target starts, not the raw rank shift.** Top-5 lift is
+  +4.0, +0.5 and +9.3 pp; top-10 lift is +18.5, +2.7 and +19.5 pp. At 30 labels the
+  target is already near the top (clean top-10 share 77%, near its ceiling), so the
+  attack converts into top-10 presence. At 75 it starts at #39 and stays out of sight
+  despite the largest mean shift. At 299 it starts at #26; two seeds show
+  double-digit top-5 lifts (+14.4 and +10.6 pp) and one does not (+2.6 pp). The 299
+  cell is too variable to call.
+- **Isolated adapters keep the poison longer at 75.** After three clean updates the
+  isolated residue is −2.7 ± 1.2 ranks at 75 (all three seeds negative), against −0.3
+  at 30 and +0.1 at 299. Shared adapters wash out at every level (+0.03, +0.33,
+  +0.52). This extends the earlier finding that isolated adapters retain a poisoned
+  block: the effect is larger at 75 labels than at 30.
+- **Late rollback increasingly buries the target.** Removing the attacked adapter at
+  the end leaves the target +1.9, +5.5 and +9.6 ranks below clean at 30, 75 and 299.
+  This is the one monotone protection result. Deleting the whole block adapter also
+  removes that block's clean learning, so part of the drop is not poison removal; a
+  clean-drop control is still missing.
+- **Immediate deletion is not a clean reset.** At 75 it leaves the target 7.5 ± 1.9
+  ranks above clean (residue, not over-correction). At 30 it is +0.5 and at 299
+  −0.5 ± 6.1, direction-inconsistent. The 75 result says deleting the poisoned update
+  right away does not restore the old ranking, while waiting and deleting it late
+  over-corrects.
+- **Ranking churn grows with label count.** On average, 7.9% of the ten top-10 slots
+  change at 75 labels and 11.7% at 299; level 2 cannot be measured because its dumps
+  lack the per-user top-10 field.
+
+Limits: one domain, one model, one 3% bandwagon attack in one block. The target changes
+with the level by the 1.3% rule, so target identity, depth and base rate are confounded
+with granularity; this is a granularity-level comparison, not a causal effect of label
+count. The 299-label cell has three seeds but a seed spread larger than its mean, so its
+average is not a stable effect. Levels 3 and 4 ran on different GPU types per seed (see
+[the results README](../replication/peso/results/granularity/README.md)); all arms within
+a seed used one card. The rollback arm lacks a clean-drop control. These are PESO's
+released Instruments blocks, not our Amazon Electronics/Movies & TV results, and the
+protocol remains an agent proposal.
