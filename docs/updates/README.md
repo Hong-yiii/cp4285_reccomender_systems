@@ -11,5 +11,6 @@ Keep implemented results, team decisions and proposals distinct, as `AGENTS.md` 
 
 | Date | Update |
 | --- | --- |
+| 7 Nov 2026 | [Category-granularity poisoning](2026-11-07-granularity-poisoning.md) |
 | 21 Oct 2026 | [PESO penalty that acts, item-level J-lens, Colab test](2026-10-21-peso-penalty.md) |
 | 20 Oct 2026 | [PESO replication: three seeds, transfer tooling, next steps](2026-10-20-peso-replication.md) |
