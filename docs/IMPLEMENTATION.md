@@ -124,6 +124,8 @@ uv run cp4285 blocks --data <dir>/Instruments_cl_ori \
 
 `cp4285 adapter-blocks` runs the proposed variant in [CONTINUED-TRAINING.md](CONTINUED-TRAINING.md#proposed-variant-corrupted-streams-and-adapter-isolation-24-october-2026): a frozen language model with LoRA adapters recommends the next category on any of PESO's released domains (Instruments, Video Games, CDs & Vinyl), and a block's update stream can carry shill profiles. The cluster grid runs from `replication/peso/slurm/grid_plans.py` and `adapter_grid.sbatch` in the PESO branch checkout. It needs the optional extra (`uv sync --locked --extra llm`, which adds `transformers` and `peft`) and a local model directory.
 
+For the 7 November category-granularity grid, `replication/peso/slurm/granularity_plans.py` writes one line per level/seed/arm and `submit_granularity.sh` submits it with level-specific `DATA`, `CATEGORIES` and `NAMES` plus an `afterok` dependency on that group's init. Levels 3 and 4 read `peso/data/Instruments_cl_cat{3,4}` and `categories/Instruments_cl_ori-cat{3,4}`. `replication/peso/granularity_attack.py` pairs each attacked run with its clean twin and writes the cross-level table; the committed result is `replication/peso/results/granularity/`.
+
 **Code revision:** the 26 October catalogue results come from tag `attack-catalogue-2026-10-26` (commit `d38d27c`), verified against the cluster checkout's source hashes on 29 October. The account-strata and dose tooling is a later commit (`e3a19a3`).
 
 ```sh

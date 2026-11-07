@@ -78,3 +78,4 @@ Aggregates only, written from runs on the NUS SoC cluster in October 2026. Proto
 | `new_items/new-items-2026-10-24.json` | [`new_items.py`](../new_items.py) | The same with the prefix run's item-only arm as a second PESO seed |
 | `noise/noise-components-2026-10-24.json` | [`noise_components.py`](../noise_components.py) | Final experiment 4 report: adds the second deterministic product seed and category seeds 42–44 |
 | `prefix/prefix-seed42.json` | [`prefix_report.py`](../prefix_report.py) | The prefix run: category-prefixed against plain item IDs, seed 42, per-user differences, McNemar flips, category accuracy and forgetting |
+| `granularity/granularity-2026-11-07.json`, `.md` | [`granularity_attack.py`](../granularity_attack.py) | Poisoning at 30, 75 and 299 Instruments labels: paired rank change, top-5/top-10 lift, persistence, rollback, immediate deletion and top-10 churn, seeds 42–44 |

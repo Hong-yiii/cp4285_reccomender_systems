@@ -1,0 +1,1885 @@
+{
+  "root": "/mnt/scratch/w/wyenzhe/peso/lm-runs",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "levels": [
+    {
+      "level": 2,
+      "prefix": "lm-ins",
+      "categories": 30,
+      "push": 11,
+      "push_name": "Musical Instruments > Keyboards & MIDI",
+      "seeds": [
+        {
+          "seed": 42,
+          "categories": 30,
+          "push": 11,
+          "push_name": "Musical Instruments > Keyboards & MIDI",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -1.780459770114943,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.07298850574712644,
+              "top10": 0.9793103448275862,
+              "clean_top5": 0.05344827586206897,
+              "churn": null,
+              "normalised_gain": 0.20068666191617548,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "immediate_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -2.017241379310345,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.06724137931034482,
+              "top10": 0.9959770114942529,
+              "clean_top5": 0.05057471264367816,
+              "churn": null,
+              "normalised_gain": 0.23972134954241225,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -0.12586206896551566,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.044252873563218394,
+              "top10": 0.9597701149425287,
+              "clean_top5": 0.039655172413793106,
+              "churn": null,
+              "normalised_gain": 0.01650214753974812,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -0.5333333333333332,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.03333333333333333,
+              "top10": 0.7097701149425287,
+              "clean_top5": 0.0339080459770115,
+              "churn": null,
+              "normalised_gain": 0.05790228988581767,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "final_iso": {
+              "users": 2207,
+              "source": "metrics",
+              "mean_rank": -0.42772995015858584,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.030811055731762575,
+              "top10": 0.7720888083371092,
+              "clean_top5": 0.024467603081105575,
+              "churn": null,
+              "normalised_gain": 0.048303740469733354,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "rollback_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 1.9603448275862068,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.009770114942528735,
+              "top10": 0.17413793103448275,
+              "clean_top5": 0.0339080459770115,
+              "churn": null,
+              "normalised_gain": -0.2128283521557372,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "drop_immediate": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.8517241379310345,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.01839080459770115,
+              "top10": 0.4149425287356322,
+              "clean_top5": 0.05344827586206897,
+              "churn": null,
+              "normalised_gain": -0.0960031094124506,
+              "top10_change": null,
+              "mean_abs_rank": null
+            }
+          },
+          "task": {
+            "hit@1": 0.003386004514672636,
+            "ndcg@10": 0.0019640266420861696,
+            "mrr@10": 0.002360349707979603
+          },
+          "clean_rank": 9.87183908045977,
+          "clean_top5": 0.05344827586206897,
+          "clean_top10": 0.5471264367816092
+        },
+        {
+          "seed": 43,
+          "categories": 30,
+          "push": 11,
+          "push_name": "Musical Instruments > Keyboards & MIDI",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -0.8597701149425294,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.06206896551724138,
+              "top10": 0.8862068965517241,
+              "clean_top5": 0.0367816091954023,
+              "churn": null,
+              "normalised_gain": 0.10303030303030311,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "immediate_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -2.0793103448275856,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.05057471264367816,
+              "top10": 0.9867816091954023,
+              "clean_top5": 0.016666666666666666,
+              "churn": null,
+              "normalised_gain": 0.23678010471204183,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.0959770114942522,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0011494252873563218,
+              "top5": 0.04310344827586207,
+              "top10": 0.9798850574712644,
+              "clean_top5": 0.04367816091954023,
+              "churn": null,
+              "normalised_gain": -0.01280478454224803,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -0.27241379310344804,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.04770114942528736,
+              "top10": 0.9390804597701149,
+              "clean_top5": 0.045402298850574715,
+              "churn": null,
+              "normalised_gain": 0.034842693325492474,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "final_iso": {
+              "users": 2207,
+              "source": "metrics",
+              "mean_rank": -0.2378794743996373,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.00045310376076121433,
+              "top5": 0.040779338468509285,
+              "top10": 0.9551427276846398,
+              "clean_top5": 0.03896692342546443,
+              "churn": null,
+              "normalised_gain": 0.030876904075751308,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "rollback_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.47701149425287426,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0011494252873563218,
+              "top5": 0.06609195402298851,
+              "top10": 0.7201149425287356,
+              "clean_top5": 0.045402298850574715,
+              "churn": null,
+              "normalised_gain": -0.06101146721552493,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "drop_immediate": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -0.19195402298850617,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0011494252873563218,
+              "top5": 0.0925287356321839,
+              "top10": 0.7775862068965518,
+              "clean_top5": 0.0367816091954023,
+              "churn": null,
+              "normalised_gain": 0.02300275482093669,
+              "top10_change": null,
+              "mean_abs_rank": null
+            }
+          },
+          "task": {
+            "hit@1": 0.0011286681715575453,
+            "ndcg@10": 0.0005001757138456409,
+            "mrr@10": 0.0012701995771970953
+          },
+          "clean_rank": 9.344827586206897,
+          "clean_top5": 0.0367816091954023,
+          "clean_top10": 0.7706896551724138
+        },
+        {
+          "seed": 44,
+          "categories": 30,
+          "push": 11,
+          "push_name": "Musical Instruments > Keyboards & MIDI",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -2.0614942528735627,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.006896551724137931,
+              "top5": 0.1454022988505747,
+              "top10": 0.9994252873563219,
+              "clean_top5": 0.06896551724137931,
+              "churn": null,
+              "normalised_gain": 0.2838040984255083,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "immediate_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": -1.9293103448275861,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.010344827586206896,
+              "top5": 0.20689655172413793,
+              "top10": 1.0,
+              "clean_top5": 0.09080459770114943,
+              "churn": null,
+              "normalised_gain": 0.2774838816333278,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_shared": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.12356321839080309,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0005747126436781609,
+              "top5": 0.04827586206896552,
+              "top10": 0.9706896551724138,
+              "clean_top5": 0.04770114942528736,
+              "churn": null,
+              "normalised_gain": -0.016535917551145772,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "persistence_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.01609195402298802,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.040229885057471264,
+              "top10": 0.9568965517241379,
+              "clean_top5": 0.035632183908045977,
+              "churn": null,
+              "normalised_gain": -0.0021276595744680205,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "final_iso": {
+              "users": 2207,
+              "source": "metrics",
+              "mean_rank": 0.06388763026733102,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.03035795197100136,
+              "top10": 0.966017217942909,
+              "clean_top5": 0.02401449932034436,
+              "churn": null,
+              "normalised_gain": -0.008485796822339887,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "rollback_iso": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 3.3568965517241374,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.0017241379310344827,
+              "top10": 0.20114942528735633,
+              "clean_top5": 0.035632183908045977,
+              "churn": null,
+              "normalised_gain": -0.4438449848024315,
+              "top10_change": null,
+              "mean_abs_rank": null
+            },
+            "drop_immediate": {
+              "users": 1740,
+              "source": "metrics",
+              "mean_rank": 0.8896551724137929,
+              "ci_low": null,
+              "ci_high": null,
+              "top1": 0.0,
+              "top5": 0.01954022988505747,
+              "top10": 0.8971264367816092,
+              "clean_top5": 0.06896551724137931,
+              "churn": null,
+              "normalised_gain": -0.1224780441490624,
+              "top10_change": null,
+              "mean_abs_rank": null
+            }
+          },
+          "task": {
+            "hit@1": 0.007336343115124211,
+            "ndcg@10": 0.0034013312089701264,
+            "mrr@10": 0.004335966892400234
+          },
+          "clean_rank": 8.263793103448275,
+          "clean_top5": 0.06896551724137931,
+          "clean_top10": 0.993103448275862
+        }
+      ],
+      "summary": {
+        "immediate_iso": {
+          "mean_rank": {
+            "mean": -1.567241379310345,
+            "sd": 0.6285950903041623,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.09348659003831418,
+            "sd": 0.04529061388210132,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.9549808429118773,
+            "sd": 0.060403182877192096,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": 0.19584035445732897,
+            "sd": 0.09048428757185488,
+            "n": 3
+          }
+        },
+        "immediate_shared": {
+          "mean_rank": {
+            "mean": -2.008620689655172,
+            "sd": 0.07537066549791148,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.1082375478927203,
+            "sd": 0.08584662906719286,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.9942528735632183,
+            "sd": 0.006775762139397495,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": 0.2513284452959273,
+            "sd": 0.022698961821808146,
+            "n": 3
+          }
+        },
+        "persistence_shared": {
+          "mean_rank": {
+            "mean": 0.03122605363984654,
+            "sd": 0.136739746966611,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.04521072796934866,
+            "sd": 0.002715985992099198,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.9701149425287356,
+            "sd": 0.010069779004560507,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": -0.004279518184548561,
+            "sd": 0.018093881869013825,
+            "n": 3
+          }
+        },
+        "persistence_iso": {
+          "mean_rank": {
+            "mean": -0.26321839080459775,
+            "sd": 0.2748280428999601,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.040421455938697316,
+            "sd": 0.007185823499429524,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.8685823754789271,
+            "sd": 0.1378236331535315,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": 0.03020577454561404,
+            "sd": 0.030282411890064264,
+            "n": 3
+          }
+        },
+        "final_iso": {
+          "mean_rank": {
+            "mean": -0.20057393143029736,
+            "sd": 0.2479228488827445,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.03398278205709107,
+            "sd": 0.005890348889895784,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.897749584654886,
+            "sd": 0.10896117043784011,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": 0.02356494924104826,
+            "sd": 0.029092291059497143,
+            "n": 3
+          }
+        },
+        "rollback_iso": {
+          "mean_rank": {
+            "mean": 1.9314176245210728,
+            "sd": 1.44016043320508,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.02586206896551724,
+            "sd": 0.035071600695154845,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.3651340996168582,
+            "sd": 0.3077189534807102,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": -0.23922826805789787,
+            "sd": 0.19277731250518548,
+            "n": 3
+          }
+        },
+        "drop_immediate": {
+          "mean_rank": {
+            "mean": 0.5164750957854404,
+            "sd": 0.6138106817980247,
+            "n": 3
+          },
+          "mean_abs_rank": null,
+          "top5": {
+            "mean": 0.04348659003831418,
+            "sd": 0.04247563216669695,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.6965517241379311,
+            "sd": 0.2510981299046066,
+            "n": 3
+          },
+          "top10_change": null,
+          "churn": null,
+          "normalised_gain": {
+            "mean": -0.06515946624685877,
+            "sd": 0.07748976358224414,
+            "n": 3
+          }
+        },
+        "task_hit@1": {
+          "mean": 0.003950338600451464,
+          "sd": 0.0031420792115294006,
+          "n": 3
+        },
+        "clean_rank": {
+          "mean": 9.16015325670498,
+          "sd": 0.8197752265276438,
+          "n": 3
+        },
+        "clean_top5": {
+          "mean": 0.053065134099616856,
+          "sd": 0.016095374568042123,
+          "n": 3
+        },
+        "clean_top10": {
+          "mean": 0.7703065134099617,
+          "sd": 0.22298875261668208,
+          "n": 3
+        }
+      }
+    },
+    {
+      "level": 3,
+      "prefix": "lm-ins-cat3",
+      "categories": 75,
+      "push": 33,
+      "push_name": "Musical Instruments > Instrument Accessories > Wind & Woodwind Accessories",
+      "seeds": [
+        {
+          "seed": 42,
+          "categories": 75,
+          "push": 33,
+          "push_name": "Musical Instruments > Instrument Accessories > Wind & Woodwind Accessories",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1749,
+              "mean_rank": -18.387650085763294,
+              "ci_low": -18.758147512864493,
+              "ci_high": -18.016580903373356,
+              "top1": 0.011435105774728416,
+              "top5": 0.030303030303030304,
+              "top10": 0.09376786735277301,
+              "clean_top5": 0.02172670097198399,
+              "churn": 0.73642081189251,
+              "normalised_gain": 0.4885500660147635,
+              "source": "dumps",
+              "top10_change": 0.08936535162950254,
+              "mean_abs_rank": 18.388793596340765
+            },
+            "immediate_shared": {
+              "users": 1749,
+              "mean_rank": -14.381360777587192,
+              "ci_low": -14.73642081189251,
+              "ci_high": -14.030303030303031,
+              "top1": 0.010863350485991996,
+              "top5": 0.026300743281875358,
+              "top10": 0.060034305317324184,
+              "clean_top5": 0.02115494568324757,
+              "churn": 0.7918810748999429,
+              "normalised_gain": 0.41281186388619745,
+              "source": "dumps",
+              "top10_change": 0.10308747855917666,
+              "mean_abs_rank": 14.445397369925672
+            },
+            "persistence_shared": {
+              "users": 1749,
+              "mean_rank": 0.45225843339050886,
+              "ci_low": 0.3704974271012007,
+              "ci_high": 0.5317324185248714,
+              "top1": 0.012006861063464836,
+              "top5": 0.02801600914808462,
+              "top10": 0.05088622069754145,
+              "clean_top5": 0.029159519725557463,
+              "churn": 0.22755860491709548,
+              "normalised_gain": -0.02839582429744881,
+              "source": "dumps",
+              "top10_change": 0.023270440251572322,
+              "mean_abs_rank": 1.2790165809033733
+            },
+            "persistence_iso": {
+              "users": 1749,
+              "mean_rank": -1.4459691252144082,
+              "ci_low": -1.6174957118353346,
+              "ci_high": -1.2692967409948541,
+              "top1": 0.010863350485991996,
+              "top5": 0.026872498570611778,
+              "top10": 0.04230989136649514,
+              "clean_top5": 0.029731275014293884,
+              "churn": 0.2938822184105203,
+              "normalised_gain": 0.041218949317631516,
+              "source": "dumps",
+              "top10_change": 0.030303030303030276,
+              "mean_abs_rank": 3.121212121212121
+            },
+            "final_iso": {
+              "users": 2207,
+              "mean_rank": -0.8577254191209787,
+              "ci_low": -1.025373810602628,
+              "ci_high": -0.7027639329406434,
+              "top1": 0.007249660172179429,
+              "top5": 0.02401449932034436,
+              "top10": 0.0412324422292705,
+              "clean_top5": 0.025373810602628003,
+              "churn": 0.2945174444947893,
+              "normalised_gain": 0.022276025432604436,
+              "source": "dumps",
+              "top10_change": 0.030040779338468604,
+              "mean_abs_rank": 3.046216583597644
+            },
+            "rollback_iso": {
+              "users": 1749,
+              "mean_rank": 6.766723842195541,
+              "ci_low": 6.546026300743282,
+              "ci_high": 6.99199542595769,
+              "top1": 0.009719839908519153,
+              "top5": 0.02058319039451115,
+              "top10": 0.03430531732418525,
+              "clean_top5": 0.029731275014293884,
+              "churn": 0.9594053744997141,
+              "normalised_gain": -0.2989833036786021,
+              "source": "dumps",
+              "top10_change": 0.18513436249285298,
+              "mean_abs_rank": 7.097198399085191
+            },
+            "drop_immediate": {
+              "users": 1749,
+              "mean_rank": -6.320182961692396,
+              "ci_low": -6.514579759862778,
+              "ci_high": -6.126929674099485,
+              "top1": 0.009719839908519153,
+              "top5": 0.02115494568324757,
+              "top10": 0.03544882790165809,
+              "clean_top5": 0.02172670097198399,
+              "churn": 0.9205260148656375,
+              "normalised_gain": 0.15613632646155592,
+              "source": "dumps",
+              "top10_change": 0.17307032590051463,
+              "mean_abs_rank": 6.5111492281303605
+            }
+          },
+          "task": {
+            "hit@1": -0.0022573363431150906,
+            "ndcg@10": -0.001280648878055124,
+            "mrr@10": -0.002294062847110201
+          },
+          "clean_rank": 38.65809033733562,
+          "clean_top5": 0.02172670097198399,
+          "clean_top10": 0.03659233847913093
+        },
+        {
+          "seed": 43,
+          "categories": 75,
+          "push": 33,
+          "push_name": "Musical Instruments > Instrument Accessories > Wind & Woodwind Accessories",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1749,
+              "mean_rank": -19.161806746712408,
+              "ci_low": -19.60205831903945,
+              "ci_high": -18.70268724985706,
+              "top1": 0.011435105774728416,
+              "top5": 0.026872498570611778,
+              "top10": 0.05202973127501429,
+              "clean_top5": 0.02172670097198399,
+              "churn": 0.624928530588908,
+              "normalised_gain": 0.4552556408074038,
+              "source": "dumps",
+              "top10_change": 0.07501429388221847,
+              "mean_abs_rank": 19.18238993710692
+            },
+            "immediate_shared": {
+              "users": 1749,
+              "mean_rank": -7.697541452258434,
+              "ci_low": -8.04002287021155,
+              "ci_high": -7.346483704974271,
+              "top1": 0.010291595197255575,
+              "top5": 0.026872498570611778,
+              "top10": 0.060034305317324184,
+              "clean_top5": 0.02858776443682104,
+              "churn": 0.775871926815323,
+              "normalised_gain": 0.26784900832700653,
+              "source": "dumps",
+              "top10_change": 0.10857632933104622,
+              "mean_abs_rank": 8.607775871926815
+            },
+            "persistence_shared": {
+              "users": 1749,
+              "mean_rank": 0.038307604345340196,
+              "ci_low": -0.05660377358490566,
+              "ci_high": 0.13950829045168667,
+              "top1": 0.008576329331046312,
+              "top5": 0.017724413950829045,
+              "top10": 0.03316180674671241,
+              "clean_top5": 0.017724413950829045,
+              "churn": 0.259576901086335,
+              "normalised_gain": -0.009027481261845842,
+              "source": "dumps",
+              "top10_change": 0.026415094339622636,
+              "mean_abs_rank": 1.41852487135506
+            },
+            "persistence_iso": {
+              "users": 1749,
+              "mean_rank": -3.9028016009148083,
+              "ci_low": -4.124070897655804,
+              "ci_high": -3.680388793596341,
+              "top1": 0.008576329331046312,
+              "top5": 0.016580903373356205,
+              "top10": 0.03430531732418525,
+              "clean_top5": 0.017152658662092625,
+              "churn": 0.27101200686106347,
+              "normalised_gain": 0.10430510380606309,
+              "source": "dumps",
+              "top10_change": 0.02790165809033729,
+              "mean_abs_rank": 4.7661520869068035
+            },
+            "final_iso": {
+              "users": 2207,
+              "mean_rank": -3.2469415496148617,
+              "ci_low": -3.42908926144087,
+              "ci_high": -3.0389669234254644,
+              "top1": 0.004984141368373357,
+              "top5": 0.014499320344358859,
+              "top10": 0.03035795197100136,
+              "clean_top5": 0.0158586316266425,
+              "churn": 0.24830086089714545,
+              "normalised_gain": 0.08582253458958321,
+              "source": "dumps",
+              "top10_change": 0.02555505210693254,
+              "mean_abs_rank": 4.245582238332578
+            },
+            "rollback_iso": {
+              "users": 1749,
+              "mean_rank": 3.911377930245855,
+              "ci_low": 3.6758147512864494,
+              "ci_high": 4.141795311606632,
+              "top1": 0.009148084619782733,
+              "top5": 0.019439679817038306,
+              "top10": 0.030303030303030304,
+              "clean_top5": 0.017152658662092625,
+              "churn": 0.8399085191538022,
+              "normalised_gain": -0.12282383004160889,
+              "source": "dumps",
+              "top10_change": 0.12121212121212122,
+              "mean_abs_rank": 5.234419668381933
+            },
+            "drop_immediate": {
+              "users": 1749,
+              "mean_rank": -9.695254431103487,
+              "ci_low": -9.889651229273872,
+              "ci_high": -9.505431675242995,
+              "top1": 0.010863350485991996,
+              "top5": 0.02801600914808462,
+              "top10": 0.04745568896512293,
+              "clean_top5": 0.02172670097198399,
+              "churn": 0.9279588336192109,
+              "normalised_gain": 0.24204849336583895,
+              "source": "dumps",
+              "top10_change": 0.16255002858776446,
+              "mean_abs_rank": 9.734133790737564
+            }
+          },
+          "task": {
+            "hit@1": 0.003950338600451464,
+            "ndcg@10": 0.005073298133451365,
+            "mrr@10": 0.0047072628901072555
+          },
+          "clean_rank": 41.63807890222984,
+          "clean_top5": 0.02172670097198399,
+          "clean_top10": 0.03945111492281304
+        },
+        {
+          "seed": 44,
+          "categories": 75,
+          "push": 33,
+          "push_name": "Musical Instruments > Instrument Accessories > Wind & Woodwind Accessories",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1749,
+              "mean_rank": -13.251572327044025,
+              "ci_low": -13.640937678673527,
+              "ci_high": -12.853630646083475,
+              "top1": 0.010863350485991996,
+              "top5": 0.025728987993138937,
+              "top10": 0.052601486563750716,
+              "clean_top5": 0.024585477415666093,
+              "churn": 0.6386506575185821,
+              "normalised_gain": 0.363812000355665,
+              "source": "dumps",
+              "top10_change": 0.07135506003430525,
+              "mean_abs_rank": 13.433390508862207
+            },
+            "immediate_shared": {
+              "users": 1749,
+              "mean_rank": -16.66781017724414,
+              "ci_low": -17.006861063464836,
+              "ci_high": -16.32875929102344,
+              "top1": 0.010863350485991996,
+              "top5": 0.030303030303030304,
+              "top10": 0.31217838765008576,
+              "clean_top5": 0.022298456260720412,
+              "churn": 0.8181818181818182,
+              "normalised_gain": 0.520395974076786,
+              "source": "dumps",
+              "top10_change": 0.11029159519725551,
+              "mean_abs_rank": 16.711263579188106
+            },
+            "persistence_shared": {
+              "users": 1749,
+              "mean_rank": 0.49514008004574045,
+              "ci_low": 0.40766152086906804,
+              "ci_high": 0.5871926815323042,
+              "top1": 0.009719839908519153,
+              "top5": 0.022298456260720412,
+              "top10": 0.04059462550028588,
+              "clean_top5": 0.024585477415666093,
+              "churn": 0.18582046883933676,
+              "normalised_gain": -0.024429955202007882,
+              "source": "dumps",
+              "top10_change": 0.019210977701543674,
+              "mean_abs_rank": 1.4202401372212694
+            },
+            "persistence_iso": {
+              "users": 1749,
+              "mean_rank": -2.79874213836478,
+              "ci_low": -2.974271012006861,
+              "ci_high": -2.6140651801029158,
+              "top1": 0.011435105774728416,
+              "top5": 0.02801600914808462,
+              "top10": 0.04516866781017725,
+              "clean_top5": 0.029159519725557463,
+              "churn": 0.2698684962835906,
+              "normalised_gain": 0.09282633751631926,
+              "source": "dumps",
+              "top10_change": 0.027844482561463768,
+              "mean_abs_rank": 3.787878787878788
+            },
+            "final_iso": {
+              "users": 2207,
+              "mean_rank": -2.182147711826008,
+              "ci_low": -2.3561395559583143,
+              "ci_high": -2.016311735387404,
+              "top1": 0.006796556411418215,
+              "top5": 0.024467603081105575,
+              "top10": 0.04349796103307658,
+              "clean_top5": 0.02492070684186679,
+              "churn": 0.2686905301314001,
+              "normalised_gain": 0.07307197542586613,
+              "source": "dumps",
+              "top10_change": 0.027367467149977398,
+              "mean_abs_rank": 3.487992750339828
+            },
+            "rollback_iso": {
+              "users": 1749,
+              "mean_rank": 5.974271012006861,
+              "ci_low": 5.708976558033162,
+              "ci_high": 6.2206975414522585,
+              "top1": 0.010291595197255575,
+              "top5": 0.025728987993138937,
+              "top10": 0.045740423098913664,
+              "clean_top5": 0.029159519725557463,
+              "churn": 0.9485420240137221,
+              "normalised_gain": -0.24886525382157226,
+              "source": "dumps",
+              "top10_change": 0.14213836477987418,
+              "mean_abs_rank": 6.890222984562607
+            },
+            "drop_immediate": {
+              "users": 1749,
+              "mean_rank": -6.371069182389937,
+              "ci_low": -6.555746140651801,
+              "ci_high": -6.179531160663236,
+              "top1": 0.010863350485991996,
+              "top5": 0.02858776443682104,
+              "top10": 0.04974271012006861,
+              "clean_top5": 0.024585477415666093,
+              "churn": 0.773013150371641,
+              "normalised_gain": 0.1828005472864246,
+              "source": "dumps",
+              "top10_change": 0.13156089193825038,
+              "mean_abs_rank": 6.471698113207547
+            }
+          },
+          "task": {
+            "hit@1": 0.004514672686230237,
+            "ndcg@10": 0.003912192530252656,
+            "mrr@10": 0.003409070550718596
+          },
+          "clean_rank": 36.496283590623214,
+          "clean_top5": 0.024585477415666093,
+          "clean_top10": 0.04059462550028588
+        }
+      ],
+      "summary": {
+        "immediate_iso": {
+          "mean_rank": {
+            "mean": -16.933676386506576,
+            "sd": 3.212202883140465,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 17.001524680769965,
+            "sd": 3.1154670419651764,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.027634838955593672,
+            "sd": 0.0023804070891550975,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.06613302839717934,
+            "sd": 0.02393417993380487,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.07857823518200875,
+            "sd": 0.009519396463393658,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.6666666666666666,
+            "sd": 0.060797243144813315,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.43587256905927746,
+            "sd": 0.06458849633555615,
+            "n": 3
+          }
+        },
+        "immediate_shared": {
+          "mean_rank": {
+            "mean": -12.915570802363256,
+            "sd": 4.661312630387969,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 13.254812273680198,
+            "sd": 4.180878844093081,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.027825424051839145,
+            "sd": 0.0021646305873071372,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.14408233276157806,
+            "sd": 0.14557545380939105,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.10731846769582613,
+            "sd": 0.003763174996433204,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.7953116066323613,
+            "sd": 0.02136254052860999,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.4003522820966633,
+            "sd": 0.12673367098420463,
+            "n": 3
+          }
+        },
+        "persistence_shared": {
+          "mean_rank": {
+            "mean": 0.3285687059271965,
+            "sd": 0.2522862247995331,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 1.3725938631599008,
+            "sd": 0.0810448416010317,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.02267962645321136,
+            "sd": 0.005156374788819776,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.04154755098151325,
+            "sd": 0.00890054844965551,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.022965504097579543,
+            "sd": 0.003611725858543317,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.22431865828092243,
+            "sd": 0.036984804516253,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.020617753587100843,
+            "sd": 0.010231463182298138,
+            "n": 3
+          }
+        },
+        "persistence_iso": {
+          "mean_rank": {
+            "mean": -2.715837621497999,
+            "sd": 1.2305126259416135,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 3.891747665332571,
+            "sd": 0.8273744197535584,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.0238231370306842,
+            "sd": 0.006297965176999544,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.04059462550028588,
+            "sd": 0.005631136536189883,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.028683056984943778,
+            "sd": 0.001403229284101364,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.2782542405183915,
+            "sd": 0.01354629742246379,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.07945013021333795,
+            "sd": 0.03360294501072505,
+            "n": 3
+          }
+        },
+        "final_iso": {
+          "mean_rank": {
+            "mean": -2.095604893520616,
+            "sd": 1.196956838863967,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 3.59326385742335,
+            "sd": 0.606573159585373,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.020993807581936266,
+            "sd": 0.005628951866359833,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.03836278507778281,
+            "sd": 0.007024326207058442,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.027654432865126182,
+            "sd": 0.0022565901688585783,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.27050294517444495,
+            "sd": 0.02316153678139021,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.06039017848268459,
+            "sd": 0.033617862614844556,
+            "n": 3
+          }
+        },
+        "rollback_iso": {
+          "mean_rank": {
+            "mean": 5.550790928149419,
+            "sd": 1.474025646076036,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 6.407280350676577,
+            "sd": 1.0209854752192573,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.021917286068229465,
+            "sd": 0.003350180261339232,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.03678292357537641,
+            "sd": 0.008011377761381246,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.14949494949494946,
+            "sd": 0.03258991771377432,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.9159519725557461,
+            "sd": 0.06607918128968905,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.22355746251392775,
+            "sd": 0.0907656502409865,
+            "n": 3
+          }
+        },
+        "drop_immediate": {
+          "mean_rank": {
+            "mean": -7.462168858395273,
+            "sd": 1.9340761963124407,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 7.572327044025157,
+            "sd": 1.8722834735198683,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.02591957308938441,
+            "sd": 0.004136179610103049,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.04421574232894988,
+            "sd": 0.007678001554596412,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.15572708214217648,
+            "sd": 0.021579451466995525,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.8738326662854965,
+            "sd": 0.08739131988066084,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.19366178903793982,
+            "sd": 0.04397385626524002,
+            "n": 3
+          }
+        },
+        "task_hit@1": {
+          "mean": 0.00206922498118887,
+          "sd": 0.0037575215115571957,
+          "n": 3
+        },
+        "clean_rank": {
+          "mean": 38.930817610062896,
+          "sd": 2.5817242069171367,
+          "n": 3
+        },
+        "clean_top5": {
+          "mean": 0.02267962645321136,
+          "sd": 0.0016505153493128226,
+          "n": 3
+        },
+        "clean_top10": {
+          "mean": 0.03887935963407661,
+          "sd": 0.0020614930105568837,
+          "n": 3
+        }
+      }
+    },
+    {
+      "level": 4,
+      "prefix": "lm-ins-cat4",
+      "categories": 299,
+      "push": 6,
+      "push_name": "Musical Instruments > Amplifiers & Effects > Guitar & Bass Amplifiers & Preamps > Electric Guitar Amplifiers & Preamps",
+      "seeds": [
+        {
+          "seed": 42,
+          "categories": 299,
+          "push": 6,
+          "push_name": "Musical Instruments > Amplifiers & Effects > Guitar & Bass Amplifiers & Preamps > Electric Guitar Amplifiers & Preamps",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1742,
+              "mean_rank": 1.2743972445464984,
+              "ci_low": 1.0269804822043629,
+              "ci_high": 1.5309988518943742,
+              "top1": 0.006888633754305396,
+              "top5": 0.12227324913892078,
+              "top10": 0.35648679678530426,
+              "clean_top5": 0.09644087256027555,
+              "churn": 0.7594718714121699,
+              "normalised_gain": -0.04826936885194962,
+              "source": "dumps",
+              "top10_change": 0.11205510907003446,
+              "mean_abs_rank": 3.6991963260619976
+            },
+            "immediate_shared": {
+              "users": 1742,
+              "mean_rank": 0.27784156142365096,
+              "ci_low": 0.000574052812858783,
+              "ci_high": 0.5436280137772675,
+              "top1": 0.006314580941446613,
+              "top5": 0.13949483352468428,
+              "top10": 0.41102181400688864,
+              "clean_top5": 0.1010332950631458,
+              "churn": 0.857060849598163,
+              "normalised_gain": 0.0226910740776383,
+              "source": "dumps",
+              "top10_change": 0.14230769230769225,
+              "mean_abs_rank": 3.8323765786452353
+            },
+            "persistence_shared": {
+              "users": 1742,
+              "mean_rank": 0.5309988518943742,
+              "ci_low": 0.4293915040183697,
+              "ci_high": 0.6331802525832376,
+              "top1": 0.0,
+              "top5": 0.04649827784156142,
+              "top10": 0.15958668197474168,
+              "clean_top5": 0.03960964408725603,
+              "churn": 0.3530424799081516,
+              "normalised_gain": -0.017376090793768922,
+              "source": "dumps",
+              "top10_change": 0.036739380022962065,
+              "mean_abs_rank": 1.386337543053961
+            },
+            "persistence_iso": {
+              "users": 1742,
+              "mean_rank": 0.48392652123995405,
+              "ci_low": 0.3760045924225029,
+              "ci_high": 0.5912743972445464,
+              "top1": 0.0,
+              "top5": 0.03960964408725603,
+              "top10": 0.18140068886337543,
+              "clean_top5": 0.032721010332950634,
+              "churn": 0.38748564867967855,
+              "normalised_gain": -0.01845484823117488,
+              "source": "dumps",
+              "top10_change": 0.04138920780711819,
+              "mean_abs_rank": 1.4781859931113663
+            },
+            "final_iso": {
+              "users": 2217,
+              "mean_rank": 0.6680198466396031,
+              "ci_low": 0.5764546684709067,
+              "ci_high": 0.7568786648624267,
+              "top1": 0.0004510599909788002,
+              "top5": 0.03247631935047361,
+              "top10": 0.14027965719440685,
+              "clean_top5": 0.02435723951285521,
+              "churn": 0.37663509246729815,
+              "normalised_gain": -0.021014899734624073,
+              "source": "dumps",
+              "top10_change": 0.03996391520072162,
+              "mean_abs_rank": 1.5611186287776275
+            },
+            "rollback_iso": {
+              "users": 1742,
+              "mean_rank": 6.291044776119403,
+              "ci_low": 6.013203214695752,
+              "ci_high": 6.561997703788749,
+              "top1": 0.0,
+              "top5": 0.010907003444316877,
+              "top10": 0.06142365097588978,
+              "clean_top5": 0.032721010332950634,
+              "churn": 0.9661308840413318,
+              "normalised_gain": -0.47722085919709156,
+              "source": "dumps",
+              "top10_change": 0.2172789896670494,
+              "mean_abs_rank": 7.263490241102182
+            },
+            "drop_immediate": {
+              "users": 1742,
+              "mean_rank": 6.175086107921929,
+              "ci_low": 5.936280137772675,
+              "ci_high": 6.386337543053961,
+              "top1": 0.0,
+              "top5": 0.022962112514351322,
+              "top10": 0.12743972445464982,
+              "clean_top5": 0.09644087256027555,
+              "churn": 0.9724454649827784,
+              "normalised_gain": -0.6423694637772975,
+              "source": "dumps",
+              "top10_change": 0.23340987370838107,
+              "mean_abs_rank": 6.827210103329507
+            }
+          },
+          "task": {
+            "hit@1": 0.004514672686230264,
+            "ndcg@10": 0.002445345105767327,
+            "mrr@10": 0.003658318105270675
+          },
+          "clean_rank": 16.300803673938002,
+          "clean_top5": 0.09644087256027555,
+          "clean_top10": 0.3421354764638347
+        },
+        {
+          "seed": 43,
+          "categories": 299,
+          "push": 6,
+          "push_name": "Musical Instruments > Amplifiers & Effects > Guitar & Bass Amplifiers & Preamps > Electric Guitar Amplifiers & Preamps",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1742,
+              "mean_rank": -17.81171067738232,
+              "ci_low": -18.438002296211252,
+              "ci_high": -17.19804822043628,
+              "top1": 0.020091848450057407,
+              "top5": 0.16417910447761194,
+              "top10": 0.4672789896670494,
+              "clean_top5": 0.01951779563719862,
+              "churn": 0.8742824339839265,
+              "normalised_gain": 0.5630826290689409,
+              "source": "dumps",
+              "top10_change": 0.127841561423651,
+              "mean_abs_rank": 17.82089552238806
+            },
+            "immediate_shared": {
+              "users": 1742,
+              "mean_rank": -20.508036739380024,
+              "ci_low": -21.21297359357061,
+              "ci_high": -19.81630309988519,
+              "top1": 0.029850746268656716,
+              "top5": 0.2680826636050517,
+              "top10": 0.5964408725602756,
+              "clean_top5": 0.01320321469575201,
+              "churn": 0.9615384615384616,
+              "normalised_gain": 0.6428445610203675,
+              "source": "dumps",
+              "top10_change": 0.18272101033295063,
+              "mean_abs_rank": 20.508036739380024
+            },
+            "persistence_shared": {
+              "users": 1742,
+              "mean_rank": 0.11997703788748565,
+              "ci_low": 0.02812858783008037,
+              "ci_high": 0.2026406429391504,
+              "top1": 0.000574052812858783,
+              "top5": 0.06199770378874857,
+              "top10": 0.14638346727898965,
+              "clean_top5": 0.06371986222732491,
+              "churn": 0.32548794489092997,
+              "normalised_gain": -0.018820061711869902,
+              "source": "dumps",
+              "top10_change": 0.03392652123995399,
+              "mean_abs_rank": 1.1624569460390355
+            },
+            "persistence_iso": {
+              "users": 1742,
+              "mean_rank": 0.02468427095292767,
+              "ci_low": -0.07634902411021814,
+              "ci_high": 0.11882893226176808,
+              "top1": 0.000574052812858783,
+              "top5": 0.040183696900114814,
+              "top10": 0.11882893226176808,
+              "clean_top5": 0.03157290470723306,
+              "churn": 0.34270952927669346,
+              "normalised_gain": -0.004164215470430259,
+              "source": "dumps",
+              "top10_change": 0.03616532721010335,
+              "mean_abs_rank": 1.4276693455797933
+            },
+            "final_iso": {
+              "users": 2217,
+              "mean_rank": 0.02390617952187641,
+              "ci_low": -0.06314839873703203,
+              "ci_high": 0.11276499774470004,
+              "top1": 0.0018042399639152007,
+              "top5": 0.03337843933243121,
+              "top10": 0.09517365809652684,
+              "clean_top5": 0.028416779431664412,
+              "churn": 0.35769057284618855,
+              "normalised_gain": -0.0038136135387259384,
+              "source": "dumps",
+              "top10_change": 0.03766350924672979,
+              "mean_abs_rank": 1.4889490302210193
+            },
+            "rollback_iso": {
+              "users": 1742,
+              "mean_rank": 16.37715269804822,
+              "ci_low": 16.039609644087257,
+              "ci_high": 16.710677382319172,
+              "top1": 0.0,
+              "top5": 0.001722158438576349,
+              "top10": 0.011481056257175661,
+              "clean_top5": 0.03157290470723306,
+              "churn": 0.9592422502870264,
+              "normalised_gain": -0.9670567659403899,
+              "source": "dumps",
+              "top10_change": 0.2343857634902411,
+              "mean_abs_rank": 16.37715269804822
+            },
+            "drop_immediate": {
+              "users": 1742,
+              "mean_rank": -1.9380022962112515,
+              "ci_low": -2.4035591274397246,
+              "ci_high": -1.5183696900114811,
+              "top1": 0.0,
+              "top5": 0.023536165327210104,
+              "top10": 0.07405281285878301,
+              "clean_top5": 0.01951779563719862,
+              "churn": 0.9615384615384616,
+              "normalised_gain": -0.09496117558631384,
+              "source": "dumps",
+              "top10_change": 0.2407577497129737,
+              "mean_abs_rank": 7.522388059701493
+            }
+          },
+          "task": {
+            "hit@1": -0.01128668171557562,
+            "ndcg@10": -0.00808152085049929,
+            "mrr@10": -0.008114317961947837
+          },
+          "clean_rank": 32.6670493685419,
+          "clean_top5": 0.01951779563719862,
+          "clean_top10": 0.10390355912743972
+        },
+        {
+          "seed": 44,
+          "categories": 299,
+          "push": 6,
+          "push_name": "Musical Instruments > Amplifiers & Effects > Guitar & Bass Amplifiers & Preamps > Electric Guitar Amplifiers & Preamps",
+          "pairs": {
+            "immediate_iso": {
+              "users": 1742,
+              "mean_rank": -9.308266360505167,
+              "ci_low": -9.61366245694604,
+              "ci_high": -9.000574052812858,
+              "top1": 0.010332950631458095,
+              "top5": 0.12055109070034443,
+              "top10": 0.3002296211251435,
+              "clean_top5": 0.012055109070034443,
+              "churn": 0.7807118254879449,
+              "normalised_gain": 0.37241235479398455,
+              "source": "dumps",
+              "top10_change": 0.11050516647531572,
+              "mean_abs_rank": 9.323191733639495
+            },
+            "immediate_shared": {
+              "users": 1742,
+              "mean_rank": -3.7072330654420207,
+              "ci_low": -3.9477611940298507,
+              "ci_high": -3.470149253731343,
+              "top1": 0.004592422502870264,
+              "top5": 0.0843857634902411,
+              "top10": 0.2261768082663605,
+              "clean_top5": 0.014925373134328358,
+              "churn": 0.8197474167623421,
+              "normalised_gain": 0.19924676252989254,
+              "source": "dumps",
+              "top10_change": 0.1336969001148105,
+              "mean_abs_rank": 4.977037887485649
+            },
+            "persistence_shared": {
+              "users": 1742,
+              "mean_rank": 0.9092996555683123,
+              "ci_low": 0.801377726750861,
+              "ci_high": 1.0137772675086107,
+              "top1": 0.0,
+              "top5": 0.03329506314580941,
+              "top10": 0.08495981630309989,
+              "clean_top5": 0.03214695752009185,
+              "churn": 0.3742824339839265,
+              "normalised_gain": -0.039193065181497413,
+              "source": "dumps",
+              "top10_change": 0.039781859931113606,
+              "mean_abs_rank": 1.602755453501722
+            },
+            "persistence_iso": {
+              "users": 1742,
+              "mean_rank": -0.17336394948335246,
+              "ci_low": -0.2876004592422503,
+              "ci_high": -0.06142365097588978,
+              "top1": 0.000574052812858783,
+              "top5": 0.022962112514351322,
+              "top10": 0.09299655568312284,
+              "clean_top5": 0.020091848450057407,
+              "churn": 0.38346727898966704,
+              "normalised_gain": 0.0040251995351262455,
+              "source": "dumps",
+              "top10_change": 0.04052812858783006,
+              "mean_abs_rank": 1.5878300803673937
+            },
+            "final_iso": {
+              "users": 2217,
+              "mean_rank": -0.18718989625620208,
+              "ci_low": -0.2972485340550293,
+              "ci_high": -0.08344609833107804,
+              "top1": 0.0004510599909788002,
+              "top5": 0.017140279657194408,
+              "top10": 0.07352277852954443,
+              "clean_top5": 0.014433919711321606,
+              "churn": 0.38340099233198016,
+              "normalised_gain": 0.005406004621396402,
+              "source": "dumps",
+              "top10_change": 0.04091114118177708,
+              "mean_abs_rank": 1.801082543978349
+            },
+            "rollback_iso": {
+              "users": 1742,
+              "mean_rank": 5.969575200918484,
+              "ci_low": 5.6974741676234215,
+              "ci_high": 6.2215843857634905,
+              "top1": 0.0,
+              "top5": 0.000574052812858783,
+              "top10": 0.01722158438576349,
+              "clean_top5": 0.020091848450057407,
+              "churn": 0.9626865671641791,
+              "normalised_gain": -0.4122031364259162,
+              "source": "dumps",
+              "top10_change": 0.26905855338691165,
+              "mean_abs_rank": 6.956946039035591
+            },
+            "drop_immediate": {
+              "users": 1742,
+              "mean_rank": -5.755453501722158,
+              "ci_low": -6.190011481056257,
+              "ci_high": -5.309988518943743,
+              "top1": 0.0,
+              "top5": 0.023536165327210104,
+              "top10": 0.11423650975889782,
+              "clean_top5": 0.012055109070034443,
+              "churn": 0.9770378874856487,
+              "normalised_gain": 0.10766530191154072,
+              "source": "dumps",
+              "top10_change": 0.2656142365097589,
+              "mean_abs_rank": 7.239954075774971
+            }
+          },
+          "task": {
+            "hit@1": 0.0022573363431151183,
+            "ndcg@10": -0.0036801950259838234,
+            "mrr@10": -0.0024214859006055356
+          },
+          "clean_rank": 28.425947187141215,
+          "clean_top5": 0.012055109070034443,
+          "clean_top10": 0.09414466130884042
+        }
+      ],
+      "summary": {
+        "immediate_iso": {
+          "mean_rank": {
+            "mean": -8.615193264446996,
+            "sd": 9.56191098260375,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 10.281094527363184,
+            "sd": 7.109414910493463,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.1356678147722924,
+            "sd": 0.024706511042989977,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.3746651358591657,
+            "sd": 0.08499536393930897,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.11680061232300039,
+            "sd": 0.009593096387199436,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.8048220436280138,
+            "sd": 0.06108472217815259,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.2957418716703253,
+            "sd": 0.312804393475024,
+            "n": 3
+          }
+        },
+        "immediate_shared": {
+          "mean_rank": {
+            "mean": -7.9791427477994645,
+            "sd": 11.0317765312129,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 9.772483735170303,
+            "sd": 9.31486103533683,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.16398775353999234,
+            "sd": 0.09426592770510925,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.4112131649445082,
+            "sd": 0.18513210631397276,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.1529085342518178,
+            "sd": 0.026174877900638552,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.8794489092996556,
+            "sd": 0.07349893881937396,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": 0.2882607992092994,
+            "sd": 0.31951558786118484,
+            "n": 3
+          }
+        },
+        "persistence_shared": {
+          "mean_rank": {
+            "mean": 0.5200918484500574,
+            "sd": 0.3947743288750281,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 1.3838499808649063,
+            "sd": 0.2201597939967711,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.0472636815920398,
+            "sd": 0.014366620240869472,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.13030998851894374,
+            "sd": 0.03982536640861641,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.036815920398009884,
+            "sd": 0.002928419645270645,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.350937619594336,
+            "sd": 0.024465248193450778,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.025129739229045413,
+            "sd": 0.01220057849598792,
+            "n": 3
+          }
+        },
+        "persistence_iso": {
+          "mean_rank": {
+            "mean": 0.11174894756984309,
+            "sd": 0.33718375429685593,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 1.4978951396861844,
+            "sd": 0.08187919812722134,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.03425181783390739,
+            "sd": 0.00978138378808424,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.1310753922694221,
+            "sd": 0.045456622486467924,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.039360887868350534,
+            "sd": 0.002800726744235386,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.37122081898201303,
+            "sd": 0.024773111517064152,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.006197954722159631,
+            "sd": 0.011377179281430597,
+            "n": 3
+          }
+        },
+        "final_iso": {
+          "mean_rank": {
+            "mean": 0.16824537663509248,
+            "sd": 0.4455011548284058,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 1.6170500676589987,
+            "sd": 0.16341076156156212,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.027665012780033076,
+            "sd": 0.009125840267925735,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.10299203127349271,
+            "sd": 0.03405826524677256,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.03951285520974283,
+            "sd": 0.0016701406027580714,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.37257555254848895,
+            "sd": 0.01332727713368891,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.0064741695506512036,
+            "sd": 0.013409883126520498,
+            "n": 3
+          }
+        },
+        "rollback_iso": {
+          "mean_rank": {
+            "mean": 9.545924225028703,
+            "sd": 5.918200529712507,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 10.199196326061998,
+            "sd": 5.352462147234583,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.0044010715652506695,
+            "sd": 0.005663470565231053,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.030042097206276312,
+            "sd": 0.027328370854208143,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.2402411021814007,
+            "sd": 0.026381708590346494,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.9626865671641791,
+            "sd": 0.003444316877152742,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.6188269205211325,
+            "sd": 0.3033230044014586,
+            "n": 3
+          }
+        },
+        "drop_immediate": {
+          "mean_rank": {
+            "mean": -0.5061232300038271,
+            "sd": 6.092795096628796,
+            "n": 3
+          },
+          "mean_abs_rank": {
+            "mean": 7.196517412935323,
+            "sd": 0.3496185857693591,
+            "n": 3
+          },
+          "top5": {
+            "mean": 0.02334481438959051,
+            "sd": 0.0003314295460330798,
+            "n": 3
+          },
+          "top10": {
+            "mean": 0.10524301569077689,
+            "sd": 0.027806524128362743,
+            "n": 3
+          },
+          "top10_change": {
+            "mean": 0.24659395331037123,
+            "sd": 0.016876794724810722,
+            "n": 3
+          },
+          "churn": {
+            "mean": 0.9703406046689629,
+            "sd": 0.007961210892734282,
+            "n": 3
+          },
+          "normalised_gain": {
+            "mean": -0.20988844581735688,
+            "sd": 0.38800031638846255,
+            "n": 3
+          }
+        },
+        "task_hit@1": {
+          "mean": -0.0015048908954100788,
+          "sd": 0.008546137465463169,
+          "n": 3
+        },
+        "clean_rank": {
+          "mean": 25.797933409873707,
+          "sd": 8.493723673640794,
+          "n": 3
+        },
+        "clean_top5": {
+          "mean": 0.042671259089169536,
+          "sd": 0.0467151091438738,
+          "n": 3
+        },
+        "clean_top10": {
+          "mean": 0.1800612323000383,
+          "sd": 0.14044520101309224,
+          "n": 3
+        }
+      }
+    }
+  ]
+}
