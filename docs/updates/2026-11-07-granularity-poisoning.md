@@ -30,7 +30,7 @@ ranking? Results and limits:
   30/75/299 — the only monotone protection result.
 - Immediate deletion at 75 still leaves the target **7.5 ± 1.9** ranks above clean;
   at 30/299 the direction is inconsistent.
-- Top-10 churn is 8% at 75 and 12% at 299.
+- On average, 7.9% of the ten top-10 slots change at 75 and 11.7% at 299.
 
 ## Interpretation
 

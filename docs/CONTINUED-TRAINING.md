@@ -547,11 +547,11 @@ Level-2 dumps predate `push_rank`, so its row uses the run's aggregate `push` ce
 levels 3 and 4 pair users through the dumps. Negative rank change means the target moved
 up; positive removal values mean it ended below clean.
 
-| Level | Labels | Target | Clean rank | Immediate (iso) | Top-5 lift (pp) | Top-10 lift (pp) | After 3 clean updates | Rollback at end | Drop immediately | Top-10 churn |
+| Level | Labels | Target | Clean rank | Immediate (iso) | Top-5 lift (pp) | Top-10 lift (pp) | After 3 clean updates | Rollback at end | Drop immediately | Top-10 slots changed |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2 | 30 | Keyboards & MIDI | +9.16 ± 0.82 | −1.57 ± 0.63 | +4.0 | +18.5 | −0.26 ± 0.27 | +1.93 ± 1.44 | +0.52 ± 0.61 | n/a |
-| 3 | 75 | Wind & Woodwind Accessories | +38.93 ± 2.58 | −16.93 ± 3.21 | +0.5 | +2.7 | −2.72 ± 1.23 | +5.55 ± 1.47 | −7.46 ± 1.93 | 0.08 ± 0.01 |
-| 4 | 299 | Electric Guitar Amplifiers & Preamps | +25.80 ± 8.49 | −8.62 ± 9.56 | +9.3 | +19.5 | +0.11 ± 0.34 | +9.55 ± 5.92 | −0.51 ± 6.09 | 0.12 ± 0.01 |
+| 3 | 75 | Wind & Woodwind Accessories | +38.93 ± 2.58 | −16.93 ± 3.21 | +0.5 | +2.7 | −2.72 ± 1.23 | +5.55 ± 1.47 | −7.46 ± 1.93 | 7.9% ± 1.0 |
+| 4 | 299 | Electric Guitar Amplifiers & Preamps | +25.80 ± 8.49 | −8.62 ± 9.56 | +9.3 | +19.5 | +0.11 ± 0.34 | +9.55 ± 5.92 | −0.51 ± 6.09 | 11.7% ± 1.0 |
 
 Mean ± sd over seeds 42–44. Top-5 and top-10 lifts are attacked minus clean shares in
 percentage points. Level 2 cannot supply top-10 churn because its dumps predate the
@@ -592,8 +592,9 @@ per-user top-10 field. The second table separates adapter topologies.
   −0.5 ± 6.1, direction-inconsistent. The 75 result says deleting the poisoned update
   right away does not restore the old ranking, while waiting and deleting it late
   over-corrects.
-- **Top-10 churn grows with label count.** 8% of top-10 sets change at 75 and 12% at
-  299; level 2 cannot be measured.
+- **Ranking churn grows with label count.** On average, 7.9% of the ten top-10 slots
+  change at 75 labels and 11.7% at 299; level 2 cannot be measured because its dumps
+  lack the per-user top-10 field.
 
 Limits: one domain, one model, one 3% bandwagon attack in one block. The target changes
 with the level by the 1.3% rule, so target identity, depth and base rate are confounded

@@ -177,7 +177,7 @@ def markdown(result):
               "Mean ± sd over seeds; negative rank change means the target moved up."), "",
              ("| Level | Categories | Target | Clean rank | Immediate (iso) | Top-5 lift (pp) | "
               "Top-10 lift (pp) | After 3 clean updates | Rollback at end | Drop immediately | "
-              "Top-10 churn |"),
+              "Top-10 slots changed |"),
              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for level in result["levels"]:
         summary = level.get("summary")
@@ -192,7 +192,9 @@ def markdown(result):
         clean10 = summary.get("clean_top10")
         lift10 = ("n/a" if top10 is None or clean10 is None
                   else f"{(top10['mean'] - clean10['mean']) * 100:+.1f}")  # fmt: skip
-        churn = fmt(summary, "immediate_iso", "top10_change", 2, False)
+        change = summary["immediate_iso"]["top10_change"]
+        churn = ("n/a" if change is None
+                 else f"{change['mean'] * 100:.1f}% ± {change['sd'] * 100:.1f}")  # fmt: skip
         lines.append(
             f"| {level['level']} | {level['categories']} | {level['push_name']} | "
             f"{fmt(summary, 'clean_rank')} | {fmt(summary, 'immediate_iso')} | "
