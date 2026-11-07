@@ -12,6 +12,8 @@ Project home for **CP4285: Modern Recommendation Systems**, NUS School of Comput
 
 - [Reviewer reference](reference.html): project walkthrough, diagrams and dated checkpoints. Open `reference.html` locally from the checkout; GitHub displays its source.
 - [Current context and next steps](CONTEXT.md)
+- [Data walkthrough](docs/DATA-WALKTHROUGH.md): how to read and analyse the datasets and run artifacts that are actually on disk, with runnable duckdb/numpy recipes
+- Handover tour: `uv run python replication/peso/handover.py` explains the project, rechecks every STePS-page number from committed results and quotes the doc lines behind the rest
 - [Project overview](docs/PROJECT.md) and [experiment definition](docs/EXPERIMENT.md)
 - [Neural workstream](docs/MODERN-RECOMMENDER.md) and [continued-training protocol](docs/CONTINUED-TRAINING.md)
 - [Adapters and parameter-efficient updates](docs/ADAPTERS.md): sourced survey for sparse, continually updated recommenders

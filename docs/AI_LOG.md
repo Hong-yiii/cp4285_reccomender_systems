@@ -1028,6 +1028,73 @@ This is a summary record, not a full prompt transcript. Retain the Codex convers
 
 **Limits:** dormancy is confounded with group composition; the block-2 effect sizes are not comparable to block-1. Target-share uses bandwagon, which is at AUC 1.00 at every share, so it does not isolate target association from realism. Three seeds, one model, category targets.
 
+## 3 November 2026 — STePS poster and write-up
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**Request:** make a STePS poster and write-up for the project in the style of past winners, built on the course template, leading with big trends and plausible explanations.
+
+**Assistance:**
+- Read the course template, the 29th STePS FAQ and poster guidelines, and winning posters and write-ups from the 27th and 28th showcases.
+- Proposed a new title and look, "The Dose Makes the Poison", replacing Forget-Me-Not at the user's invitation. Built an A1 poster and a project image on a Design canvas, and the UVENTS text and booth notes in a doc.
+- Drew the charts to scale from `CONTINUED-TRAINING.md`, `PESO-REPLICATION.md` and `results/grid/lattice.json`, and recorded the poster rules in `REQUIREMENTS.md`.
+
+**Findings raised with the user:** `lattice.json` counts differ from the `POISONING-STORY.md` draft. At 3%, edits carry about twice the target-ending examples of fake shoppers in every catalogue and push about twice as far, so the draft's reading that edited examples punch above their count does not hold. The poster uses the committed counts.
+
+**Validation:** rendered both artboards in headless Chrome with the canvas's own runtime, with no overflow in the measured sections. The print PDF is one A1 page with embedded fonts, and both QR codes decode from it. Headline grid numbers were recomputed from `lattice.json`. Later results (dose, activity, dormancy) come from the written tables, because their raw runs are on the cluster. The hosted canvas itself was not opened or checked.
+
+**Limits:** a draft for team review. The attack catalogue and study design remain agent proposals, each plausible explanation is an interpretation, and member roles and the mentor's name are not on the poster because the repo does not confirm them. No commit was made.
+
+### Same day: UVENTS page content
+
+**Request:** keep the branding less radical, and focus first on filling the UVENTS project page, using past winners as the guide.
+
+**Assistance:**
+- Inspected public winner pages and the page's own data to find its fields: name, introduction, Markdown description, image links, poster, video and homepage links.
+- Kept Forget-Me-Not, which is already on the live page, and dropped the toxicology theme. Wrote the page text and drew a hero image and six result cards on the team's logo canvas.
+
+**Validation:** rendered all seven images with the canvas runtime, with no overflow. Filled a private local copy of the page, with its scripts stripped, to check the title box, hero crop, description, table and gallery at desktop and phone widths. Numbers are the ones checked earlier the same day.
+
+**Limits:** nothing was posted to UVENTS. The session's Chrome was not logged in, so the edit form itself was not seen, and the field list comes from the page's data. The hosted canvas was not opened or checked.
+
+Later on 3 November, at the user's request, the fine print came off the seven page images, "Plausible why" became "Reinterpretation", and the page text and card wording were rewritten in plainer language. The chart labels now carry what the fine print explained. The removed caveats remain in the page's Limits section and the booth notes. `avoid-ai-writing` scored the page text and card text 0 (clean).
+
+Also on 3 November, for "eye catching stuff" on the page: a looping GIF and a four-panel comic of one real case (Keyboards & MIDI under re-listing on Instruments) starring the team's flower. The ranks are from `results/grid/lattice.json`; the category order is an example and the speech-bubble jokes are invented. The page text gained the late-removal numbers for all four attacks from the same file. No promotional video was made, because the STePS video award rules out fully AI-made videos. Validation: the GIF's frames and the filled page copy were inspected, and the page text scored 0 on `avoid-ai-writing`.
+
+At the user's request, the nine page images were pushed to the team repo on branch `docs/steps-page-images` (commit `9f1cba2`) so that UVENTS can link to them, because the page only accepts image links. No PR was opened. All nine commit-pinned raw URLs returned HTTP 200 with the right image type.
+
+The user then asked to combine the team's banner with the animation. The new looping GIF opens on the banner, moves into the story and returns to the banner, using the same ranks. It was pushed to the same branch at commit `b50bbe4`, and its raw URL returned HTTP 200.
+
+The project card crops the same image to about 2.3:1 from the centre (site CSS: 200px tall, background cover), so the main animation was rebuilt to keep its content inside that strip and clear of the card's badge, and pushed at `d6a7091`. Both crops were simulated locally; the live card was not re-checked.
+
+## 6 November 2026 — Data walkthrough
+
+**Tool:** OpenCode (x-test-3).
+
+**User request:** "do a walkthrough for a person to look thru and analyse the data in this repo."
+
+**Assistance:** Inventory of every data layer on disk and a written tour, `docs/DATA-WALKTHROUGH.md`, linked from `README.md` and the `AGENTS.md` navigation list. Read-only throughout: `du`, `git ls-files`/`check-ignore`, duckdb over the metadata parquet, numpy over the cached `.npz`, `json` over the run artifacts, plus `cp4285 doctor`, `adapter-summary` and `blocks-summary`. Nothing was downloaded, trained or written into `data/`, `runs/` or `reports/`; scratch output went to `/tmp/opencode/`.
+
+**Findings raised with the user:** the local environment has duckdb/numpy/torch and the `meta`/`llm` extras but no pandas, matplotlib or pyarrow, so the recipes use duckdb and the stdlib; `data/raw` is two symlinks into a deleted `dev/cp4285-recommender-systems/`, so the raw Amazon files are gone while the two derived `.npz` caches remain, and those caches hold two different Movies & TV vintages (7.44M/197,943 against 17.16M/747,764 events/items) with a renumbered shared user vocabulary; `data/meta` ships the full `out/` (35,393,189 item rows, 30 domains, 89.0/8.3/2.7% observed/predicted/unknown) but only Instruments under `items/` and `raw/`, so `meta-audit`/`meta-classify`/`meta-group` cannot be re-run for other domains here; the two dump layouts differ, so `cp4285 flips` raises `KeyError: 'ranked'` on `adapter-blocks` dumps, and `cp4285 dose-summary` refuses the October grid ("Dumps lack push_rank") because the November dose, strata, activity and dormancy runs live only on the SoC cluster; `runs/metrics-check-1792660917` is synthetic despite its directory name.
+
+**Validation:** every command in the doc was run here and its real output is quoted. Re-deriving `blocks-summary` from its own six runs reproduces the committed `runs/cluster-blocks/summary-3seeds.json` (blocks 1–3 Hit@10 sasrec 0.0212, category 0.0202, popularity 0.0191, paired −0.0010 ± 0.0019), and the committed `summary-3seeds.json` recomputes to the PESO − single-LoRA difference of −0.0001 already recorded. Aggregate counts were checked against the published run (35.4M items, 89.0% observed). No source file changed, so tests and Ruff were not affected.
+
+**Limits:** this documents this machine's ignored artifacts, which a fresh clone will not have; it does not revalidate any run, resolve which Movies & TV vintage a September report used, or re-derive the November tables whose raw runs are remote. The category-label confound raised in recipe 4 (Instruments 6.5% and Video Games 4.1% predicted labels against CDs 0%) is an observation for the team, not a tested explanation.
+
+## 6 November 2026 — Handover tour
+
+**Tool:** Claude Code (Claude Opus 5.5).
+
+**User request:** trace where the STePS artefacts' claims came from, describe those data sources, then "do a handover script for someone to try to unds whats gg on".
+
+**Assistance:** Read the UVENTS page doc and the Forget-Me-Not canvas cards, matched every number to `replication/peso/results/` or a doc line, and wrote `replication/peso/handover.py`. The script is read-only and stdlib-only. It walks through the project, the data, and findings A (PESO gap), B (granularity ladder) and C (poisoning grid). It recomputes each figure from committed JSON against the page's value and quotes the November results that exist only as written tables. Linked from `README.md` and `AGENTS.md`.
+
+**Findings raised with the user:** the page's results table gives edited histories +4.80 and +0.80, but `lattice.json` gives 4.787 and 0.790 (4.79 and 0.79). "More than 400 runs" has no single source; it sums 303 + 54 + 75 = 432 from `CONTINUED-TRAINING.md`. The fake-shopper target-example range on the booth notes (72–137) reaches 145 once copied fakes are included.
+
+**Validation:** the full tour ran; every other check matched and every quoted line was found, so it exits 1 only for the two edited-history figures. Ruff check and format pass on the new file. No source under `src/` changed, so tests were not rerun.
+
+**Limits:** the November dose and activity numbers are quoted, not recomputed, because their runs are on the SoC cluster. The page doc and canvas were read, not edited. No commit was made.
+
 ## 7 November 2026 — Category-granularity poisoning
 
 **Tool:** OpenCode (DeepSeek V4.1 Flash test build).

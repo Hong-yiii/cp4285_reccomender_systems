@@ -29,6 +29,17 @@ It lists the project as 30% of the course grade. Final STePS presentation is 11 
 
 AI assistance is allowed for group projects and must be documented collectively. This folder includes an initial log. [Grading and AI policy](https://wing-nus.github.io/cp4285-website/docs/grading/)
 
+## STePS poster
+
+Checked 3 November 2026 against the [course poster template](https://soc-n.us/cp4285-t2610-steps-poster), the [29th STePS FAQ](https://uvents.nus.edu.sg/event/29th-steps/faq) and the [poster guidelines](https://bit.ly/steps-poster).
+
+- STePS teams submit a PDF of the poster to Canvas Files as a proxy for the report. An 8-page report is ignored. An optional one-page A4 PDF may add elaborated answers, with a `.zip` if it includes code.
+- The poster should have sections for most or all components of the Project Design Critique Update.
+- Prof Min visits for about 5–10 minutes and asks questions.
+- A1, one free coated print per team. Submit the PDF through the [RT system](https://rt.comp.nus.edu.sg/) under Others, with subject "Events related: A1 Coated Poster Printing (29th STePS)" and the module and project codes in the comments. Print dates are 5, 6, 9 and 10 November, and a submitted PDF cannot change.
+- Platinum and Gold sponsor logos must appear prominently at the top or bottom. On 3 November the UVENTS sponsor page listed DSTA, Garena, Sea and Tealseed as Platinum, and SGInnovate and SIMSYS as Gold.
+- Guideline sizes: title 72–100 pt, headings 36–48 pt, body 24–32 pt, 2–3 colours. Significant AI use must be disclosed, with human verification.
+
 ## Information still needed
 
 - Canvas deadline, upload item, and any newer critique announcement.
