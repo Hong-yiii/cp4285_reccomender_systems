@@ -34,12 +34,15 @@ healthy() {
 export HF_HUB_OFFLINE=1 HF_HOME=/tmp/$USER-hf  # the base model is a local directory
 # SRC runs a newer source tree on the same environment, e.g. SRC=$W/cp4285-main/src after an rsync.
 if [ -n "${SRC:-}" ]; then export PYTHONPATH=$SRC; fi
-D=$W/peso/data
+# A granularity grid passes DATA, CATEGORIES and NAMES for a deeper label rung; the
+# defaults are the original level-2 Instruments run.
+DATA=${DATA:-$W/peso/data/Instruments_cl_ori}
+CATEGORIES=${CATEGORIES:-$W/peso/data/Instruments_cl_cat/Instruments_cl_cat.index.cat2.json}
+NAMES=${NAMES:-$W/cp4285/replication/peso/results/category/category_stats.json}
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 # shellcheck disable=SC2086  # ARGS holds extra flags
-"$ENV/repo/.venv/bin/cp4285" adapter-blocks --data "$D/Instruments_cl_ori" \
-    --categories "$D/Instruments_cl_cat/Instruments_cl_cat.index.cat2.json" \
-    --names "$W/cp4285/replication/peso/results/category/category_stats.json" \
+"$ENV/repo/.venv/bin/cp4285" adapter-blocks --data "$DATA" \
+    --categories "$CATEGORIES" --names "$NAMES" \
     --model "$W/models/Llama-3.2-1B-4e20de362430" \
     --revision 4e20de362430cd3b72f300e6b0f18e50e7166e08 --seed "${SEED:-42}" \
     --output "$W/lm-runs/${RUN:?set RUN}" ${ARGS:?set ARGS}

@@ -34,7 +34,11 @@ healthy() {
 ) 9> "/tmp/$USER-cp4285-llm.lock" || exit 1
 export HF_HUB_OFFLINE=1 HF_HOME=/tmp/$USER-hf  # the base model is a local directory
 if [ -n "${SRC:-}" ]; then export PYTHONPATH=$SRC; fi
-C=$W/categories/${DATASET:?set DATASET}-cat2
+# A granularity plan passes DATA, CATEGORIES and NAMES for a deeper label rung; the
+# defaults are the original level-2 Instruments run.
+DATA=${DATA:-$W/peso/data/${DATASET:?set DATASET}}
+CATEGORIES=${CATEGORIES:-$W/categories/${DATASET}-cat2/${DATASET}.index.cat2.json}
+NAMES=${NAMES:-$(dirname "$CATEGORIES")/category_stats.json}
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 while IFS=$'\t' read -r run args; do
     [ -z "$run" ] && continue
@@ -43,8 +47,8 @@ while IFS=$'\t' read -r run args; do
     if [ -e "$out" ]; then mv "$out" "$out.interrupted-${SLURM_JOB_ID:-manual}"; fi
     echo "start $run $(date +%T)"
     # shellcheck disable=SC2086  # args holds the run's flags
-    "$ENV/repo/.venv/bin/cp4285" adapter-blocks --data "$W/peso/data/$DATASET" \
-        --categories "$C/$DATASET.index.cat2.json" --names "$C/category_stats.json" \
+    "$ENV/repo/.venv/bin/cp4285" adapter-blocks --data "$DATA" \
+        --categories "$CATEGORIES" --names "$NAMES" \
         --model "$W/models/Llama-3.2-1B-4e20de362430" \
         --revision 4e20de362430cd3b72f300e6b0f18e50e7166e08 --output "$out" $args ||
         echo "FAILED $run"
